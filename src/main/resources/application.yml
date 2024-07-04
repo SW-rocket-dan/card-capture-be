@@ -6,3 +6,16 @@ spring:
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: ${GOOGLE_REDIRECT_URI}
+    response-type: "code"
+    base-url: "https://accounts.google.com/o/oauth2/auth"
+    oauth-url: "https://oauth2.googleapis.com"
+    api-url: "https://www.googleapis.com"
+    client-name: Google
+    scope: openid, email
