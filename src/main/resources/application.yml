@@ -7,6 +7,13 @@ spring:
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  jpa:
+    hibernate:
+        ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
 
 oauth:
   google:
@@ -19,3 +26,10 @@ oauth:
     api-url: "https://www.googleapis.com"
     client-name: Google
     scope: openid, email
+
+
+jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000
+    token-prefix: "Bearer "
+    header-key: "Authorization"
