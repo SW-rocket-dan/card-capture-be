@@ -15,7 +15,7 @@
       - redirect_uri: 인증 후 사용자가 돌아올 URI.
       - response_type: 반환되는 인증 코드(code).
       - scope: 요청하는 권한(예: openid, email, profile).
-      - state: CSRF 공격을 방지하기 위한 임의의 문자열.
+      - state(선택): CSRF 공격을 방지하기 위한 임의의 문자열.
 ~~~
 GET HTTP/1.1 302 Found
 Location: https://accounts.google.com/o/oauth2/v2/auth?
