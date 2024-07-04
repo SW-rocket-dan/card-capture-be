@@ -16,5 +16,11 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException());
     }
 
-
+    public User createUser(String email, String name) {
+        User user = User.builder()
+                .email(email)
+                .name(name)
+                .build();
+        return userRepository.save(user);
+    }
 }
