@@ -1,6 +1,7 @@
 package app.cardcapture.auth.controller;
 
 import app.cardcapture.auth.config.GoogleAuthConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,19 +23,26 @@ public class GoogleAuthControllerTest {
     @MockBean
     private GoogleAuthConfig googleAuthConfig;
 
-    @Test
-    public void 구글_로그인_인가_서버에_보낼_양식을_응답받을_수_있다() throws Exception {
-        // given
-        String clientId = "test-client-id";
-        String redirectUri = "http://localhost:8080/api/v1/auth/google/callback";
-        String responseType = "code";
-        String scope = "openid email profile";
+    private String clientId;
+    private String redirectUri;
+    private String responseType;
+    private String scope;
+
+    @BeforeEach
+    public void setGoogleAuthConfig() {
+        clientId = "test-client-id";
+        redirectUri = "http://localhost:8080/api/v1/auth/google/callback";
+        responseType = "code";
+        scope = "openid email profile";
 
         given(googleAuthConfig.getClientId()).willReturn(clientId);
         given(googleAuthConfig.getRedirectUri()).willReturn(redirectUri);
         given(googleAuthConfig.getResponseType()).willReturn(responseType);
         given(googleAuthConfig.getScope()).willReturn(scope);
+    }
 
+    @Test
+    public void api로_구글_로그인_인가_서버에_보낼_양식을_응답받을_수_있다() throws Exception {
         // when
         ResultActions resultActions = mockMvc.perform(get("/api/v1/auth/google/login"));
 

@@ -16,7 +16,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void 구글_유저_정보를_조회할_수_있다() throws Exception {
+    public void api로_구글_유저_정보를_조회할_수_있다() throws Exception {
         mockMvc.perform(get("/api/v1/user/me"))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").exists())
