@@ -5,24 +5,20 @@ import app.cardcapture.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Transactional
 public class UserServiceTest {
 
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
     @InjectMocks
@@ -31,23 +27,21 @@ public class UserServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        userService = new UserService(userRepository);
     }
 
     @Test
-    @Rollback(true)
     public void 유저id로_개인_정보를_조회할_수_있다() {
         // given
         User user = User.builder()
                 .email("inpink@cardcapture.app")
                 .name("Veronica")
                 .build();
-        userRepository.saveAndFlush(user);
+        user.setId(1L);
 
-        long userId = user.getId();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         // when
-        User result = userService.findUserById(userId);
+        User result = userService.findUserById(1L);
 
         // then
         assertAll(
@@ -58,10 +52,11 @@ public class UserServiceTest {
     }
 
     @Test
-    @Rollback(true)
     public void 유저id로_개인_정보를_조회할_수_없으면_예외가_발생한다() {
         // given
         long invalidUserId = 1234567890L;
+
+        when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty());
 
         // when & then
         assertThrows(IllegalArgumentException.class, () -> {
@@ -70,11 +65,16 @@ public class UserServiceTest {
     }
 
     @Test
-    @Rollback(true)
     public void 유저를_생성할_수_있다() {
         // given
         String email = "inpink@cardcapture.app";
         String name = "Veronica";
+        User user = User.builder()
+                .email(email)
+                .name(name)
+                .build();
+
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         // when
         User createdUser = userService.createUser(email, name);
