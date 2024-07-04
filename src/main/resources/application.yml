@@ -1,3 +1,8 @@
 spring:
   application:
     name: cardcapture
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/cardcapture
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
