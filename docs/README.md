@@ -5,6 +5,9 @@
     - Google로부터 받아올 개인정보는 이름, email이다.
     - 프론트엔드에서 개인정보를 조회할 수 있다.
       - GET localhost:8080/api/v1/user/me
+        - 브라우저 헤더에 JWT가 필요하다.
+        - JWT가 없으면 401 Unauthorized를 반환한다.
+        - JWT가 유효하지 않으면 401 Unauthorized를 반환한다.
     - 프론트엔드에 구글 인가 서버에 보낼 데이터를 HTTP API로 제공한다.
       - GET localhost:8080/api/v1/auth/google/login 
     - 보내줄 데이터 예시

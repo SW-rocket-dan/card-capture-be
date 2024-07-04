@@ -22,4 +22,18 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.email").exists());
     }
+
+    @Test
+    public void Jwt헤더가_없으면_401을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/user/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void Jwt토큰이_유효하지_않으면_401을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/v1/user/me")
+                .header("Authorization", "Bearer invalid_token"))
+                .andExpect(status().isUnauthorized());
+    }
+
 }
