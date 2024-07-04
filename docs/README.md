@@ -37,7 +37,9 @@ grant_type=authorization_code&code=AUTH_CODE&redirect_uri=YOUR_REDIRECT_URI&clie
 ~~~
 - JWT를 발행한다.
 - JWT를 response body에 담아 json형태로 반환한다.
-  
+
+- API는 Swagger에서 확인 가능하다.
+  - http://localhost:8080/swagger-ui.html
 
 - 유저는 자동 로그인을 할 수 있다.
 - 유저는 로그아웃을 할 수 있다.

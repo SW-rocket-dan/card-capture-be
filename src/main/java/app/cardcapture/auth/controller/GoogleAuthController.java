@@ -2,6 +2,9 @@ package app.cardcapture.auth.controller;
 
 import app.cardcapture.auth.config.GoogleAuthConfig;
 import app.cardcapture.auth.dto.GoogleLoginInfoDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +23,10 @@ public class GoogleAuthController {
     }
 
     @GetMapping("/login")
+    @Operation(summary = "구글 로그인 정보 제공",
+            description = "구글 로그인 정보를 JSON 형태로 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "구글 로그인 정보 반환",
+            content = @Content(mediaType = "application/json"))
     public ResponseEntity<GoogleLoginInfoDto> getGoogleLoginData() {
         GoogleLoginInfoDto googleLoginDto = new GoogleLoginInfoDto(
                 googleAuthConfig.getClientId(),
