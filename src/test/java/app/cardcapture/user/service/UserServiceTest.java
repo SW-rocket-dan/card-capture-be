@@ -68,4 +68,22 @@ public class UserServiceTest {
             userService.findUserById(invalidUserId);
         });
     }
+
+    @Test
+    @Rollback(true)
+    public void 유저를_생성할_수_있다() {
+        // given
+        String email = "inpink@cardcapture.app";
+        String name = "Veronica";
+
+        // when
+        User createdUser = userService.createUser(email, name);
+
+        // then
+        assertAll(
+                () -> assertThat(createdUser).isNotNull(),
+                () -> assertThat(createdUser.getEmail()).isEqualTo(email),
+                () -> assertThat(createdUser.getName()).isEqualTo(name)
+        );
+    }
 }
