@@ -10,6 +10,7 @@
         - JWT가 유효하지 않으면 401 Unauthorized를 반환한다.
       - MySQL RDB에 유저 개인 정보가 저장되어 있다.
       - RDB에서 유저 개인 정보를 조회할 수 있다.
+        - 유저id로_개인_정보를_조회할_수_없으면_예외가_발생한다
     - [X] 프론트엔드에 구글 인가 서버에 보낼 데이터를 HTTP API로 제공한다. 
       - [X] GET/POST localhost:8080/api/v1/auth/google/login 
       - 이미 로그인된 사용자가 요청하면 400 Bad Request를 반환한다.
