@@ -8,8 +8,12 @@
         - 브라우저 헤더에 JWT가 필요하다.
         - JWT가 없으면 401 Unauthorized를 반환한다.
         - JWT가 유효하지 않으면 401 Unauthorized를 반환한다.
+      - MySQL RDB에 유저 개인 정보가 저장되어 있다.
+      - RDB에서 유저 개인 정보를 조회할 수 있다.
     - [X] 프론트엔드에 구글 인가 서버에 보낼 데이터를 HTTP API로 제공한다. 
-      - [X] GET localhost:8080/api/v1/auth/google/login 
+      - [X] GET/POST localhost:8080/api/v1/auth/google/login 
+      - 이미 로그인된 사용자가 요청하면 400 Bad Request를 반환한다.
+        - 이미 로그인되었다는 기준은 JWT가 유효한지 여부이다. (이 부분 테스트 어떻게 할 지 고민 중)
     - [X] 보내줄 데이터 예시
       - [X] client_id: 애플리케이션의 클라이언트 ID.
       - [X] redirect_uri: 인증 후 사용자가 돌아올 URI.
