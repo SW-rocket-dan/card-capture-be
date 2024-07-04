@@ -8,14 +8,15 @@
         - 브라우저 헤더에 JWT가 필요하다.
         - JWT가 없으면 401 Unauthorized를 반환한다.
         - JWT가 유효하지 않으면 401 Unauthorized를 반환한다.
-    - 프론트엔드에 구글 인가 서버에 보낼 데이터를 HTTP API로 제공한다.
-      - GET localhost:8080/api/v1/auth/google/login 
-    - 보내줄 데이터 예시
-      - client_id: 애플리케이션의 클라이언트 ID.
-      - redirect_uri: 인증 후 사용자가 돌아올 URI.
-      - response_type: 반환되는 인증 코드(code).
-      - scope: 요청하는 권한(예: openid, email, profile).
+    - [X] 프론트엔드에 구글 인가 서버에 보낼 데이터를 HTTP API로 제공한다. 
+      - [X] GET localhost:8080/api/v1/auth/google/login 
+    - [X] 보내줄 데이터 예시
+      - [X] client_id: 애플리케이션의 클라이언트 ID.
+      - [X] redirect_uri: 인증 후 사용자가 돌아올 URI.
+      - [X] response_type: 반환되는 인증 코드(code).
+      - [X] scope: 요청하는 권한(예: openid, email, profile).
       - state(선택): CSRF 공격을 방지하기 위한 임의의 문자열.
+- [X] 예시
 ~~~
 GET HTTP/1.1 302 Found
 Location: https://accounts.google.com/o/oauth2/v2/auth?
