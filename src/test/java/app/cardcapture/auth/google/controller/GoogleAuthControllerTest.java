@@ -70,4 +70,21 @@ public class GoogleAuthControllerTest {
                 .andExpect(jsonPath("$.responseType").value(responseType))
                 .andExpect(jsonPath("$.scope").value(scope));
     }
+
+    @Test
+    public void api로_구글_인가_서버에서_authCode받고_JWT_객체_반환() throws Exception {
+        // given
+        String authCode = "auth code";
+        JwtDto jwtDto = JwtDto.builder().authCode(authCode).build();
+
+        given(googleAuthService.exchangeAuthCodeForJwt(authCode)).willReturn(jwtDto);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get(
+                "/api/v1/auth/google/redirect?authCode=" + authCode));
+
+        // then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.authCode").value(authCode));
+    }
 }
