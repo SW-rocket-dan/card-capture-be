@@ -1,6 +1,6 @@
 ## [유저]
 - 유저는 회원가입을 통해 회원가입을 할 수 있다.
-![img.png](img.png)
+![OAuthFlow.png](OAuthFlow.png)
   - 유저는 Google 간편 로그인을 할 수 있다. (OAuth2.0) 
     - Google로부터 받아올 개인정보는 이름, email이다.
     - 프론트엔드에서 개인정보를 조회할 수 있다.
