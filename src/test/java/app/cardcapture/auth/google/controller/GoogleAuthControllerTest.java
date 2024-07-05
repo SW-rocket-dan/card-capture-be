@@ -1,11 +1,17 @@
-package app.cardcapture.auth.controller;
+package app.cardcapture.auth.google.controller;
 
-import app.cardcapture.auth.config.GoogleAuthConfig;
+import app.cardcapture.auth.google.GoogleAuthController;
+import app.cardcapture.auth.google.config.GoogleAuthConfig;
+import app.cardcapture.auth.google.service.GoogleAuthService;
+import app.cardcapture.auth.jwt.dto.JwtDto;
+import app.cardcapture.auth.jwt.service.JwtService;
+import app.cardcapture.security.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -15,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(GoogleAuthController.class)
+@Import({SecurityConfig.class})
 public class GoogleAuthControllerTest {
 
     @Autowired
@@ -23,6 +30,13 @@ public class GoogleAuthControllerTest {
     @MockBean
     private GoogleAuthConfig googleAuthConfig;
 
+    @MockBean
+    private GoogleAuthService googleAuthService;
+
+    @MockBean
+    private JwtService jwtService;
+
+    private String baseUrl;
     private String clientId;
     private String redirectUri;
     private String responseType;
@@ -30,11 +44,13 @@ public class GoogleAuthControllerTest {
 
     @BeforeEach
     public void setGoogleAuthConfig() {
+        baseUrl = "https://accounts.google.com/o/oauth2/v2/auth";
         clientId = "test-client-id";
         redirectUri = "http://localhost:8080/api/v1/auth/google/callback";
         responseType = "code";
         scope = "openid email profile";
 
+        given(googleAuthConfig.getBaseUrl()).willReturn(baseUrl);
         given(googleAuthConfig.getClientId()).willReturn(clientId);
         given(googleAuthConfig.getRedirectUri()).willReturn(redirectUri);
         given(googleAuthConfig.getResponseType()).willReturn(responseType);
@@ -48,6 +64,7 @@ public class GoogleAuthControllerTest {
 
         // then
         resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.loginBaseUrl").value(baseUrl))
                 .andExpect(jsonPath("$.clientId").value(clientId))
                 .andExpect(jsonPath("$.redirectUri").value(redirectUri))
                 .andExpect(jsonPath("$.responseType").value(responseType))

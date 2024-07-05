@@ -1,4 +1,4 @@
-package app.cardcapture.auth.config;
+package app.cardcapture.auth.google.config;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

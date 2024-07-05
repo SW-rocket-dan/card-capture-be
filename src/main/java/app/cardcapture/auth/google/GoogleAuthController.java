@@ -1,7 +1,10 @@
-package app.cardcapture.auth.controller;
+package app.cardcapture.auth.google;
 
-import app.cardcapture.auth.config.GoogleAuthConfig;
-import app.cardcapture.auth.dto.GoogleLoginInfoDto;
+import app.cardcapture.auth.google.config.GoogleAuthConfig;
+import app.cardcapture.auth.google.dto.GoogleLoginRequestDto;
+import app.cardcapture.auth.google.service.GoogleAuthService;
+import app.cardcapture.auth.jwt.dto.JwtDto;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -19,21 +23,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class GoogleAuthController {
 
     private final GoogleAuthConfig googleAuthConfig;
+    private final GoogleAuthService googleAuthService;
 
     @GetMapping("/login")
     @Operation(summary = "구글 로그인 정보 제공",
             description = "구글 로그인 정보를 JSON 형태로 반환합니다.")
     @ApiResponse(responseCode = "200", description = "구글 로그인 정보 반환",
             content = @Content(mediaType = "application/json"))
-    public ResponseEntity<GoogleLoginInfoDto> getGoogleLoginData() {
-        GoogleLoginInfoDto googleLoginDto = new GoogleLoginInfoDto(
-                googleAuthConfig.getClientId(),
-                googleAuthConfig.getRedirectUri(),
-                googleAuthConfig.getResponseType(),
-                googleAuthConfig.getScope()
-        );
+    public ResponseEntity<GoogleLoginRequestDto> getGoogleLoginData() {
 
-        return ResponseEntity.ok(googleLoginDto);
+        GoogleLoginRequestDto googleLoginRequestDto = GoogleLoginRequestDto.builder()
+                .loginBaseUrl(googleAuthConfig.getBaseUrl())
+                .scope(googleAuthConfig.getScope())
+                .redirectUri(googleAuthConfig.getRedirectUri())
+                .responseType(googleAuthConfig.getResponseType())
+                .clientId(googleAuthConfig.getClientId())
+                .build();
+
+        return ResponseEntity.ok(googleLoginRequestDto);
     }
 
 }
