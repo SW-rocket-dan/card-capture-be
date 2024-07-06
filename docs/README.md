@@ -1,8 +1,8 @@
 ## [유저]
 - 유저는 회원가입을 통해 회원가입을 할 수 있다.
 ![OAuthFlow.png](OAuthFlow.png)
-  - 유저는 Google 간편 로그인을 할 수 있다. (OAuth2.0) 
-    - Google로부터 받아올 개인정보는 이름, email이다.
+  - [X]유저는 Google 간편 로그인을 할 수 있다. (OAuth2.0) 
+    - [X]Google로부터 받아올 개인정보는 이름, email이다.
     - 프론트엔드에서 개인정보를 조회할 수 있다.
       - GET localhost:8080/api/v1/user/me
         - 브라우저 헤더에 JWT가 필요하다.
@@ -33,9 +33,9 @@ scope=openid%20email%20profile&
 state=xyz  
 ~~~   
 ㅤ
-- 사용자가 구글 인가 페이지에서 로그인을 성공시켰으면, 구글이 프론트 서버를 통해 http://localhost:8080/api/v1/auth/google/redirect 로 보내는 리다이렉트를 받는다.
-  - 이 요청에는 구글 인가 서버에서 발급한 유저의 Access Token과 Refresh Token이 담겨있다.
-- 구글 데이터 서버에 Access Token을 통해 유저의 정보를 요청하고 받아온다.
+- [X]사용자가 구글 인가 페이지에서 로그인을 성공시켰으면, 구글이 프론트 서버를 통해 http://localhost:8080/api/v1/auth/google/redirect 로 보내는 리다이렉트를 받는다.
+  - [X]이 요청에는 구글 인가 서버에서 발급한 유저의 Access Token과 Refresh Token이 담겨있다.
+- [X]구글 데이터 서버에 Access Token을 통해 유저의 정보를 요청하고 받아온다.
 ~~~
 POST https://oauth2.googleapis.com/token
 Content-Type: application/x-www-form-urlencoded

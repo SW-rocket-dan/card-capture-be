@@ -1,13 +1,14 @@
 package app.cardcapture.auth.google.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import app.cardcapture.auth.google.config.GoogleAuthConfig;
 import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.common.exception.BusinessLogicException;
+import app.cardcapture.user.dto.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,10 +49,11 @@ public class GoogleAuthServiceTest {
         when(googleAuthConfig.getClientSecret()).thenReturn("your-client-secret");
         when(googleAuthConfig.getRedirectUri()).thenReturn("your-redirect-uri");
         when(googleAuthConfig.getGrantType()).thenReturn("authorization_code");
+        when(googleAuthConfig.getApiUrl()).thenReturn("https://www.googleapis.com/oauth2/v1/userinfo");
     }
 
     @Test
-    public void testGetGoogleToken_Success() throws Exception {
+    public void auth_code로_구글_데이터_서버에_Token을_받아온다() throws Exception {
         // given
         GoogleTokenResponseDto mockResponse = new GoogleTokenResponseDto(
                 "mock-access-token", "mock-refresh-token", "mock id token", "Bearer", 3600);
@@ -74,22 +76,15 @@ public class GoogleAuthServiceTest {
     }
 
     @Test
-    public void testGetGoogleToken_Failure() {
+    public void auth_code로_구글_데이터_서버에_Token을_받아오지_못하면_예외_발생() {
         // given
         mockServer.expect(ExpectedCount.once(), MockRestRequestMatchers.requestTo("https://oauth2.googleapis.com/token"))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.BAD_REQUEST));
 
-        // when
-        BusinessLogicException exception = assertThrows(BusinessLogicException.class, () -> {
-            googleAuthService.getGoogleToken("mock-auth-code");
-        });
-
-        // then
-        assertAll("BusinessLogicException",
-                () -> assertThat(exception).isNotNull(),
-                () -> assertThat(exception).isInstanceOf(BusinessLogicException.class)
-        );
+        // when & then
+        assertThatThrownBy(() -> googleAuthService.getGoogleToken("mock-auth-code"))
+                .isInstanceOf(BusinessLogicException.class);
     }
 
     @Test

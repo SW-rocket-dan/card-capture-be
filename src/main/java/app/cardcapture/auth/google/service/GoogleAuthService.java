@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class GoogleAuthService {
     private static final String GOOGLE_TOKEN_RETRIEVAL_ERROR = "Failed to retrieve Google token";
+    private static final String USER_INFO_RETRIEVAL_ERROR = "Failed to retrieve user info";
     private static final String UNEXPECTED_ERROR = "An unexpected error occurred";
 
     private final GoogleAuthConfig googleAuthConfig;
@@ -71,8 +72,19 @@ public class GoogleAuthService {
         headers.setBearerAuth(accessToken);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<UserDto> response = restTemplate.exchange(userInfoUrl, HttpMethod.GET, entity, UserDto.class);
+        return getUserResponseWithErrorHandling(userInfoUrl, entity);
+    }
 
-        return response.getBody();
+    private UserDto getUserResponseWithErrorHandling(String userInfoUrl, HttpEntity<String> entity) {
+        try {
+            ResponseEntity<UserDto> response = restTemplate.exchange(userInfoUrl, HttpMethod.GET, entity, UserDto.class);
+            return response.getBody();
+        } catch (RestClientException e) {
+            log.error("{}: {}", USER_INFO_RETRIEVAL_ERROR, e.getMessage(), e);
+            throw new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, e, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("{}: {}", UNEXPECTED_ERROR, e.getMessage(), e);
+            throw new BusinessLogicException(UNEXPECTED_ERROR, e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

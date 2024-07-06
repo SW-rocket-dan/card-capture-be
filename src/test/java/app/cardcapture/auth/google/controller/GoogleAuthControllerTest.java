@@ -79,7 +79,7 @@ public class GoogleAuthControllerTest {
         String authCode = "auth code";
         GoogleTokenResponseDto googleTokenResponseDto = new GoogleTokenResponseDto(
                 "accessToken", "refreshToken", "idToken", "tokenType", 3600);
-        UserDto userDto = new UserDto("userId","name","email");
+        UserDto userDto = new UserDto("userId","email",true, "inpink y", "inpink", "y", "profileImageUrl");
         JwtDto jwtDto = new JwtDto("jwtToken");
 
         given(googleAuthService.getGoogleToken(authCode)).willReturn(googleTokenResponseDto);
