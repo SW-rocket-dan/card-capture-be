@@ -18,4 +18,5 @@ public class GoogleAuthConfig {
     private String baseUrl;
     private String oauthUrl;
     private String apiUrl;
+    private String grantType;
 }

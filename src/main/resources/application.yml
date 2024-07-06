@@ -20,12 +20,13 @@ oauth:
     client-id: ${GOOGLE_CLIENT_ID}
     client-secret: ${GOOGLE_CLIENT_SECRET}
     redirect-uri: ${GOOGLE_REDIRECT_URI}
-    response-type: "code"
-    base-url: "https://accounts.google.com/o/oauth2/auth"
-    oauth-url: "https://oauth2.googleapis.com"
-    api-url: "https://www.googleapis.com"
+    response-type: code
+    base-url: https://accounts.google.com/o/oauth2/auth
+    oauth-url: https://oauth2.googleapis.com/token
+    api-url: https://www.googleapis.com
     client-name: Google
     scope: openid, email
+    grant-type: authorization_code
 
 
 jwt:

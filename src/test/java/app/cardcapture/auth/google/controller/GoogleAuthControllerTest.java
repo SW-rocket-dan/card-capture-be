@@ -2,10 +2,12 @@ package app.cardcapture.auth.google.controller;
 
 import app.cardcapture.auth.google.GoogleAuthController;
 import app.cardcapture.auth.google.config.GoogleAuthConfig;
+import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtDto;
 import app.cardcapture.auth.jwt.service.JwtService;
 import app.cardcapture.security.config.SecurityConfig;
+import app.cardcapture.user.dto.UserDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,16 +77,20 @@ public class GoogleAuthControllerTest {
     public void api로_구글_인가_서버에서_authCode받고_JWT_객체_반환() throws Exception {
         // given
         String authCode = "auth code";
-        JwtDto jwtDto = JwtDto.builder().authCode(authCode).build();
+        GoogleTokenResponseDto googleTokenResponseDto = new GoogleTokenResponseDto("accessToken", "refreshToken", "idToken", "tokenType", 3600L);
+        UserDto userDto = new UserDto("userId","name","email");
+        JwtDto jwtDto = new JwtDto("jwtToken");
 
-        given(googleAuthService.exchangeAuthCodeForJwt(authCode)).willReturn(jwtDto);
+        given(googleAuthService.getGoogleToken(authCode)).willReturn(googleTokenResponseDto);
+        given(googleAuthService.getUserInfo("accessToken")).willReturn(userDto);
+        given(jwtService.publish(userDto.getId())).willReturn(jwtDto);
 
         // when
-        ResultActions resultActions = mockMvc.perform(get(
-                "/api/v1/auth/google/redirect?authCode=" + authCode));
+        ResultActions resultActions = mockMvc.perform(get("/api/v1/auth/google/redirect")
+                .param("code", authCode));
 
         // then
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.authCode").value(authCode));
+                .andExpect(jsonPath("$.accessToken").value("jwtToken"));
     }
 }
