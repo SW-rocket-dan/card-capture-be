@@ -91,4 +91,52 @@ public class GoogleAuthServiceTest {
                 () -> assertThat(exception).isInstanceOf(BusinessLogicException.class)
         );
     }
+
+    @Test
+    public void access_token으로_구글_데이터_서버에_유저정보_받아오기() throws Exception {
+        // given
+        String accessToken = "mock-access-token";
+        UserDto mockResponse = new UserDto(
+                "123456789012345678901",
+                "testuser@example.com",
+                true,
+                "Test User",
+                "Test",
+                "User",
+                "https://example.com/path/to/picture.jpg"
+        );
+
+        mockServer.expect(ExpectedCount.once(), MockRestRequestMatchers.requestTo("https://www.googleapis.com/oauth2/v1/userinfo"))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
+                .andRespond(MockRestResponseCreators.withSuccess(new ObjectMapper().writeValueAsString(mockResponse), MediaType.APPLICATION_JSON));
+
+        // when
+        UserDto response = googleAuthService.getUserInfo(accessToken);
+
+        // then
+        assertAll("UserDto",
+                () -> assertThat(response).isNotNull(),
+                () -> assertThat(response.getId()).isEqualTo("123456789012345678901"),
+                () -> assertThat(response.getEmail()).isEqualTo("testuser@example.com"),
+                () -> assertThat(response.isVerifiedEmail()).isTrue(),
+                () -> assertThat(response.getName()).isEqualTo("Test User"),
+                () -> assertThat(response.getGivenName()).isEqualTo("Test"),
+                () -> assertThat(response.getFamilyName()).isEqualTo("User"),
+                () -> assertThat(response.getPicture()).isEqualTo("https://example.com/path/to/picture.jpg")
+        );
+    }
+
+    @Test
+    public void access_token으로_구글_데이터_서버에_유저정보_못_받아오면_예외_발생() {
+        // given
+        String accessToken = "mock-access-token";
+
+        mockServer.expect(ExpectedCount.once(), MockRestRequestMatchers.requestTo("https://www.googleapis.com/oauth2/v1/userinfo"))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.BAD_REQUEST));
+
+        // when & then
+        assertThatThrownBy(() -> googleAuthService.getUserInfo("mock-auth-code"))
+                .isInstanceOf(BusinessLogicException.class);
+    }
 }
