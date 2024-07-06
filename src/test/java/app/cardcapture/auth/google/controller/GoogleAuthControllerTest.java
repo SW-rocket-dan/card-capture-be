@@ -77,7 +77,8 @@ public class GoogleAuthControllerTest {
     public void api로_구글_인가_서버에서_authCode받고_JWT_객체_반환() throws Exception {
         // given
         String authCode = "auth code";
-        GoogleTokenResponseDto googleTokenResponseDto = new GoogleTokenResponseDto("accessToken", "refreshToken", "idToken", "tokenType", 3600L);
+        GoogleTokenResponseDto googleTokenResponseDto = new GoogleTokenResponseDto(
+                "accessToken", "refreshToken", "idToken", "tokenType", 3600);
         UserDto userDto = new UserDto("userId","name","email");
         JwtDto jwtDto = new JwtDto("jwtToken");
 

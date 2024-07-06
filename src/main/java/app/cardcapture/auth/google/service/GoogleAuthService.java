@@ -21,10 +21,9 @@ public class GoogleAuthService {
     private static final String UNEXPECTED_ERROR = "An unexpected error occurred";
 
     private final GoogleAuthConfig googleAuthConfig;
+    protected final RestTemplate restTemplate;
 
     public GoogleTokenResponseDto getGoogleToken(String authCode) {
-        RestTemplate restTemplate = new RestTemplate();
-
         String tokenUrl = googleAuthConfig.getOauthUrl();
         HttpHeaders headers = getHttpHeaders();
         MultiValueMap<String, String> bodyParams = getGoogleTokenBodyParams(authCode);
@@ -51,7 +50,9 @@ public class GoogleAuthService {
         return bodyParams;
     }
 
-    private static GoogleTokenResponseDto getTokenWithExceptionHandling(RestTemplate restTemplate, String tokenUrl, HttpEntity<MultiValueMap<String, String>> request) {
+    private static GoogleTokenResponseDto getTokenWithExceptionHandling(RestTemplate restTemplate,
+                                                                        String tokenUrl,
+                                                                        HttpEntity<MultiValueMap<String, String>> request) {
         try {
             ResponseEntity<GoogleTokenResponseDto> response = restTemplate.postForEntity(tokenUrl, request, GoogleTokenResponseDto.class);
             return response.getBody();
@@ -65,8 +66,6 @@ public class GoogleAuthService {
     }
 
     public UserDto getUserInfo(String accessToken) {
-        RestTemplate restTemplate = new RestTemplate();
-
         String userInfoUrl = googleAuthConfig.getApiUrl();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
