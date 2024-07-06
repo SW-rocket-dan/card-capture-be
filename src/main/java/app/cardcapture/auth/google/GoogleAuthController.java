@@ -55,8 +55,10 @@ public class GoogleAuthController {
         GoogleTokenResponseDto googleTokenResponseDto = googleAuthService.getGoogleToken(authCode);
         System.out.println("googleTokenResponseDto = " + googleTokenResponseDto.toString());
 
-        // TODO: 자체 Jwt 발급하기
         UserDto userDto = googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken());
+        System.out.println("userDto = " + userDto.toString());
+
+        // TODO: 자체 Jwt 발급하기
         // jwt 발급 시 필요한 데이터 모아서 보내기
         JwtDto jwtDto = jwtService.publish(userDto.getId()); //메서드 명은 고민 더 해보기
 

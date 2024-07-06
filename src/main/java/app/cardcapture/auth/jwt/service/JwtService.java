@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
     public JwtDto publish(String id) {
-        return new JwtDto("auth code test");
+        return new JwtDto(id);
     }
 }

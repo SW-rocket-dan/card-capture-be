@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-public class RestTemplateConfig {
+public class RestTemplateConfig { // TODO: RestClient로 변경?
 
     @Bean
     public RestTemplate restTemplate() {
