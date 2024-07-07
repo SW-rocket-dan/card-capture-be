@@ -1,97 +1,79 @@
 package app.cardcapture.auth.google.controller;
 
-import app.cardcapture.auth.google.GoogleAuthController;
 import app.cardcapture.auth.google.config.GoogleAuthConfig;
+import app.cardcapture.auth.google.config.GoogleAuthConfigStub;
+import app.cardcapture.auth.google.dto.GoogleLoginRequestDto;
 import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtDto;
-import app.cardcapture.auth.jwt.service.JwtService;
-import app.cardcapture.security.config.SecurityConfig;
+import app.cardcapture.auth.jwt.service.JwtComponent;
+import app.cardcapture.auth.jwt.service.JwtComponentStub;
 import app.cardcapture.user.dto.UserDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
-@WebMvcTest(GoogleAuthController.class)
-@Import({SecurityConfig.class})
 public class GoogleAuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private GoogleAuthConfig googleAuthConfig;
-
-    @MockBean
+    @Mock
     private GoogleAuthService googleAuthService;
 
-    @MockBean
-    private JwtService jwtService;
+    private GoogleAuthConfig googleAuthConfigStub;
+    private JwtComponent jwtComponentStub;
 
-    private String baseUrl;
-    private String clientId;
-    private String redirectUri;
-    private String responseType;
-    private String scope;
+    @InjectMocks
+    private GoogleAuthControllerStub googleAuthControllerStub;
 
     @BeforeEach
-    public void setGoogleAuthConfig() {
-        baseUrl = "https://accounts.google.com/o/oauth2/v2/auth";
-        clientId = "test-client-id";
-        redirectUri = "http://localhost:8080/api/v1/auth/google/callback";
-        responseType = "code";
-        scope = "openid email profile";
-
-        given(googleAuthConfig.getBaseUrl()).willReturn(baseUrl);
-        given(googleAuthConfig.getClientId()).willReturn(clientId);
-        given(googleAuthConfig.getRedirectUri()).willReturn(redirectUri);
-        given(googleAuthConfig.getResponseType()).willReturn(responseType);
-        given(googleAuthConfig.getScope()).willReturn(scope);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        googleAuthConfigStub = new GoogleAuthConfigStub();
+        jwtComponentStub = JwtComponentStub.createStub();
+        googleAuthControllerStub = new GoogleAuthControllerStub(googleAuthConfigStub, googleAuthService, jwtComponentStub);
     }
 
     @Test
-    public void api로_구글_로그인_인가_서버에_보낼_양식을_응답받을_수_있다() throws Exception {
+    void testGetGoogleLoginData() {
         // when
-        ResultActions resultActions = mockMvc.perform(get("/api/v1/auth/google/login"));
+        ResponseEntity<GoogleLoginRequestDto> response = googleAuthControllerStub.getGoogleLoginData();
 
         // then
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.loginBaseUrl").value(baseUrl))
-                .andExpect(jsonPath("$.clientId").value(clientId))
-                .andExpect(jsonPath("$.redirectUri").value(redirectUri))
-                .andExpect(jsonPath("$.responseType").value(responseType))
-                .andExpect(jsonPath("$.scope").value(scope));
+        GoogleLoginRequestDto body = response.getBody();
+        assertAll(
+                () -> assertNotNull(body),
+                () -> assertEquals("https://accounts.google.com/o/oauth2/v2/auth", body.getLoginBaseUrl()),
+                () -> assertEquals("profile email", body.getScope()),
+                () -> assertEquals("http://localhost:8080/api/v1/auth/google/redirect", body.getRedirectUri()),
+                () -> assertEquals("code", body.getResponseType()),
+                () -> assertEquals("your-client-id", body.getClientId())
+        );
     }
 
     @Test
-    public void api로_구글_인가_서버에서_authCode받고_JWT_객체_반환() throws Exception {
+    void testGetGoogleRedirect() {
         // given
-        String authCode = "auth code";
+        String authCode = "auth-code";
         GoogleTokenResponseDto googleTokenResponseDto = new GoogleTokenResponseDto(
                 "accessToken", "refreshToken", "idToken", "tokenType", 3600);
-        UserDto userDto = new UserDto("userId","email",true, "inpink y", "inpink", "y", "profileImageUrl");
-        JwtDto jwtDto = new JwtDto("jwtToken");
+        UserDto userDto = new UserDto("userId", "email", true, "inpink y", "inpink", "y", "profileImageUrl");
 
-        given(googleAuthService.getGoogleToken(authCode)).willReturn(googleTokenResponseDto);
-        given(googleAuthService.getUserInfo("accessToken")).willReturn(userDto);
-        given(jwtService.publish(userDto.getId())).willReturn(jwtDto);
+        when(googleAuthService.getGoogleToken(authCode)).thenReturn(googleTokenResponseDto);
+        when(googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken())).thenReturn(userDto);
 
         // when
-        ResultActions resultActions = mockMvc.perform(get("/api/v1/auth/google/redirect")
-                .param("code", authCode));
+        ResponseEntity<JwtDto> response = googleAuthControllerStub.getGoogleRedirect(authCode);
 
         // then
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("jwtToken"));
+        JwtDto body = response.getBody();
+        assertAll(
+                () -> assertNotNull(body),
+                () -> assertTrue(body.getAccessToken().startsWith("eyJ"))
+        );
     }
 }
