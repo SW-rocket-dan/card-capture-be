@@ -29,7 +29,8 @@ oauth:
     grant-type: authorization_code
 
 jwt:
-    secret: ${JWT_SECRET}
-    expiration: 86400000
-    token-prefix: "Bearer "
-    header-key: "Authorization"
+  issuer: cardcapture
+  secret: ${JWT_SECRET}
+  expiration-in-seconds: ${JWT_EXPIRATION_IN_SECONDS}
+  token-prefix: "Bearer "
+  header-key: "Authorization"

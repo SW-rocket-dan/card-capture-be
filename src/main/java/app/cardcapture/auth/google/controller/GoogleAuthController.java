@@ -1,11 +1,11 @@
-package app.cardcapture.auth.google;
+package app.cardcapture.auth.google.controller;
 
 import app.cardcapture.auth.google.config.GoogleAuthConfig;
 import app.cardcapture.auth.google.dto.GoogleLoginRequestDto;
 import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtDto;
-import app.cardcapture.auth.jwt.service.JwtService;
+import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.user.dto.UserDto;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,7 +27,7 @@ public class GoogleAuthController {
 
     private final GoogleAuthConfig googleAuthConfig;
     private final GoogleAuthService googleAuthService;
-    private final JwtService jwtService;
+    private final JwtComponent jwtComponent;
 
     @GetMapping("/login")
     @Operation(summary = "구글 로그인 정보 제공",
@@ -50,17 +50,11 @@ public class GoogleAuthController {
     @Hidden
     public ResponseEntity<JwtDto> getGoogleRedirect(@RequestParam(name = "code") String authCode)
     {
-        System.out.println("authCode = " + authCode);
-        // TODO: 구글 데이터 서버에 auth code 보내기 -> access token & refresh token 받기 -> 데이터 서버에 access token으로 사용자 정보 요청하기 (at와 ft는 폐기)
         GoogleTokenResponseDto googleTokenResponseDto = googleAuthService.getGoogleToken(authCode);
-        System.out.println("googleTokenResponseDto = " + googleTokenResponseDto.toString());
-
         UserDto userDto = googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken());
-        System.out.println("userDto = " + userDto.toString());
 
-        // TODO: 자체 Jwt 발급하기
-        // jwt 발급 시 필요한 데이터 모아서 보내기
-        JwtDto jwtDto = jwtService.publish(userDto.getId()); //메서드 명은 고민 더 해보기
+        String jwt = jwtComponent.create(userDto.getId(), "ROLE_USER");
+        JwtDto jwtDto = new JwtDto(jwt);
 
         return ResponseEntity.ok(jwtDto);
     }

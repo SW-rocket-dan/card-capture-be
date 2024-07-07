@@ -33,6 +33,20 @@ public class GoogleAuthService {
         return getTokenWithExceptionHandling(restTemplate, tokenUrl, request);
     }
 
+    public UserDto getUserInfo(String accessToken) {
+        String userInfoUrl = googleAuthConfig.getApiUrl();
+        HttpHeaders headers = getHttpHeaders(accessToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        
+        return getUserResponseWithErrorHandling(userInfoUrl, entity);
+    }
+
+    private static HttpHeaders getHttpHeaders(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        return headers;
+    }
+
     private static HttpHeaders getHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -51,7 +65,8 @@ public class GoogleAuthService {
         return bodyParams;
     }
 
-    private static GoogleTokenResponseDto getTokenWithExceptionHandling(RestTemplate restTemplate,
+    private static GoogleTokenResponseDto
+    getTokenWithExceptionHandling(RestTemplate restTemplate,
                                                                         String tokenUrl,
                                                                         HttpEntity<MultiValueMap<String, String>> request) {
         try {
@@ -64,15 +79,6 @@ public class GoogleAuthService {
             log.error("{}: {}", UNEXPECTED_ERROR, e.getMessage(), e);
             throw new BusinessLogicException(UNEXPECTED_ERROR, e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    public UserDto getUserInfo(String accessToken) {
-        String userInfoUrl = googleAuthConfig.getApiUrl();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        return getUserResponseWithErrorHandling(userInfoUrl, entity);
     }
 
     private UserDto getUserResponseWithErrorHandling(String userInfoUrl, HttpEntity<String> entity) {
