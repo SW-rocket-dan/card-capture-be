@@ -6,10 +6,11 @@ import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtDto;
 import app.cardcapture.auth.jwt.service.JwtComponentStub;
+import app.cardcapture.user.domain.User;
 import app.cardcapture.user.dto.UserDto;
+import app.cardcapture.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,19 +19,22 @@ import static org.mockito.Mockito.when;
 
 public class GoogleAuthControllerTest {
 
-    private GoogleAuthControllerStub googleAuthControllerStub;
+    private GoogleAuthController googleAuthController;
 
     private GoogleAuthService googleAuthService;
+    private UserService userService;
+
     @BeforeEach
     void setUp() {
         googleAuthService = mock(GoogleAuthService.class);
-        googleAuthControllerStub = GoogleAuthControllerStub.createStub(googleAuthService);
+        userService=mock(UserService.class);
+        googleAuthController = new GoogleAuthController(GoogleAuthConfigStub.createStub(), googleAuthService, userService, JwtComponentStub.createStub());
     }
 
     @Test
     void testGetGoogleLoginData() {
         // when
-        ResponseEntity<GoogleLoginRequestDto> response = googleAuthControllerStub.getGoogleLoginData();
+        ResponseEntity<GoogleLoginRequestDto> response = googleAuthController.getGoogleLoginData();
 
         // then
         GoogleLoginRequestDto body = response.getBody();
@@ -51,12 +55,14 @@ public class GoogleAuthControllerTest {
         GoogleTokenResponseDto googleTokenResponseDto = new GoogleTokenResponseDto(
                 "accessToken", "refreshToken", "idToken", "tokenType", 3600);
         UserDto userDto = new UserDto("1234578910987654321", "email", true, "inpink y", "inpink", "y", "profileImageUrl");
+        User user = new User(1L, "213", "email", "dsdf", true, "inpink y", "y", "profileImageUrl");
 
         when(googleAuthService.getGoogleToken(authCode)).thenReturn(googleTokenResponseDto);
         when(googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken())).thenReturn(userDto);
+        when(userService.save(userDto)).thenReturn(user);
 
         // when
-        ResponseEntity<JwtDto> response = googleAuthControllerStub.getGoogleRedirect(authCode);
+        ResponseEntity<JwtDto> response = googleAuthController.getGoogleRedirect(authCode);
 
         // then
         JwtDto body = response.getBody();
