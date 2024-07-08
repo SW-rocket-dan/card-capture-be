@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Google OAuth Login</title>
+</head>
+<body>
+<h1>Login with Google</h1>
+<button onclick="redirectToGoogle()">Login with Google</button>
+
+<script>
+    function redirectToGoogle() {
+        window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=318421033688-lu50b8qckr8pe6e4t2fpag34vltgaobl.apps.googleusercontent.com&redirect_uri=http://localhost:8080/api/v1/auth/google/redirect&response_type=code&scope=openid%20email%20profile";
+    }
+</script>
+</body>
+</html>

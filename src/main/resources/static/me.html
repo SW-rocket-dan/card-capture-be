@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Info</title>
+    <script>
+        async function getUserInfo() {
+            const token = document.getElementById("jwtToken").value;
+            const response = await fetch('/api/v1/user/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': token
+                }
+            });
+
+            if (response.status === 200) {
+                const userInfo = await response.json();
+                document.getElementById("result").textContent = JSON.stringify(userInfo, null, 2);
+            } else {
+                document.getElementById("result").textContent = 'Error: ' + response.status;
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>User Info</h1>
+<input type="text" id="jwtToken" placeholder="Enter JWT token here">
+<button onclick="getUserInfo()">Get User Info</button>
+<pre id="result"></pre>
+</body>
+</html>

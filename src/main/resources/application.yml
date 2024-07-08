@@ -1,3 +1,40 @@
 spring:
   application:
     name: cardcapture
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/cardcapture
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+        ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: ${GOOGLE_REDIRECT_URI}
+    response-type: code
+    base-url: https://accounts.google.com/o/oauth2/auth
+    oauth-url: https://oauth2.googleapis.com/token
+    api-url: https://www.googleapis.com/oauth2/v1/userinfo
+    client-name: Google
+    scope: openid email
+    grant-type: authorization_code
+
+jwt:
+  issuer: cardcapture
+  secret: ${JWT_SECRET}
+  expiration-in-seconds: ${JWT_EXPIRATION_IN_SECONDS}
+  header-key: Authorization
+
+
+springdoc:
+  api-docs:
+    path: ${SWAGGER_PATH}
