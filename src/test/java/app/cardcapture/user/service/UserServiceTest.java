@@ -1,7 +1,9 @@
 package app.cardcapture.user.service;
 
 import app.cardcapture.user.domain.User;
+import app.cardcapture.user.dto.UserDto;
 import app.cardcapture.user.repository.UserRepository;
+import app.cardcapture.common.exception.BusinessLogicException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -25,23 +27,22 @@ public class UserServiceTest {
     private UserService userService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void 유저id로_개인_정보를_조회할_수_있다() {
         // given
-        User user = User.builder()
-                .email("inpink@cardcapture.app")
-                .name("Veronica")
-                .build();
+        User user = new User();
         user.setId(1L);
+        user.setEmail("inpink@cardcapture.app");
+        user.setName("Veronica");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         // when
-        User result = userService.findUserById(1L);
+        UserDto result = userService.findUserById(1L);
 
         // then
         assertAll(
@@ -59,7 +60,7 @@ public class UserServiceTest {
         when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BusinessLogicException.class, () -> {
             userService.findUserById(invalidUserId);
         });
     }
@@ -69,6 +70,8 @@ public class UserServiceTest {
         // given
         String email = "inpink@cardcapture.app";
         String name = "Veronica";
+        UserDto userDto = new UserDto(null, email, false, name, "GivenName", "FamilyName", "PictureUrl");
+
         User user = User.builder()
                 .email(email)
                 .name(name)
@@ -77,7 +80,7 @@ public class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // when
-        User createdUser = userService.createUser(email, name);
+        User createdUser = userService.save(userDto);
 
         // then
         assertAll(

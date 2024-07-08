@@ -40,7 +40,7 @@ public class GoogleAuthServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        googleAuthConfigStub = new GoogleAuthConfigStub();
+        googleAuthConfigStub = GoogleAuthConfigStub.createStub();
         mockServer = MockRestServiceServer.createServer(restTemplate);
     }
 
@@ -84,7 +84,7 @@ public class GoogleAuthServiceTest {
         // given
         String accessToken = "mock-access-token";
         UserDto mockResponse = new UserDto(
-                "123456789012345678901",
+                12345789L,
                 "testuser@example.com",
                 true,
                 "Test User",
@@ -103,7 +103,7 @@ public class GoogleAuthServiceTest {
         // then
         assertAll("UserDto",
                 () -> assertThat(response).isNotNull(),
-                () -> assertThat(response.getId()).isEqualTo("123456789012345678901"),
+                () -> assertThat(response.getId()).isEqualTo(12345789L),
                 () -> assertThat(response.getEmail()).isEqualTo("testuser@example.com"),
                 () -> assertThat(response.isVerifiedEmail()).isTrue(),
                 () -> assertThat(response.getName()).isEqualTo("Test User"),

@@ -1,41 +1,30 @@
 package app.cardcapture.auth.google.controller;
 
-import app.cardcapture.auth.google.config.GoogleAuthConfig;
 import app.cardcapture.auth.google.config.GoogleAuthConfigStub;
 import app.cardcapture.auth.google.dto.GoogleLoginRequestDto;
 import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtDto;
-import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.auth.jwt.service.JwtComponentStub;
 import app.cardcapture.user.dto.UserDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class GoogleAuthControllerTest {
 
-    @Mock
-    private GoogleAuthService googleAuthService;
-
-    private GoogleAuthConfig googleAuthConfigStub;
-    private JwtComponent jwtComponentStub;
-
-    @InjectMocks
     private GoogleAuthControllerStub googleAuthControllerStub;
 
+    private GoogleAuthService googleAuthService;
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        googleAuthConfigStub = new GoogleAuthConfigStub();
-        jwtComponentStub = JwtComponentStub.createStub();
-        googleAuthControllerStub = new GoogleAuthControllerStub(googleAuthConfigStub, googleAuthService, jwtComponentStub);
+        googleAuthService = mock(GoogleAuthService.class);
+        googleAuthControllerStub = GoogleAuthControllerStub.createStub(googleAuthService);
     }
 
     @Test
@@ -61,7 +50,7 @@ public class GoogleAuthControllerTest {
         String authCode = "auth-code";
         GoogleTokenResponseDto googleTokenResponseDto = new GoogleTokenResponseDto(
                 "accessToken", "refreshToken", "idToken", "tokenType", 3600);
-        UserDto userDto = new UserDto("userId", "email", true, "inpink y", "inpink", "y", "profileImageUrl");
+        UserDto userDto = new UserDto(12345789L, "email", true, "inpink y", "inpink", "y", "profileImageUrl");
 
         when(googleAuthService.getGoogleToken(authCode)).thenReturn(googleTokenResponseDto);
         when(googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken())).thenReturn(userDto);

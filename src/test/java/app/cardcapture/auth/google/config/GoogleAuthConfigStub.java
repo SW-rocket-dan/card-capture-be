@@ -2,6 +2,14 @@ package app.cardcapture.auth.google.config;
 
 public class GoogleAuthConfigStub extends GoogleAuthConfig {
 
+    private GoogleAuthConfigStub() {
+        super();
+    }
+
+    public static GoogleAuthConfig createStub() {
+        return new GoogleAuthConfigStub();
+    }
+
     @Override
     public String getBaseUrl() {
         return "https://accounts.google.com/o/oauth2/v2/auth";

@@ -19,7 +19,7 @@ class JwtComponentTest {
     @Test
     void testCreateToken() {
         // Given
-        String userId = "test-user";
+        Long userId = 12345789L;
         String role = "USER";
 
         // When
@@ -32,7 +32,7 @@ class JwtComponentTest {
     @Test
     void testVerifyToken() {
         // Given
-        Claims claims = Claims.of("test-user", "USER", "test-issuer");
+        Claims claims = Claims.of(12345789L, "USER", "test-issuer");
         String token = jwtComponent.create(claims);
 
         // When
