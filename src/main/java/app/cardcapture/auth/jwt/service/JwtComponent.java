@@ -25,7 +25,7 @@ public class JwtComponent {
         this.jwtVerifier = JWT.require(jwtHashAlgorithm).withIssuer(jwtConfig.getIssuer()).build();
     }
 
-    public String create(String userId, String role) {
+    public String create(Long userId, String role) {
         return this.create(Claims.of(userId, role, jwtConfig.getIssuer()));
     }
 

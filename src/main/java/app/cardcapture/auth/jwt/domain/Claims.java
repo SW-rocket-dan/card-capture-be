@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Getter
 public class Claims {
-    private String id;
+    private Long id;
     private String[] roles;
     private Date issuedAt;
     private Date expiresAt;
@@ -16,14 +16,14 @@ public class Claims {
     private Claims() {}
 
     public Claims(DecodedJWT decodedJWT) {
-        this.id = decodedJWT.getClaim("id").asString();
+        this.id = decodedJWT.getClaim("id").asLong();
         this.roles = decodedJWT.getClaim("roles").asArray(String.class);
         this.issuedAt = decodedJWT.getIssuedAt();
         this.expiresAt = decodedJWT.getExpiresAt();
         this.issuer = decodedJWT.getIssuer();
     }
 
-    public static Claims of(String id, String role, String issuer) {
+    public static Claims of(Long id, String role, String issuer) {
         Claims claims = new Claims();
 
         claims.id = id;

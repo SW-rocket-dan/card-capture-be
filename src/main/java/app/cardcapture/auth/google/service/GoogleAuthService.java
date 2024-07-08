@@ -67,17 +67,20 @@ public class GoogleAuthService {
 
     private static GoogleTokenResponseDto
     getTokenWithExceptionHandling(RestTemplate restTemplate,
-                                                                        String tokenUrl,
-                                                                        HttpEntity<MultiValueMap<String, String>> request) {
+                                  String tokenUrl,
+                                  HttpEntity<MultiValueMap<String, String>> request) {
         try {
-            ResponseEntity<GoogleTokenResponseDto> response = restTemplate.postForEntity(tokenUrl, request, GoogleTokenResponseDto.class);
+            ResponseEntity<GoogleTokenResponseDto> response = restTemplate.postForEntity(
+                    tokenUrl,
+                    request,
+                    GoogleTokenResponseDto.class);
             return response.getBody();
         } catch (RestClientException e) {
             log.error("{}: {}", GOOGLE_TOKEN_RETRIEVAL_ERROR, e.getMessage(), e);
-            throw new BusinessLogicException(GOOGLE_TOKEN_RETRIEVAL_ERROR, e, HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(GOOGLE_TOKEN_RETRIEVAL_ERROR, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             log.error("{}: {}", UNEXPECTED_ERROR, e.getMessage(), e);
-            throw new BusinessLogicException(UNEXPECTED_ERROR, e, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessLogicException(UNEXPECTED_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -87,10 +90,10 @@ public class GoogleAuthService {
             return response.getBody();
         } catch (RestClientException e) {
             log.error("{}: {}", USER_INFO_RETRIEVAL_ERROR, e.getMessage(), e);
-            throw new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, e, HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             log.error("{}: {}", UNEXPECTED_ERROR, e.getMessage(), e);
-            throw new BusinessLogicException(UNEXPECTED_ERROR, e, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessLogicException(UNEXPECTED_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

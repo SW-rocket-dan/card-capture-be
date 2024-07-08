@@ -1,7 +1,7 @@
 package app.cardcapture.security.config;
 
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import app.cardcapture.auth.jwt.filter.JwtAuthenticationTokenFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,7 +12,8 @@ import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@Getter
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     @Bean

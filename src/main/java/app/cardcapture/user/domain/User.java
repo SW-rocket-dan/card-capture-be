@@ -6,7 +6,9 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users")
 public class User {
 
@@ -20,9 +22,15 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Builder
-    public User(@NonNull String name, @NonNull String email) {
-        this.name = name;
-        this.email = email;
-    }
+    @Column(nullable = false)
+    private boolean verifiedEmail;
+
+    @Column(nullable = false)
+    private String givenName;
+
+    @Column(nullable = false)
+    private String familyName;
+
+    @Column(nullable = true)
+    private String picture;
 }
