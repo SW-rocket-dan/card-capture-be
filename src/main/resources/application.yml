@@ -32,5 +32,9 @@ jwt:
   issuer: cardcapture
   secret: ${JWT_SECRET}
   expiration-in-seconds: ${JWT_EXPIRATION_IN_SECONDS}
-  token-prefix: "Bearer "
-  header-key: "Authorization"
+  header-key: Authorization
+
+
+springdoc:
+  api-docs:
+    path: ${SWAGGER_PATH}

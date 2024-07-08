@@ -27,13 +27,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             throws IOException, ServletException {
         String authHeader = request.getHeader("Authorization");
         System.out.println("authHeader = " + authHeader);
+        System.out.println("requestURI = " + request.getRequestURI());
 
         if (authHeader != null && !authHeader.isEmpty()) {
-            String authToken = authHeader; // Bearer 부분 없이 전체 토큰을 그대로 사용
+            String authToken = authHeader;
             Claims claims = jwtComponent.verify(authToken);
-            System.out.println("authHeader != null && authHeader is not empty");
             if (claims != null) {
-                System.out.println("claims != null");
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         claims.getId(), null, new ArrayList<>());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

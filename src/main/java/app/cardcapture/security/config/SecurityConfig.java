@@ -2,6 +2,7 @@ package app.cardcapture.security.config;
 
 import app.cardcapture.auth.jwt.filter.JwtAuthenticationTokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,13 +18,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    @Value("${springdoc.api-docs.path}")
+    private String swaggerPath;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests)
                         -> requests
-                        .requestMatchers("/api/v1/auth/google/**", "/api/v1/user/meTest/**", "/login.html", "/me.html").permitAll()
+                        .requestMatchers("/api/v1/auth/google/**",
+                                swaggerPath + "/**", "/swagger-ui/**", "/login.html", "/me.html" // TODO: 추후 관리자 role만 접속 가능
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(
