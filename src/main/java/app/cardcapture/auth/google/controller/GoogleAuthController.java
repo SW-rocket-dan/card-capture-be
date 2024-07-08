@@ -6,7 +6,9 @@ import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtDto;
 import app.cardcapture.auth.jwt.service.JwtComponent;
+import app.cardcapture.user.domain.User;
 import app.cardcapture.user.dto.UserDto;
+import app.cardcapture.user.service.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +29,7 @@ public class GoogleAuthController {
 
     private final GoogleAuthConfig googleAuthConfig;
     private final GoogleAuthService googleAuthService;
+    private final UserService userService;
     private final JwtComponent jwtComponent;
 
     @GetMapping("/login")
@@ -52,11 +55,11 @@ public class GoogleAuthController {
     {
         GoogleTokenResponseDto googleTokenResponseDto = googleAuthService.getGoogleToken(authCode);
         UserDto userDto = googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken());
+        User user = userService.save(userDto);
 
-        String jwt = jwtComponent.create(userDto.getId(), "ROLE_USER");
+        String jwt = jwtComponent.create(user.getId(), "ROLE_USER");
         JwtDto jwtDto = new JwtDto(jwt);
 
         return ResponseEntity.ok(jwtDto);
     }
-
 }

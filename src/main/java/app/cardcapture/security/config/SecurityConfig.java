@@ -16,15 +16,24 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                        (requests) -> requests.anyRequest().permitAll()
-                );
-        http.sessionManagement(
+        http
+                .authorizeHttpRequests((requests)
+                        -> requests
+                        .requestMatchers("/api/v1/auth/google/**", "/api/v1/user/meTest/**", "/login.html", "/me.html").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(
                         (session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
-        http.csrf(csrf -> csrf.disable());
+                )
+                .csrf(csrf -> csrf.disable())
+                .addFilterBefore(jwtAuthenticationTokenFilter, ExceptionTranslationFilter.class)
+                .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .formLogin(formLogin -> formLogin.disable());
 
         return http.build();
     }

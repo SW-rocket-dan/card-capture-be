@@ -84,7 +84,7 @@ public class GoogleAuthServiceTest {
         // given
         String accessToken = "mock-access-token";
         UserDto mockResponse = new UserDto(
-                12345789L,
+                "1234578910987654321",
                 "testuser@example.com",
                 true,
                 "Test User",
@@ -103,7 +103,7 @@ public class GoogleAuthServiceTest {
         // then
         assertAll("UserDto",
                 () -> assertThat(response).isNotNull(),
-                () -> assertThat(response.getId()).isEqualTo(12345789L),
+                () -> assertThat(response.getGoogleId()).isEqualTo("1234578910987654321"),
                 () -> assertThat(response.getEmail()).isEqualTo("testuser@example.com"),
                 () -> assertThat(response.isVerifiedEmail()).isTrue(),
                 () -> assertThat(response.getName()).isEqualTo("Test User"),

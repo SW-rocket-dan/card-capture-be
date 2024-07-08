@@ -9,6 +9,7 @@ import app.cardcapture.auth.jwt.dto.JwtDto;
 import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.auth.jwt.service.JwtComponentStub;
 import app.cardcapture.user.dto.UserDto;
+import app.cardcapture.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -16,23 +17,28 @@ import static org.mockito.Mockito.mock;
 
 public class GoogleAuthControllerStub extends GoogleAuthController {
 
-    private GoogleAuthControllerStub(GoogleAuthConfig googleAuthConfig, GoogleAuthService googleAuthService, JwtComponent jwtComponent) {
-        super(googleAuthConfig, googleAuthService, jwtComponent);
+    private GoogleAuthControllerStub(GoogleAuthConfig googleAuthConfig,
+                                     GoogleAuthService googleAuthService,
+                                     UserService userService,
+                                     JwtComponent jwtComponent) {
+        super(googleAuthConfig, googleAuthService, userService, jwtComponent);
     }
 
     public static GoogleAuthControllerStub createStub() {
         GoogleAuthConfig googleAuthConfig = GoogleAuthConfigStub.createStub();
         GoogleAuthService googleAuthService = mock(GoogleAuthService.class);
+        UserService userService = mock(UserService.class);
         JwtComponent jwtComponent = JwtComponentStub.createStub();
 
-        return new GoogleAuthControllerStub(googleAuthConfig, googleAuthService, jwtComponent);
+        return new GoogleAuthControllerStub(googleAuthConfig, googleAuthService, userService, jwtComponent);
     }
 
     public static GoogleAuthControllerStub createStub(GoogleAuthService googleAuthService) {
         GoogleAuthConfig googleAuthConfig = GoogleAuthConfigStub.createStub();
         JwtComponent jwtComponent = JwtComponentStub.createStub();
+        UserService userService = mock(UserService.class);
 
-        return new GoogleAuthControllerStub(googleAuthConfig, googleAuthService, jwtComponent);
+        return new GoogleAuthControllerStub(googleAuthConfig, googleAuthService, userService, jwtComponent);
     }
 
     @Override
@@ -52,7 +58,7 @@ public class GoogleAuthControllerStub extends GoogleAuthController {
     public ResponseEntity<JwtDto> getGoogleRedirect(@RequestParam(name = "code") String authCode) {
         GoogleTokenResponseDto googleTokenResponseDto = new GoogleTokenResponseDto(
                 "accessToken", "refreshToken", "idToken", "tokenType", 3600);
-        UserDto userDto = new UserDto(12345789L, "email", true, "inpink y", "inpink", "y", "profileImageUrl");
+        UserDto userDto = new UserDto("1234578910987654321", "email", true, "inpink y", "inpink", "y", "profileImageUrl");
 
         String jwt = "eyJ.mock.jwt.token";
         JwtDto jwtDto = new JwtDto(jwt);

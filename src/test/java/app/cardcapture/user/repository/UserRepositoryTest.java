@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.core.env.Environment;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +30,11 @@ public class UserRepositoryTest {
     public void 유저id로_개인_정보를_조회할_수_있다() {
         // given
         User user = User.builder()
+                .googleId("1234578910987654321")
                 .email("inpink@cardcapture.app")
-                .name("Veronica")
+                .name("Veronica y")
+                .familyName("y")
+                .givenName("Veronica")
                 .build();
 
         entityManager.persistAndFlush(user);
