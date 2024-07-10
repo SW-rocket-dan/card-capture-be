@@ -38,6 +38,9 @@ springdoc:
   api-docs:
     path: ${SWAGGER_PATH}
 
+swagger:
+  url: ${SWAGGER_URL}
+
 
 cloud:
   aws:
