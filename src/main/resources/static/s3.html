@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S3 API Tester</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="file"], button { width: 100%; padding: 10px; }
+        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        .response { margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>S3 API Tester</h1>
+
+    <div class="form-group">
+        <h2>Generate Presigned URL</h2>
+        <input type="text" id="generateDir" placeholder="Directory Name (e.g., test)" />
+        <input type="text" id="generateFileName" placeholder="File Name (e.g., testFile)" />
+        <input type="text" id="generateExtension" placeholder="File Extension (e.g., png)" />
+        <button onclick="generatePresignedUrl()">Generate</button>
+        <div id="generateResponse" class="response"></div>
+    </div>
+
+    <div class="form-group">
+        <h2>Delete File</h2>
+        <input type="text" id="deleteFileUrl" placeholder="File URL (e.g., https://bucket.s3.amazonaws.com/uploads/example.jpg)" />
+        <button onclick="deleteFile()">Delete</button>
+        <div id="deleteResponse" class="response"></div>
+    </div>
+</div>
+
+<script>
+    const baseUrl = 'http://localhost:8080/s3';
+
+    async function generatePresignedUrl() {
+        const dirName = document.getElementById('generateDir').value;
+        const fileName = document.getElementById('generateFileName').value;
+        const extension = document.getElementById('generateExtension').value;
+
+        try {
+            const response = await fetch(`${baseUrl}/generate-presigned-url?dirName=${dirName}&fileName=${fileName}&extension=${extension}`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+            document.getElementById('generateResponse').innerText = `Presigned URL: ${result.presignedUrl}\nFile URL: ${result.fileUrl}`;
+        } catch (error) {
+            document.getElementById('generateResponse').innerText = `Error: ${error}`;
+        }
+    }
+
+    async function deleteFile() {
+        const fileUrl = document.getElementById('deleteFileUrl').value;
+
+        try {
+            const response = await fetch(`${baseUrl}/delete?fileUrl=${encodeURIComponent(fileUrl)}`, {
+                method: 'DELETE'
+            });
+            const result = await response.text();
+            document.getElementById('deleteResponse').innerText = `Response: ${result}`;
+        } catch (error) {
+            document.getElementById('deleteResponse').innerText = `Error: ${error}`;
+        }
+    }
+</script>
+</body>
+</html>
