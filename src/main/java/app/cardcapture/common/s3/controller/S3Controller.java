@@ -28,53 +28,18 @@ public class S3Controller {
             summary = "프리사인 URL 발급",
             description = "S3에 파일을 업로드할 수 있는 프리사인 URL과, 성공 시 사용할 이미지 URL을 반환합니다." +
                     " 응답된 URL에 {key:file value:업로드할 파일}을 'binary'로 body로 담아서 HTTP PUT으로 보내면 저장이 됩니다. " +
-                    "png같은 확장자를 정해줘야 합니다.",
-            requestBody = @RequestBody(
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "Generate Presigned URL Request",
-                                    value = "{\n" +
-                                            "  \"dirName\": \"test\",\n" +
-                                            "  \"fileName\": \"testFile\",\n" +
-                                            "  \"extension\": \"png\"\n" +
-                                            "}"
-                            )
-                    )
-            ),
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "프리사인 URL 생성 성공",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    examples = @ExampleObject(
-                                            name = "Generate Presigned URL Response",
-                                            value = "{\n" +
-                                                    "  \"presignedUrl\": \"https://cardcaptureposterimage.s3.ap-northeast-2.amazonaws.com/test/81059369-2511-4c5c-b4ca-5ae2726c5612_test1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240710T055837Z&X-Amz-SignedHeaders=host&X-Amz-Expires=600&X-Amz-Credential=AKIA3FLDXCLAJLR7VTGK%2F20240710%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Signature=f8feca7495eeeb7218c2c4717989e6c1701636bc45f3fdb035a03828ca154733\",\n" +
-                                                    "  \"fileUrl\": \"https://cardcaptureposterimage.s3.ap-northeast-2.amazonaws.com/test/81059369-2511-4c5c-b4ca-5ae2726c5612_test1.png\"\n" +
-                                                    "}"
-                                    )
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "프리사인 URL 발급 중 오류 발생",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    examples = @ExampleObject(
-                                            name = "Error Response",
-                                            value = "{\n" +
-                                                    "  \"message\": \"프리사인 URL 발급 중 오류가 발생했습니다.\"\n" +
-                                                    "}"
-                                    )
-                            )
-                    )
-            }
+                    "png같은 확장자를 정해줘야 합니다."
     )
     public ResponseEntity<PresignedUrlResponseDto> generatePresignedUrl(
-            @RequestParam("dirName") String dirName,
+            @Parameter(description = "디렉토리명", examples = {
+                    @ExampleObject(name = "example1", value = "myDir"),
+                    @ExampleObject(name = "example2", value = "myDir/subDir")
+            }) @RequestParam("dirName") String dirName,
+
+            @Parameter(description = "파일명", example = "myFile")
             @RequestParam("fileName") String fileName,
+
+            @Parameter(description = "확장자명", example = "png")
             @RequestParam("extension") String extension) {
         try {
             String presignedUrl = s3Service.generatePresignedUrl(dirName, fileName, extension);
