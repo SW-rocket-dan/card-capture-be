@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:mysql://localhost:3306/testdb
+    username: testuser
+    password: ${DB_PASSWORD}

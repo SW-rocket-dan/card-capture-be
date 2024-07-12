@@ -3,11 +3,11 @@
 ![OAuthFlow.png](OAuthFlow.png)
   - [X] 유저는 Google 간편 로그인을 할 수 있다. (OAuth2.0) 
     - [X] Google로부터 받아올 개인정보는 이름, email이다.
-    - 프론트엔드에서 개인정보를 조회할 수 있다.
-      - GET localhost:8080/api/v1/user/me
-        - 브라우저 헤더에 JWT가 필요하다.
-        - JWT가 없으면 401 Unauthorized를 반환한다.
-        - JWT가 유효하지 않으면 401 Unauthorized를 반환한다.
+    - [X] 프론트엔드에서 개인정보를 조회할 수 있다.
+      - [X] GET localhost:8080/api/v1/user/me
+        - [X] 브라우저 헤더에 JWT가 필요하다.
+        - [X] JWT가 없으면 ~~401 Unauthorized~~403 Forbidden를 반환한다.
+        - [X] JWT가 유효하지 않으면 ~~401 Unauthorized~~403 Forbidden를 반환한다.
       - [X] MySQL RDB에 유저 개인 정보가 저장되어 있다.
       - [X] RDB에서 유저 개인 정보를 조회할 수 있다.
         - [X] 유저id로_개인_정보를_조회할_수_없으면_예외가_발생한다

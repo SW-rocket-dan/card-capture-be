@@ -34,7 +34,26 @@ jwt:
   expiration-in-seconds: ${JWT_EXPIRATION_IN_SECONDS}
   header-key: Authorization
 
-
 springdoc:
   api-docs:
     path: ${SWAGGER_PATH}
+
+swagger:
+  url: ${SWAGGER_URL}
+
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_REGION}
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+
+server:
+  port: 8080
+
+cors:
+  origins: ${CORS_ORIGINS}

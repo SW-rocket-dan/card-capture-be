@@ -31,12 +31,14 @@ public class JwtComponent {
 
     public String create(Claims claims) {
         Date now = new Date();
+
         JWTCreator.Builder builder = JWT.create();
         builder.withIssuer(claims.getIssuer());
         builder.withIssuedAt(now);
         builder.withExpiresAt(jwtConfig.getExpirationDate(now));
         builder.withClaim("id", claims.getId());
         builder.withArrayClaim("roles", claims.getRoles());
+
         return builder.sign(jwtHashAlgorithm);
     }
 
