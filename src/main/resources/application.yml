@@ -54,3 +54,6 @@ cloud:
 
 server:
   port: 8080
+
+cors:
+  origins: ${CORS_ORIGINS}
