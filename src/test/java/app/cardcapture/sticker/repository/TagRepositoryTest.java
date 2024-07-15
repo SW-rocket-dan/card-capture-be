@@ -45,7 +45,6 @@ public class TagRepositoryTest {
     @Rollback(true)
     public void 태그를_저장할_수_있다() {
         // given
-
         Sticker sticker = new Sticker();
         sticker.setFileUrl("testUrl");
 

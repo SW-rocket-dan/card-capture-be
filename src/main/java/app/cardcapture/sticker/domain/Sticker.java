@@ -9,7 +9,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "stickers")
-//@Data
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +29,7 @@ public class Sticker {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "sticker", fetch = FetchType.LAZY)
-    private List<Tag> tags = new ArrayList<>();
+    private List<Tag> tags;
 
     @PrePersist
     protected void onCreate() {
@@ -41,5 +40,13 @@ public class Sticker {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "Sticker{" +
+                "id=" + id +
+                ", fileUrl='" + fileUrl + '\'' +
+                '}';
     }
 }

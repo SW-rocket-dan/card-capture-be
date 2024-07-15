@@ -5,7 +5,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "tags")
-//@Data
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,13 +23,4 @@ public class Tag {
 
     @Column(nullable = true)
     private String english;
-
-    @Override
-    public String toString() {
-        return "Tag{" +
-                "id=" + id +
-                ", korean='" + korean + '\'' +
-                ", english='" + english + '\'' +
-                '}';
-    }
 }
