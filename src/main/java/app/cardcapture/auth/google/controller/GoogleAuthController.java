@@ -55,7 +55,7 @@ public class GoogleAuthController {
     {
         GoogleTokenResponseDto googleTokenResponseDto = googleAuthService.getGoogleToken(authCode);
         UserDto userDto = googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken());
-        User user = userService.save(userDto);
+        User user = userService.save(userDto); // TODO: 만약 이미 가입된 user라면(고유한 googleId이용?) update로 변경?
 
         String jwt = jwtComponent.create(user.getId(), "ROLE_USER");
         JwtDto jwtDto = new JwtDto(jwt);

@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((requests)
                         -> requests
                         .requestMatchers("/api/v1/auth/google/**",
-                                swaggerPath + "/**", "/swagger-ui/**", "/login.html", "/me.html", "/s3.html"// TODO: 추후 관리자 role만 접속 가능
+                                swaggerPath + "/**", "/swagger-ui/**", "/login.html", "/me.html", "/s3.html", "/sticker/**"// TODO: 추후 관리자 role만 접속 가능
                                 ,"/s3/**", "/error" // TODO: 추후 인증자만 사용 가능
                         ).permitAll()
                         .anyRequest().authenticated()
