@@ -10,4 +10,7 @@ import java.util.List;
 
 @Repository
 public interface StickerRepository extends JpaRepository<Sticker, Long> {
+    //@EntityGraph(attributePaths = "tags") // N+1문제 해결
+    @Query("SELECT DISTINCT s FROM Sticker s JOIN FETCH s.tags t WHERE t.korean LIKE %:korean% OR t.english LIKE %:english%")
+    List<Sticker> findByTags_KoreanContainingOrTags_EnglishContaining(String korean, String english);
 }
