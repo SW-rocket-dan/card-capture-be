@@ -1,4 +1,4 @@
-package app.cardcapture.common.s3.service;
+package app.cardcapture.s3.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
