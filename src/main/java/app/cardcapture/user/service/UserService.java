@@ -20,7 +20,7 @@
         public UserDto findUserById(Long id) {
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.NOT_FOUND));
-            return app.cardcapture.user.dto.UserDto.from(user);
+            return UserDto.from(user);
         }
 
         public User save(UserDto userDto) {
