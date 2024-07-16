@@ -1,10 +1,10 @@
 ## [스티커]
 
 ### 사용자는 에디터에 사용할 무료 스티커를 검색할 수 있다.
-- 이미지는 s3에 저장한다
-- MySQL DB에는 Stickers: {id(pk), fileUrl, tags, createdAt, updatedAt}으로 저장한다
-- Tags : {id(pk), korean, english}로 저장한다.
-  - 추후 다른 언어가 추가될 수 있다.
+- [X] 이미지는 s3에 저장한다
+- [X] MySQL DB에는 Stickers: {id(pk), fileUrl, tags, createdAt, updatedAt}으로 저장한다
+- [X] Tags : {id(pk), korean, english}로 저장한다.
+  - [X] 추후 다른 언어가 추가될 수 있다.
 - 사용자는 스티커를 검색할 때 태그를 이용할 수 있다.
   - 우선 현재는 한글, 영어 2가지 언어의 태그를 사용한다.
     - 추후 다른 언어의 태그를 추가할 수 있다.
