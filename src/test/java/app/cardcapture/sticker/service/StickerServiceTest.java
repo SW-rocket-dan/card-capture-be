@@ -4,20 +4,18 @@ import app.cardcapture.sticker.domain.Sticker;
 import app.cardcapture.sticker.dto.StickerResponseDto;
 import app.cardcapture.sticker.dto.TagDto;
 import app.cardcapture.sticker.repository.StickerRepository;
-import app.cardcapture.common.exception.BusinessLogicException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -49,10 +47,12 @@ public class StickerServiceTest {
 
         Sticker sticker = new Sticker();
         sticker.setFileUrl(fileUrl);
+        sticker.setTags(new ArrayList<>());
 
         Sticker savedSticker = new Sticker();
         savedSticker.setId(1L);
         savedSticker.setFileUrl(fileUrl);
+        savedSticker.setTags(new ArrayList<>());
 
         when(stickerRepository.save(any(Sticker.class))).thenReturn(savedSticker);
 
@@ -76,15 +76,16 @@ public class StickerServiceTest {
         Sticker sticker1 = new Sticker();
         sticker1.setId(1L);
         sticker1.setFileUrl("testUrl1");
+        sticker1.setTags(new ArrayList<>());
 
         Sticker sticker2 = new Sticker();
         sticker2.setId(2L);
         sticker2.setFileUrl("testUrl2");
-
+        sticker2.setTags(new ArrayList<>());
 
         List<Sticker> stickers = Arrays.asList(sticker1, sticker2);
 
-        when(stickerRepository.findByTags_KoreanContainingOrTags_EnglishContaining(searchTerm, searchTerm))
+        when(stickerRepository.findByTag(searchTerm, searchTerm))
                 .thenReturn(stickers);
 
         // when

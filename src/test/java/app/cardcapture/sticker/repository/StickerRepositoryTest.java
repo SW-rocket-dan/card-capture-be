@@ -73,7 +73,7 @@ public class StickerRepositoryTest {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void 스티커를_태그로_조회할_수_있다(String koreanKeyword, String englishKeyword, int expectedSize, String[] expectedUrls) {
         // when
-        List<Sticker> result = stickerRepository.findByTags_KoreanContainingOrTags_EnglishContaining(koreanKeyword, englishKeyword);
+        List<Sticker> result = stickerRepository.findByTag(koreanKeyword, englishKeyword);
         //System.out.println("result.get(0).getTags() = " + result.get(0).getTags());
 
         // then

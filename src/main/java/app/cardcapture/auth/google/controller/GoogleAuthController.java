@@ -6,6 +6,7 @@ import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtDto;
 import app.cardcapture.auth.jwt.service.JwtComponent;
+import app.cardcapture.common.dto.ResponseDto;
 import app.cardcapture.user.domain.User;
 import app.cardcapture.user.dto.UserDto;
 import app.cardcapture.user.service.UserService;
@@ -27,17 +28,15 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class GoogleAuthController {
 
+    private static final String GOOGLE_LOGIN_DATA_RETRIEVAL_SUCCESS = "Google login data retrieved successfully";
     private final GoogleAuthConfig googleAuthConfig;
     private final GoogleAuthService googleAuthService;
     private final UserService userService;
     private final JwtComponent jwtComponent;
 
     @GetMapping("/login")
-    @Operation(summary = "구글 로그인 정보 제공",
-            description = "구글 로그인 정보를 JSON 형태로 반환합니다.")
-    @ApiResponse(responseCode = "200", description = "구글 로그인 정보 반환",
-            content = @Content(mediaType = "application/json"))
-    public ResponseEntity<GoogleLoginRequestDto> getGoogleLoginData() {
+    @Operation(summary = "구글 로그인 정보 제공", description = "구글 로그인 정보를 JSON 형태로 반환합니다.")
+    public ResponseEntity<ResponseDto<GoogleLoginRequestDto>> getGoogleLoginData() {
         GoogleLoginRequestDto googleLoginRequestDto = GoogleLoginRequestDto.builder()
                 .loginBaseUrl(googleAuthConfig.getBaseUrl())
                 .scope(googleAuthConfig.getScope())
@@ -46,7 +45,9 @@ public class GoogleAuthController {
                 .clientId(googleAuthConfig.getClientId())
                 .build();
 
-        return ResponseEntity.ok(googleLoginRequestDto);
+        ResponseDto responseDto = ResponseDto.createSuccess(GOOGLE_LOGIN_DATA_RETRIEVAL_SUCCESS, googleLoginRequestDto);
+
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/redirect")

@@ -38,7 +38,7 @@ public class StickerService {
     }
 
     public List<StickerResponseDto> searchStickers(String searchTerm) {
-        List<Sticker> stickers = stickerRepository.findByTags_KoreanContainingOrTags_EnglishContaining(searchTerm, searchTerm);
+        List<Sticker> stickers = stickerRepository.findByTag(searchTerm, searchTerm);
         return stickers.stream()
                 .map(sticker -> StickerResponseDto.from(sticker))
                 .toList();

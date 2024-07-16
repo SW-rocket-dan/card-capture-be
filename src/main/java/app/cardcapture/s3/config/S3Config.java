@@ -1,4 +1,4 @@
-package app.cardcapture.common.s3.config;
+package app.cardcapture.s3.config;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
