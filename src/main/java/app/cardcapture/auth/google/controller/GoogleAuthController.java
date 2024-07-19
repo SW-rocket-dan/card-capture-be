@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 @Tag(name = "google login", description = "The google login API")
 @RequestMapping("/api/v1/auth/google")
@@ -50,17 +52,24 @@ public class GoogleAuthController {
     // 지금은 다 403보내고있는데, 이를 구분해주기위한 용도로 에러코드를 이용할 수 있다.
     @Operation(summary = "구글 리다이렉트 엔드포인트", description = "구글 리다이렉트를 통해 받은 auth code를 받습니다. auth code를 이용하여 유저 정보를 가져올 것입니다.")
     public ResponseEntity<SuccessResponseDto<JwtDto>> getGoogleRedirect(@RequestParam(name = "code") String authCode)
-    {
-        // TODO: Service로 좀 감추기 (테스트 관점에서도 복잡도 감소 가능)
-        GoogleTokenResponseDto googleTokenResponseDto = googleAuthService.getGoogleToken(authCode);
-        UserDto userDto = googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken());
-        User user = userService.save(userDto); // TODO: 만약 이미 가입된 user라면(고유한 googleId이용?) update로 변경?
+        {
+            // TODO: Service로 좀 감추기 (테스트 관점에서도 복잡도 감소 가능)
+            GoogleTokenResponseDto googleTokenResponseDto = googleAuthService.getGoogleToken(authCode);
+            UserDto userDto = googleAuthService.getUserInfo(googleTokenResponseDto.getAccessToken());
 
-        String jwt = jwtComponent.create(user.getId(), "ROLE_USER");
-        JwtDto jwtDto = new JwtDto(jwt);
 
-        SuccessResponseDto responseDto = SuccessResponseDto.create(jwtDto);
+            Optional<User> existingUserOpt = userService.findByGoogleId(userDto.getGoogleId());
 
-        return ResponseEntity.ok(responseDto);
+            User user = existingUserOpt.orElseGet(() -> {
+                // 신규 유저라면 저장
+                return userService.save(userDto);
+            });
+
+            String jwt = jwtComponent.create(user.getId(), "ROLE_USER");
+            JwtDto jwtDto = new JwtDto(jwt);
+
+            SuccessResponseDto responseDto = SuccessResponseDto.create(jwtDto);
+
+            return ResponseEntity.ok(responseDto);
     }
 }

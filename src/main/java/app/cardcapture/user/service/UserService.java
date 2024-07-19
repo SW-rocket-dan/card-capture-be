@@ -10,6 +10,8 @@
     import org.springframework.http.HttpStatus;
     import org.springframework.stereotype.Service;
 
+    import java.util.Optional;
+
     @Service
     @AllArgsConstructor
     public class UserService {
@@ -34,5 +36,9 @@
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.NOT_FOUND));
             return UserDto.from(user);
+        }
+
+        public Optional<User> findByGoogleId(String googleId) {
+            return userRepository.findByGoogleId(googleId);
         }
     }
