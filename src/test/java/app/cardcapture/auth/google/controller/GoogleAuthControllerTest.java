@@ -2,10 +2,8 @@ package app.cardcapture.auth.google.controller;
 
 import app.cardcapture.auth.google.config.GoogleAuthConfig;
 import app.cardcapture.auth.google.config.GoogleAuthConfigStub;
-import app.cardcapture.auth.google.dto.GoogleLoginRequestDto;
 import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.google.service.GoogleAuthService;
-import app.cardcapture.auth.jwt.dto.JwtDto;
 import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.user.domain.User;
 import app.cardcapture.user.dto.UserDto;
@@ -28,7 +26,7 @@ import static org.hamcrest.Matchers.*;
 
 @WebMvcTest(GoogleAuthController.class)
 @Import(GoogleAuthConfigStub.class)
-public class GoogleAuthControllerTest {
+public class GoogleAuthControllerTest  { // mockmvc 및 jwtComponent 등 부모 객체로 만들어서 상속
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,11 +56,11 @@ public class GoogleAuthControllerTest {
         mockMvc.perform(get("/api/v1/auth/google/login")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.loginBaseUrl").value("https://accounts.google.com/o/oauth2/v2/auth"))
-                .andExpect(jsonPath("$.scope").value("profile email"))
-                .andExpect(jsonPath("$.redirectUri").value("http://localhost:8080/api/v1/auth/google/redirect"))
-                .andExpect(jsonPath("$.responseType").value("code"))
-                .andExpect(jsonPath("$.clientId").value("your-client-id"));
+                .andExpect(jsonPath("$.data.loginBaseUrl").value("https://accounts.google.com/o/oauth2/v2/auth"))
+                .andExpect(jsonPath("$.data.scope").value("profile email"))
+                .andExpect(jsonPath("$.data.redirectUri").value("http://localhost:8080/api/v1/auth/google/redirect"))
+                .andExpect(jsonPath("$.data.responseType").value("code"))
+                .andExpect(jsonPath("$.data.clientId").value("your-client-id"));
     }
 
     @Test
@@ -86,6 +84,6 @@ public class GoogleAuthControllerTest {
                         .param("code", authCode)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value(startsWith("eyJ")));
+                .andExpect(jsonPath("$.data.accessToken").value(startsWith("eyJ")));
     }
 }

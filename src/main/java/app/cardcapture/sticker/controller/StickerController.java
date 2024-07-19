@@ -1,6 +1,6 @@
 package app.cardcapture.sticker.controller;
 
-import app.cardcapture.common.dto.ResponseDto;
+import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.sticker.dto.StickerResponseDto;
 import app.cardcapture.sticker.dto.StickerSaveRequestDto;
 import app.cardcapture.sticker.service.StickerService;
@@ -9,16 +9,20 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @Tag(name = "sticker", description = "The sticker API")
-@RequestMapping("/sticker")
+@RequestMapping("/api/v1/sticker")
 @RequiredArgsConstructor
 public class StickerController {
-    private static final String STICKER_SEARCH_SUCCESS = "Stickers retrieved successfully";
     private final StickerService stickerService;
 
     @Hidden
@@ -39,11 +43,11 @@ public class StickerController {
                     "Cat, Dog, Flower, Heart, Star, Cake, Balloon, Gift, Rainbow, Sunshine, Moon, Cloud, Car, Airplane, Boat, Train, Mountain, Tree, Beach, Sea, Book, Instrument, Music, Movie, Sports, Travel, Camera, Smile, Happiness, Friendship, Love, Fashion, Art, Food, Coffee, Tea, Dessert, Celebration, Party, Birthday, Wedding, Shoes, Clothing, Accessory, Family, Nature, Animal, Plant"
     )
     @GetMapping("/search")
-    public ResponseEntity<ResponseDto<List<StickerResponseDto>>> searchStickers(
+    public ResponseEntity<SuccessResponseDto<List<StickerResponseDto>>> searchStickers(
             @RequestParam String searchTerm
     ) {
         List<StickerResponseDto> stickers = stickerService.searchStickers(searchTerm);
-        ResponseDto<List<StickerResponseDto>> response = ResponseDto.createSuccess(STICKER_SEARCH_SUCCESS, stickers);
+        SuccessResponseDto<List<StickerResponseDto>> response = SuccessResponseDto.create(stickers);
 
         return ResponseEntity.ok(response);
     }
