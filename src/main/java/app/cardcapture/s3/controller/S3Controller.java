@@ -1,6 +1,5 @@
 package app.cardcapture.s3.controller;
 
-import app.cardcapture.common.dto.ResponseDto;
 import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.s3.dto.PresignedUrlResponseDto;
 import app.cardcapture.s3.service.S3Service;

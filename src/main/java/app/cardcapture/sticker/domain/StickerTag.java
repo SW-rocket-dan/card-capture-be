@@ -18,12 +18,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tags")
+@Table(name = "sticker_tags")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Tag {
+public class StickerTag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -17,7 +17,7 @@ public class StickerResponseDto {
         return new StickerResponseDto(
                 sticker.getId(),
                 sticker.getFileUrl(),
-                sticker.getTags().stream()
+                sticker.getStickerTags().stream()
                         .map(tag -> TagDto.from(tag))
                         .toList()
         );

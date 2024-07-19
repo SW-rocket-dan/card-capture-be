@@ -1,9 +1,9 @@
 package app.cardcapture.sticker.service;
 
 import app.cardcapture.sticker.domain.Sticker;
-import app.cardcapture.sticker.domain.Tag;
+import app.cardcapture.sticker.domain.StickerTag;
 import app.cardcapture.sticker.dto.TagDto;
-import app.cardcapture.sticker.repository.TagRepository;
+import app.cardcapture.sticker.repository.StickerTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,16 +13,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TagService {
 
-    private final TagRepository tagRepository;
+    private final StickerTagRepository stickerTagRepository;
 
-    public List<Tag> saveTags(List<TagDto> tagDtos, Sticker savedSticker) {
+    public List<StickerTag> saveTags(List<TagDto> tagDtos, Sticker savedSticker) {
         return tagDtos.stream()
                 .map(tagRequest -> {
-                    Tag tag = new Tag();
-                    tag.setSticker(savedSticker);
-                    tag.setKorean(tagRequest.getKorean());
-                    tag.setEnglish(tagRequest.getEnglish());
-                    return tagRepository.save(tag);
+                    StickerTag stickerTag = new StickerTag();
+                    stickerTag.setSticker(savedSticker);
+                    stickerTag.setKorean(tagRequest.getKorean());
+                    stickerTag.setEnglish(tagRequest.getEnglish());
+                    return stickerTagRepository.save(stickerTag);
                 })
                 .toList();
     }

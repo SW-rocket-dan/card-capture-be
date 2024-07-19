@@ -42,7 +42,7 @@ public class Sticker {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "sticker", fetch = FetchType.LAZY)
-    private List<Tag> tags;
+    private List<StickerTag> stickerTags;
 
     @PrePersist
     protected void onCreate() {
