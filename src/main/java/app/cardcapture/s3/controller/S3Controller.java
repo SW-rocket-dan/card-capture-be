@@ -6,12 +6,15 @@ import app.cardcapture.s3.service.S3Service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -51,11 +54,7 @@ public class S3Controller {
     @DeleteMapping("/delete")
     @Operation(
             summary = "파일 삭제",
-            description = "S3에서 파일을 삭제합니다. 전체 URL을 파라미터로 받아 파일을 삭제합니다. 반환 데이터(data)는 없습니다.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "파일이 삭제되었습니다."),
-                    @ApiResponse(responseCode = "500", description = "파일 삭제 중 오류 발생")
-            }
+            description = "S3에서 파일을 삭제합니다. 전체 URL을 파라미터로 받아 파일을 삭제합니다. 반환 데이터(data)는 없습니다."
     )
     public ResponseEntity<SuccessResponseDto<String>> deleteFile(
             @Parameter(description = "파일 URL", example = "https://your-s3-bucket.s3.amazonaws.com/test/testFile.png") @RequestParam("fileUrl") String fileUrl) {

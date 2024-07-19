@@ -30,6 +30,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         System.out.println("requestURI = " + request.getRequestURI());
 
         if (authHeader != null && !authHeader.isEmpty()) {
+            if (authHeader.startsWith("Bearer ")) {
+                authHeader = authHeader.substring(7);
+            }
             String authToken = authHeader;
             Claims claims = jwtComponent.verify(authToken);
             if (claims != null) {
