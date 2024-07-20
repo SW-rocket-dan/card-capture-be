@@ -37,6 +37,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("API Documentation")
                         .version("1.0.0"))
+                .servers(List.of(server))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication",
