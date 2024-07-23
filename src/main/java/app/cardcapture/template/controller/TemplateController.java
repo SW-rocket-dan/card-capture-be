@@ -36,4 +36,13 @@ public class TemplateController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "템플릿 조회", description = "템플릿 ID를 사용하여 템플릿을 조회합니다.")
+    public ResponseEntity<SuccessResponseDto<TemplateResponseDto>> getTemplate(
+            @RequestParam Long id
+    ) {
+        TemplateResponseDto templateResponseDto = templateService.findById(id);
+        SuccessResponseDto<TemplateResponseDto> responseDto = SuccessResponseDto.create(templateResponseDto);
+        return ResponseEntity.ok(responseDto);
+    }
 }
