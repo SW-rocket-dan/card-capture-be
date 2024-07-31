@@ -3,15 +3,11 @@ package app.cardcapture.template.domain.entity;
 import app.cardcapture.template.domain.Emphasis;
 import app.cardcapture.template.domain.Phrase;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,12 +25,10 @@ public class Prompt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "phrase_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private Phrase phrase; //TODO:
+    @Embedded
+    private Phrase phrase;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "emphasis_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @Embedded
     private Emphasis emphasis;
 
     @Column(nullable = false)
