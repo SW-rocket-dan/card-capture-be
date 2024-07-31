@@ -1,7 +1,7 @@
 package app.cardcapture.template.domain.entity;
 
-import app.cardcapture.template.domain.Emphasis;
-import app.cardcapture.template.domain.Phrase;
+import app.cardcapture.template.domain.embed.Emphasis;
+import app.cardcapture.template.domain.embed.Phrase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;

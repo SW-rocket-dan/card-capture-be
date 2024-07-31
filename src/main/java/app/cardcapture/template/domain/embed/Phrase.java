@@ -1,4 +1,4 @@
-package app.cardcapture.template.domain;
+package app.cardcapture.template.domain.embed;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;

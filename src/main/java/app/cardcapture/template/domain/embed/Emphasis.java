@@ -1,4 +1,4 @@
-package app.cardcapture.template.domain;
+package app.cardcapture.template.domain.embed;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
