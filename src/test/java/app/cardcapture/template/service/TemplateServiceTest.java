@@ -3,6 +3,8 @@ package app.cardcapture.template.service;
 import app.cardcapture.template.dto.PhraseDto;
 import app.cardcapture.template.dto.PromptRequestDto;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,15 +34,19 @@ public class TemplateServiceTest {
                 "color",
                 "model"
         );
+        ObjectMapper objectMapper = new ObjectMapper();
 
         // when
         TemplateEditorResponseDto result = templateService.createTemplate(promptRequestDto);
+        String editorJson = result.getEditor();
 
         // then
         assertAll(
                 () -> assertThat(result).isNotNull(),
                 () -> assertThat(result.getTemplateId()).isEqualTo(1L),
-                () -> assertThat(result.getEditor()).isEqualTo("에디터 json이 올 자리")
+                () -> Assertions.assertThatCode(() -> objectMapper.readTree(editorJson))
+                        .doesNotThrowAnyException()
+
         );
     }
 }
