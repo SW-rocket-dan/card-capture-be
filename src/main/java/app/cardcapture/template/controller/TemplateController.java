@@ -1,6 +1,7 @@
 package app.cardcapture.template.controller;
 
 import app.cardcapture.common.dto.SuccessResponseDto;
+import app.cardcapture.security.PrincipleDetails;
 import app.cardcapture.template.dto.PromptRequestDto;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
@@ -9,7 +10,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "template", description = "The template API")
 @RequestMapping("/api/v1/template")
 @RequiredArgsConstructor
+@Slf4j
 public class TemplateController {
 
     private final TemplateService templateService;
@@ -28,11 +32,14 @@ public class TemplateController {
     @PostMapping("/create")
     @Operation(summary = "템플릿 생성", description = "프롬프트 데이터를 받아 AI 포스터 템플릿을 생성합니다.")
     public ResponseEntity<SuccessResponseDto<TemplateEditorResponseDto>> createTemplate(
-            @Valid @RequestBody PromptRequestDto promptRequestDto
+            @Valid @RequestBody PromptRequestDto promptRequestDto,
+            @AuthenticationPrincipal PrincipleDetails principle
     ) {
-        System.out.println("promptRequestDto = " + promptRequestDto);
-        TemplateEditorResponseDto templateEditorResponseDto = templateService.createTemplate(promptRequestDto);
+        log.info("promptRequestDto = " + promptRequestDto);
+
+        TemplateEditorResponseDto templateEditorResponseDto = templateService.createTemplate(promptRequestDto, principle.getUser());
         SuccessResponseDto<TemplateEditorResponseDto> responseDto = SuccessResponseDto.create(templateEditorResponseDto);
+        System.out.println("principle = " + principle);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -43,6 +50,7 @@ public class TemplateController {
     ) {
         TemplateResponseDto templateResponseDto = templateService.findById(id);
         SuccessResponseDto<TemplateResponseDto> responseDto = SuccessResponseDto.create(templateResponseDto);
+
         return ResponseEntity.ok(responseDto);
     }
 }
