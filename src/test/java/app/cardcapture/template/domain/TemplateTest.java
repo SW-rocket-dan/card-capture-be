@@ -1,6 +1,8 @@
 package app.cardcapture.template.domain;
 
-import app.cardcapture.user.domain.User;
+import app.cardcapture.template.domain.entity.Prompt;
+import app.cardcapture.template.domain.entity.Template;
+import app.cardcapture.user.domain.entity.User;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

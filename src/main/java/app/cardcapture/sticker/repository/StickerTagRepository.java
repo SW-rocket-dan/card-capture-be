@@ -1,6 +1,6 @@
 package app.cardcapture.sticker.repository;
 
-import app.cardcapture.sticker.domain.StickerTag;
+import app.cardcapture.sticker.domain.entity.StickerTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -7,7 +7,7 @@ import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtDto;
 import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.common.dto.SuccessResponseDto;
-import app.cardcapture.user.domain.User;
+import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.dto.UserDto;
 import app.cardcapture.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -3,7 +3,7 @@
     import app.cardcapture.auth.jwt.domain.Claims;
     import app.cardcapture.auth.jwt.service.JwtComponent;
     import app.cardcapture.common.exception.BusinessLogicException;
-    import app.cardcapture.user.domain.User;
+    import app.cardcapture.user.domain.entity.User;
     import app.cardcapture.user.dto.UserDto;
     import app.cardcapture.user.repository.UserRepository;
     import lombok.AllArgsConstructor;

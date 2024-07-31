@@ -1,6 +1,6 @@
 package app.cardcapture.sticker.service;
 
-import app.cardcapture.sticker.domain.Sticker;
+import app.cardcapture.sticker.domain.entity.Sticker;
 import app.cardcapture.sticker.dto.StickerResponseDto;
 import app.cardcapture.sticker.dto.TagDto;
 import app.cardcapture.sticker.repository.StickerRepository;

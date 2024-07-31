@@ -1,7 +1,7 @@
 package app.cardcapture.sticker.repository;
 
-import app.cardcapture.sticker.domain.Sticker;
-import app.cardcapture.sticker.domain.StickerTag;
+import app.cardcapture.sticker.domain.entity.Sticker;
+import app.cardcapture.sticker.domain.entity.StickerTag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

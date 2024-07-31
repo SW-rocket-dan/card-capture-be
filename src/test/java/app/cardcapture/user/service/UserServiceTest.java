@@ -1,6 +1,6 @@
 package app.cardcapture.user.service;
 
-import app.cardcapture.user.domain.User;
+import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.dto.UserDto;
 import app.cardcapture.user.repository.UserRepository;
 import app.cardcapture.common.exception.BusinessLogicException;

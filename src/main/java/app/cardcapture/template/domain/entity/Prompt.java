@@ -1,5 +1,7 @@
-package app.cardcapture.template.domain;
+package app.cardcapture.template.domain.entity;
 
+import app.cardcapture.template.domain.Emphasis;
+import app.cardcapture.template.domain.Phrase;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -29,7 +31,7 @@ public class Prompt {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "phrase_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private Phrase phrase;
+    private Phrase phrase; //TODO:
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emphasis_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))

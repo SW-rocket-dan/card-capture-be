@@ -1,7 +1,7 @@
 package app.cardcapture.sticker.service;
 
-import app.cardcapture.sticker.domain.Sticker;
-import app.cardcapture.sticker.domain.StickerTag;
+import app.cardcapture.sticker.domain.entity.Sticker;
+import app.cardcapture.sticker.domain.entity.StickerTag;
 import app.cardcapture.sticker.dto.TagDto;
 import app.cardcapture.sticker.repository.StickerTagRepository;
 import lombok.RequiredArgsConstructor;

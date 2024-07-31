@@ -1,6 +1,6 @@
 package app.cardcapture.sticker.dto;
 
-import app.cardcapture.sticker.domain.StickerTag;
+import app.cardcapture.sticker.domain.entity.StickerTag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

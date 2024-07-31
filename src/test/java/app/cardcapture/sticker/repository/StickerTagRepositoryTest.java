@@ -1,7 +1,7 @@
 package app.cardcapture.sticker.repository;
 
-import app.cardcapture.sticker.domain.Sticker;
-import app.cardcapture.sticker.domain.StickerTag;
+import app.cardcapture.sticker.domain.entity.Sticker;
+import app.cardcapture.sticker.domain.entity.StickerTag;
 import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

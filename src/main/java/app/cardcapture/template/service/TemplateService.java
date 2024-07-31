@@ -4,7 +4,7 @@ import app.cardcapture.template.dto.PromptRequestDto;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
 import app.cardcapture.template.repository.TemplateRepository;
-import app.cardcapture.user.domain.User;
+import app.cardcapture.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

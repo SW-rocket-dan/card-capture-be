@@ -1,4 +1,4 @@
-package app.cardcapture.sticker.domain;
+package app.cardcapture.sticker.domain.entity;
 
 
 import jakarta.persistence.Column;
