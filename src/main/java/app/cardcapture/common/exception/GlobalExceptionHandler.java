@@ -13,14 +13,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessLogicException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleBusinessLogicException(BusinessLogicException ex) {
-        ErrorResponseDto<String> response = ErrorResponseDto.create("알 수 없는 에러", null);
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponseDto<String> response = ErrorResponseDto.create(ex.getMessage(), null);
         return new ResponseEntity<>(response, ex.getStatus());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto<String>> handleGeneralException(Exception ex) {
-        ErrorResponseDto<String> response = ErrorResponseDto.create("Internal Server Error", null);
-        log.error("Internal Server Error", ex);
+        log.error(ex.getMessage(), ex);
+
+        ErrorResponseDto<String> response = ErrorResponseDto.create(ex.getMessage(), null);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

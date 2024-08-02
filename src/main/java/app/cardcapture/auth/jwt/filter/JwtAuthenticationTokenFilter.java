@@ -36,7 +36,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 authHeader = authHeader.substring(7);
             }
             String authToken = authHeader;
-            Claims claims = jwtComponent.verify(authToken);
+            Claims claims = jwtComponent.verifyAccessToken(authToken);
             if (claims != null) {
                 Long userId = claims.getId();
                 if (userId != null) {

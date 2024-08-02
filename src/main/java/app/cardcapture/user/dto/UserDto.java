@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 @ToString
@@ -21,6 +23,8 @@ public class UserDto {
     private String givenName;
     private String familyName;
     private String picture;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static UserDto from(User user) {
         return new UserDto(
@@ -30,7 +34,9 @@ public class UserDto {
                 user.getName(),
                 user.getGivenName(),
                 user.getFamilyName(),
-                user.getPicture()
+                user.getPicture(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
         );
     }
 

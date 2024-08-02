@@ -23,12 +23,12 @@ public class JwtConfigStub extends JwtConfig {
     }
 
     @Override
-    public Long getExpirationInSeconds() {
+    public Long getAccessExpirationInSeconds() {
         return 3600L; // 1시간
     }
 
     @Override
-    public Date getExpirationDate(Date now) {
-        return new Date(now.getTime() + getExpirationInSeconds() * 1000);
+    public Date getAccessExpirationDate(Date now) {
+        return new Date(now.getTime() + getAccessExpirationInSeconds() * 1000);
     }
 }
