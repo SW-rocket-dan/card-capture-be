@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Configuration
@@ -25,5 +26,9 @@ public class JwtConfig {
 
     public Date getExpirationDate(Date current) {
         return new Date(getExpirationMillis(current.getTime()));
+    }
+
+    public LocalDateTime getExpirationDate(LocalDateTime current) {
+        return current.plusSeconds(expirationInSeconds.intValue());
     }
 }
