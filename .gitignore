@@ -40,3 +40,13 @@ out/
 ### profile ###
 /src/main/resources/application-prod.yml
 /src/main/resources/application.yml
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+deploy/*
+.platform/*
+legacy/*
+.ssh/*
+Procfile
