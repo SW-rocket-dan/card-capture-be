@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 public class StickerServiceTest {
 
     @Mock
-    private TagService tagService;
+    private StickerTagService stickerTagService;
 
     @Mock
     private StickerRepository stickerRepository;
@@ -66,7 +66,7 @@ public class StickerServiceTest {
                 () -> assertThat(result.getFileUrl()).isEqualTo(savedSticker.getFileUrl()),
                 () -> assertThat(result.getTags()).isEqualTo(tagDtos)
         );
-        verify(tagService).saveTags(tagDtos, savedSticker);
+        verify(stickerTagService).saveTags(tagDtos, savedSticker);
     }
 
     @Test
