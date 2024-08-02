@@ -50,3 +50,4 @@ deploy/*
 legacy/*
 .ssh/*
 Procfile
+deployment-package.zip
