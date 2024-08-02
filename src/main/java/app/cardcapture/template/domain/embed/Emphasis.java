@@ -17,6 +17,5 @@ public class Emphasis {
     @NotBlank
     private String firstEmphasis;
 
-    @NotBlank
     private String secondEmphasis;
 }
