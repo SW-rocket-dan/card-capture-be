@@ -17,7 +17,6 @@ public class PrincipleUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
         User principal = userRepository.findById(Long.valueOf(id))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        System.out.println("userfind"+principal.toString());
         return new PrincipleDetails(principal);
     }
 }

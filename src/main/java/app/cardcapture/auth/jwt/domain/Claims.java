@@ -1,8 +1,10 @@
 package app.cardcapture.auth.jwt.domain;
 
+import app.cardcapture.common.utils.TimeUtils;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -36,5 +38,9 @@ public class Claims {
         claims.createdAt = createdAt;
 
         return claims;
+    }
+
+    public LocalDateTime getLoalDateCreatedAt() {
+        return TimeUtils.toLocalDateTime(createdAt);
     }
 }

@@ -31,4 +31,24 @@ public class TimeUtils {
     public static long toEpochSecond(Date date) {
         return date.toInstant().getEpochSecond();
     }
+
+    public static boolean isCurrentTimeOver(LocalDateTime localDateTime) {
+        return LocalDateTime.now().isAfter(localDateTime);
+    }
+
+    public static boolean isCurrentTimeOverInMilli(Date date) {
+        return System.currentTimeMillis() > toEpochMilli(date);
+    }
+
+    public static boolean isCurrentTimeOverInMilli(LocalDateTime localDateTime) {
+        return System.currentTimeMillis() > toEpochMilli(localDateTime);
+    }
+
+    public static boolean isCurrentTimeOverInSeconds(Date date) {
+        return System.currentTimeMillis() / 1000 > toEpochSecond(date);
+    }
+
+    public static boolean isCurrentTimeOverInSeconds(LocalDateTime localDateTime) {
+        return System.currentTimeMillis() / 1000 > toEpochSecond(localDateTime);
+    }
 }
