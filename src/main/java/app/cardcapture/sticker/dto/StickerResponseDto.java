@@ -1,6 +1,6 @@
 package app.cardcapture.sticker.dto;
 
-import app.cardcapture.sticker.domain.Sticker;
+import app.cardcapture.sticker.domain.entity.Sticker;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,7 +17,7 @@ public class StickerResponseDto {
         return new StickerResponseDto(
                 sticker.getId(),
                 sticker.getFileUrl(),
-                sticker.getTags().stream()
+                sticker.getStickerTags().stream()
                         .map(tag -> TagDto.from(tag))
                         .toList()
         );

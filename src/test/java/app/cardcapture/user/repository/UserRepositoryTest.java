@@ -1,6 +1,6 @@
 package app.cardcapture.user.repository;
 
-import app.cardcapture.user.domain.User;
+import app.cardcapture.user.domain.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;

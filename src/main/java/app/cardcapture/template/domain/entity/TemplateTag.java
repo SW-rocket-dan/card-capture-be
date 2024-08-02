@@ -1,5 +1,4 @@
-package app.cardcapture.sticker.domain;
-
+package app.cardcapture.template.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -18,20 +17,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tags")
+@Table(name = "template_tags")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Tag {
+public class TemplateTag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sticker_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private Sticker sticker;
+    @JoinColumn(name = "template_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Template template;
 
     @Column(nullable = false)
     private String korean;

@@ -1,17 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Google OAuth Login</title>
+    <title>Google Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .login-container {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .google-btn {
+            background: #4285f4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .google-btn img {
+            margin-right: 10px;
+        }
+        #jwt-container {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-<h1>Login with Google</h1>
-<button onclick="redirectToGoogle()">Login with Google</button>
-
+<div class="login-container">
+    <h2>Login with Google</h2>
+    <button class="google-btn" onclick="loginWithGoogle()">
+        <img src="https://www.google.com/images/icons/product/google_maps-48.png" alt="Google icon" width="24">
+        Login with Google
+    </button>
+    <div id="jwt-container" style="display:none;">
+        <h3>JWT Token</h3>
+        <pre id="jwt-token"></pre>
+    </div>
+</div>
 <script>
-    function redirectToGoogle() {
-        window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?client_id=318421033688-ejpb883pk15i184989rou2unf7v0hqp9.apps.googleusercontent.com&redirect_uri=https://api.cardcapture.app/api/v1/auth/google/redirect&response_type=code&scope=openid%20email%20profile&flowName=GeneralOAuthFlow";
+    function loginWithGoogle() {
+        fetch('/api/v1/auth/google/login')
+            .then(response => response.json())
+            .then(data => {
+                window.location.href = data.data.loginBaseUrl + '?client_id=' + data.data.clientId +
+                    '&redirect_uri=' + data.data.redirectUri +
+                    '&scope=' + data.data.scope +
+                    '&response_type=' + data.data.responseType;
+            });
     }
+
+    function displayJwt(jwt) {
+        document.getElementById('jwt-container').style.display = 'block';
+        document.getElementById('jwt-token').innerText = jwt;
+    }
+
+    // Extract query parameters from the URL
+    function getQueryParams() {
+        const params = {};
+        window.location.search.slice(1).split('&').forEach(param => {
+            const [key, value] = param.split('=');
+            params[key] = decodeURIComponent(value);
+        });
+        return params;
+    }
+
+    window.onload = function() {
+        const params = getQueryParams();
+        if (params.code) {
+            fetch(`/api/v1/auth/google/redirect?code=${params.code}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayJwt(data.data.token);
+                });
+        }
+    };
 </script>
 </body>
 </html>

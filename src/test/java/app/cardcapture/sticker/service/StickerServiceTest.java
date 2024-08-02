@@ -1,6 +1,6 @@
 package app.cardcapture.sticker.service;
 
-import app.cardcapture.sticker.domain.Sticker;
+import app.cardcapture.sticker.domain.entity.Sticker;
 import app.cardcapture.sticker.dto.StickerResponseDto;
 import app.cardcapture.sticker.dto.TagDto;
 import app.cardcapture.sticker.repository.StickerRepository;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 public class StickerServiceTest {
 
     @Mock
-    private TagService tagService;
+    private StickerTagService stickerTagService;
 
     @Mock
     private StickerRepository stickerRepository;
@@ -47,12 +47,12 @@ public class StickerServiceTest {
 
         Sticker sticker = new Sticker();
         sticker.setFileUrl(fileUrl);
-        sticker.setTags(new ArrayList<>());
+        sticker.setStickerTags(new ArrayList<>());
 
         Sticker savedSticker = new Sticker();
         savedSticker.setId(1L);
         savedSticker.setFileUrl(fileUrl);
-        savedSticker.setTags(new ArrayList<>());
+        savedSticker.setStickerTags(new ArrayList<>());
 
         when(stickerRepository.save(any(Sticker.class))).thenReturn(savedSticker);
 
@@ -66,7 +66,7 @@ public class StickerServiceTest {
                 () -> assertThat(result.getFileUrl()).isEqualTo(savedSticker.getFileUrl()),
                 () -> assertThat(result.getTags()).isEqualTo(tagDtos)
         );
-        verify(tagService).saveTags(tagDtos, savedSticker);
+        verify(stickerTagService).saveTags(tagDtos, savedSticker);
     }
 
     @Test
@@ -76,12 +76,12 @@ public class StickerServiceTest {
         Sticker sticker1 = new Sticker();
         sticker1.setId(1L);
         sticker1.setFileUrl("testUrl1");
-        sticker1.setTags(new ArrayList<>());
+        sticker1.setStickerTags(new ArrayList<>());
 
         Sticker sticker2 = new Sticker();
         sticker2.setId(2L);
         sticker2.setFileUrl("testUrl2");
-        sticker2.setTags(new ArrayList<>());
+        sticker2.setStickerTags(new ArrayList<>());
 
         List<Sticker> stickers = Arrays.asList(sticker1, sticker2);
 

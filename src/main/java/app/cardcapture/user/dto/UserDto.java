@@ -1,6 +1,6 @@
 package app.cardcapture.user.dto;
 
-import app.cardcapture.user.domain.User;
+import app.cardcapture.user.domain.entity.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -43,6 +43,7 @@ public class UserDto {
                 .givenName(givenName)
                 .familyName(familyName)
                 .picture(picture)
+                .role("ROLE_USER")
                 .build();
     }
 }

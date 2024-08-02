@@ -1,7 +1,7 @@
 package app.cardcapture.sticker.repository;
 
-import app.cardcapture.sticker.domain.Sticker;
-import app.cardcapture.sticker.domain.Tag;
+import app.cardcapture.sticker.domain.entity.Sticker;
+import app.cardcapture.sticker.domain.entity.StickerTag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,7 +33,7 @@ public class StickerRepositoryTest {
     private StickerRepository stickerRepository;
 
     @Autowired
-    private TagRepository tagRepository;
+    private StickerTagRepository stickerTagRepository;
 
     @BeforeEach
     public void setUp() {
@@ -51,18 +51,18 @@ public class StickerRepositoryTest {
         entityManager.persistAndFlush(sticker1);
         entityManager.persistAndFlush(sticker2);
 
-        Tag koreanTag = new Tag();
-        koreanTag.setSticker(sticker1);
-        koreanTag.setKorean("안녕하세요");
-        koreanTag.setEnglish("hello");
+        StickerTag koreanStickerTag = new StickerTag();
+        koreanStickerTag.setSticker(sticker1);
+        koreanStickerTag.setKorean("안녕하세요");
+        koreanStickerTag.setEnglish("hello");
 
-        Tag englishTag = new Tag();
-        englishTag.setSticker(sticker2);
-        englishTag.setKorean("안녕");
-        englishTag.setEnglish("hi");
+        StickerTag englishStickerTag = new StickerTag();
+        englishStickerTag.setSticker(sticker2);
+        englishStickerTag.setKorean("안녕");
+        englishStickerTag.setEnglish("hi");
 
-        entityManager.persistAndFlush(koreanTag);
-        entityManager.persistAndFlush(englishTag);
+        entityManager.persistAndFlush(koreanStickerTag);
+        entityManager.persistAndFlush(englishStickerTag);
 
         entityManager.clear();
     }

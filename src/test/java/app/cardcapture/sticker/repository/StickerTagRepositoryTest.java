@@ -1,8 +1,7 @@
 package app.cardcapture.sticker.repository;
 
-import app.cardcapture.sticker.domain.Sticker;
-import app.cardcapture.sticker.domain.Tag;
-import jakarta.persistence.EntityManagerFactory;
+import app.cardcapture.sticker.domain.entity.Sticker;
+import app.cardcapture.sticker.domain.entity.StickerTag;
 import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,25 +20,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 @ActiveProfiles("test")
-public class TagRepositoryTest {
+public class StickerTagRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private TagRepository tagRepository;
+    private StickerTagRepository stickerTagRepository;
 
     @Test
     @Rollback(true)
     public void 태그를_저장할_때_sticker_id가_없으면_예외_발생한다() {
         // given
-        Tag tagWithoutSticker = new Tag();
-        tagWithoutSticker.setKorean("안녕하세요");
-        tagWithoutSticker.setEnglish("hello");
+        StickerTag stickerTagWithoutSticker = new StickerTag();
+        stickerTagWithoutSticker.setKorean("안녕하세요");
+        stickerTagWithoutSticker.setEnglish("hello");
 
         // when & then
         assertThrows(PersistenceException.class, () -> {
-            entityManager.persistAndFlush(tagWithoutSticker);
+            entityManager.persistAndFlush(stickerTagWithoutSticker);
         });
     }
 
@@ -52,21 +51,21 @@ public class TagRepositoryTest {
 
         entityManager.persistAndFlush(sticker);
 
-        Tag tag = new Tag();
-        tag.setSticker(sticker);
-        tag.setKorean("안녕하세요");
-        tag.setEnglish("hello");
+        StickerTag stickerTag = new StickerTag();
+        stickerTag.setSticker(sticker);
+        stickerTag.setKorean("안녕하세요");
+        stickerTag.setEnglish("hello");
 
         // when
-        tagRepository.save(tag);
-        Tag savedTag = tagRepository.findById(tag.getId()).orElse(null);
+        stickerTagRepository.save(stickerTag);
+        StickerTag savedStickerTag = stickerTagRepository.findById(stickerTag.getId()).orElse(null);
 
         // then
         assertAll(
-                () -> assertThat(savedTag).isNotNull(),
-                () -> assertThat(savedTag.getSticker()).isEqualTo(sticker),
-                () -> assertThat(savedTag.getKorean()).isEqualTo("안녕하세요"),
-                () -> assertThat(savedTag.getEnglish()).isEqualTo("hello")
+                () -> assertThat(savedStickerTag).isNotNull(),
+                () -> assertThat(savedStickerTag.getSticker()).isEqualTo(sticker),
+                () -> assertThat(savedStickerTag.getKorean()).isEqualTo("안녕하세요"),
+                () -> assertThat(savedStickerTag.getEnglish()).isEqualTo("hello")
         );
     }
 }

@@ -43,3 +43,21 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+task makeZipForDeploy(type: Exec) {
+	commandLine 'sh', '-c', '''
+        echo "Starting custom commands"
+        ls -la
+        pwd
+        echo "Current date:" $(date)
+        ./gradlew clean build -Dspring.profiles.active=prod -x test
+        rm -rf deploy 
+        mkdir deploy
+        cp build/libs/cardcapture-0.0.1-SNAPSHOT.jar deploy/
+        cp -R .platform deploy/
+        cp Procfile deploy/
+        rm -f deployment-package.zip
+        cd deploy
+        zip -r ../deployment-package.zip .
+    '''
+}
