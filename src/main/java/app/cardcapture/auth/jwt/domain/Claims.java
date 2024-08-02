@@ -12,6 +12,7 @@ public class Claims {
     private Date issuedAt;
     private Date expiresAt;
     private String issuer;
+    private Date createdAt;
 
     private Claims() {}
 
@@ -21,9 +22,10 @@ public class Claims {
         this.issuedAt = decodedJWT.getIssuedAt();
         this.expiresAt = decodedJWT.getExpiresAt();
         this.issuer = decodedJWT.getIssuer();
+        this.createdAt = decodedJWT.getClaim("created_at").asDate();
     }
 
-    public static Claims of(Long id, String role, String issuer) {
+    public static Claims of(Long id, String role, String issuer, Date createdAt) {
         Claims claims = new Claims();
 
         claims.id = id;
@@ -31,6 +33,7 @@ public class Claims {
         claims.issuedAt = new Date();
         claims.expiresAt = null;
         claims.issuer = issuer;
+        claims.createdAt = createdAt;
 
         return claims;
     }

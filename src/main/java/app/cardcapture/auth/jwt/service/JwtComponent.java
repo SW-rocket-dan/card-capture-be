@@ -25,8 +25,8 @@ public class JwtComponent {
         this.jwtVerifier = JWT.require(jwtHashAlgorithm).withIssuer(jwtConfig.getIssuer()).build();
     }
 
-    public String create(Long userId, String role) {
-        return this.create(Claims.of(userId, role, jwtConfig.getIssuer()));
+    public String create(Long userId, String role, Date createdAt) {
+        return this.create(Claims.of(userId, role, jwtConfig.getIssuer(), createdAt));
     }
 
     public String create(Claims claims) {
@@ -38,11 +38,13 @@ public class JwtComponent {
         builder.withExpiresAt(jwtConfig.getExpirationDate(now));
         builder.withClaim("id", claims.getId());
         builder.withArrayClaim("roles", claims.getRoles());
+        builder.withClaim("created_at", claims.getCreatedAt());
 
         return builder.sign(jwtHashAlgorithm);
     }
 
     public Claims verify(String token) {
         return new Claims(jwtVerifier.verify(token));
+
     }
 }
