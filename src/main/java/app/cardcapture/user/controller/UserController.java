@@ -26,9 +26,7 @@ public class UserController {
 
     @GetMapping("/me")
     @Operation(summary = "사용자 정보 조회",
-            description = "현재 로그인한 사용자의 정보를 조회합니다. " +
-                    "JWT를 통해 사용자를 식별합니다. " +
-                    "JWT가 유효하지 않으면 403을 반환합니다.")
+            description = "현재 로그인한 사용자의 정보를 조회합니다. JWT를 통해 사용자를 식별합니다. ")
     public ResponseEntity<SuccessResponseDto<UserDto>> getUserDetails(
             @AuthenticationPrincipal PrincipleDetails principle
     ) {

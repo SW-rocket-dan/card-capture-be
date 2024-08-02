@@ -18,17 +18,22 @@ import java.util.Date;
 public class JwtConfig {
     private String issuer;
     private String secret;
-    private Long expirationInSeconds;
+    private Long accessExpirationInSeconds;
+    private Long refreshExpirationInSeconds;
 
-    public long getExpirationMillis(long current) {
-        return current + expirationInSeconds * 1000L;
+    public long getAccessExpirationMillis(long current) {
+        return current + accessExpirationInSeconds * 1000L;
     }
 
-    public Date getExpirationDate(Date current) {
-        return new Date(getExpirationMillis(current.getTime()));
+    public Date getAccessExpirationDate(Date current) {
+        return new Date(getAccessExpirationMillis(current.getTime()));
     }
 
-    public LocalDateTime getExpirationDate(LocalDateTime current) {
-        return current.plusSeconds(expirationInSeconds.intValue());
+    public LocalDateTime getAccessExpirationDate(LocalDateTime current) {
+        return current.plusSeconds(accessExpirationInSeconds.intValue());
+    }
+
+    public Date getRefreshExpirationDate(Date current) {
+        return new Date(current.getTime() + refreshExpirationInSeconds * 1000L);
     }
 }

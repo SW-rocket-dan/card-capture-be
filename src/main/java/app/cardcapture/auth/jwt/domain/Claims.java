@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
-public class Claims {
+public class Claims { //TODO: Access Token, Refresh Token 용 Claims 구분하기(NullpointerException 방지)
     private Long id;
     private String[] roles;
     private Date issuedAt;

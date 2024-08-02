@@ -26,20 +26,20 @@ class JwtComponentTest {
         Date createdAt = new Date();
 
         // When
-        String token = jwtComponent.create(userId, role, createdAt);
+        String token = jwtComponent.createAccessToken(userId, role, createdAt);
 
         // Then
         assertNotNull(token);
     }
 
     @Test
-    void testVerifyToken() {
+    void testVerifyAccessTokenToken() {
         // Given
         Claims claims = Claims.of(12345789L, "USER", "test-issuer", new Date());
-        String token = jwtComponent.create(claims);
+        String token = jwtComponent.createAccessToken(claims);
 
         // When
-        Claims verifiedClaims = jwtComponent.verify(token);
+        Claims verifiedClaims = jwtComponent.verifyAccessToken(token);
 
         // Then
         assertAll("Verify decoded claims",
@@ -50,12 +50,12 @@ class JwtComponentTest {
     }
 
     @Test
-    void testVerifyInvalidToken() {
+    void testVerifyAccessTokenInvalidToken() {
         // Given
         String invalidToken = "invalid-token";
 
         // When & Then
-        assertThatThrownBy(() -> jwtComponent.verify(invalidToken))
+        assertThatThrownBy(() -> jwtComponent.verifyAccessToken(invalidToken))
                 .isInstanceOf(com.auth0.jwt.exceptions.JWTVerificationException.class);
     }
 }

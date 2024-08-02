@@ -39,17 +39,17 @@ public class JwtComponent {
         this.userService = userService;
     }
 
-    public String create(Long userId, String role, Date createdAt) {
-        return this.create(Claims.of(userId, role, jwtConfig.getIssuer(), createdAt));
+    public String createAccessToken(Long userId, String role, Date createdAt) {
+        return this.createAccessToken(Claims.of(userId, role, jwtConfig.getIssuer(), createdAt));
     }
 
-    public String create(Claims claims) {
+    public String createAccessToken(Claims claims) {
         Date now = new Date();
 
         JWTCreator.Builder builder = JWT.create();
         builder.withIssuer(claims.getIssuer());
         builder.withIssuedAt(now);
-        builder.withExpiresAt(jwtConfig.getExpirationDate(now));
+        builder.withExpiresAt(jwtConfig.getAccessExpirationDate(now));
         builder.withClaim("id", claims.getId());
         builder.withArrayClaim("roles", claims.getRoles());
         builder.withClaim("created_at", claims.getCreatedAt());
@@ -57,13 +57,32 @@ public class JwtComponent {
         return builder.sign(jwtHashAlgorithm);
     }
 
-    public Claims verify(String token) {
+    public String createRefreshToken(Long userId) {
+        Date now = new Date();
+        Date expirationDate = jwtConfig.getRefreshExpirationDate(now);
+
+        return JWT.create()
+                .withIssuer(jwtConfig.getIssuer())
+                .withIssuedAt(now)
+                .withExpiresAt(expirationDate)
+                .withClaim("id", userId)
+                .sign(jwtHashAlgorithm);
+    }
+
+    public Claims verifyAccessToken(String token) {
         verifyBlacklisted(token);
 
         DecodedJWT decodedJWT = verifyJWT(token);
         Claims claims = new Claims(decodedJWT);
 
         verifyActualUser(claims);
+
+        return claims;
+    }
+
+    public Claims verifyRefreshToken(String token) {
+        DecodedJWT decodedJWT = verifyJWT(token);
+        Claims claims = new Claims(decodedJWT);
 
         return claims;
     }

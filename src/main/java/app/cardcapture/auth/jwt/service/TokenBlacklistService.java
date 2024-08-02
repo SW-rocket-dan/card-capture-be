@@ -31,7 +31,7 @@ public class TokenBlacklistService {
 
         TokenBlacklist tokenBlacklist = new TokenBlacklist();
         tokenBlacklist.setToken(refinedToken);
-        tokenBlacklist.setExpiryDate(jwtConfig.getExpirationDate(LocalDateTime.now()));
+        tokenBlacklist.setExpiryDate(jwtConfig.getAccessExpirationDate(LocalDateTime.now()));
         tokenBlacklistRepository.save(tokenBlacklist);
     }
 }
