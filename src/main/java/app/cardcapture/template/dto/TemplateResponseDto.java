@@ -1,6 +1,7 @@
 package app.cardcapture.template.dto;
 
 import app.cardcapture.template.domain.entity.Prompt;
+import app.cardcapture.template.domain.entity.Template;
 import app.cardcapture.template.domain.entity.TemplateTag;
 import app.cardcapture.user.domain.entity.User;
 import jakarta.validation.constraints.NotBlank;
@@ -12,21 +13,32 @@ import java.util.List;
 
 public record TemplateResponseDto(
         Long id,
-        @NotNull User user,
-        @NotBlank  String title,
+        Long userId,
+        @NotBlank String title,
         String description,
         int likes,
         int purchaseCount,
         @NotBlank String editor,
         @NotBlank String fileUrl,
-        @NotEmpty List<TemplateTag> templateTags,
-        @NotNull Prompt prompt,
+        @NotEmpty List<TemplateTagResponseDto> templateTags,
+        @NotNull PromptResponseDto prompt,
         @NotNull LocalDateTime createdAt,
         @NotNull LocalDateTime updatedAt
 ) {
-    public TemplateResponseDto {
-        if (description == null) {
-            description = "";
-        }
+    public static TemplateResponseDto fromEntity(Template template) {
+        return new TemplateResponseDto(
+                template.getId(),
+                template.getUser().getId(),
+                template.getTitle(),
+                template.getDescription(),
+                template.getLikes(),
+                template.getPurchaseCount(),
+                template.getEditor(),
+                template.getFileUrl(),
+                template.getTemplateTags().stream().map(TemplateTagResponseDto::fromEntity).toList(),
+                PromptResponseDto.fromEntity(template.getPrompt()),
+                template.getCreatedAt(),
+                template.getUpdatedAt()
+        );
     }
 }

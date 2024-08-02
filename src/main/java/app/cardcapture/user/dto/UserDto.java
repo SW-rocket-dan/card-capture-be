@@ -43,6 +43,7 @@ public class UserDto {
                 .givenName(givenName)
                 .familyName(familyName)
                 .picture(picture)
+                .role("ROLE_USER")
                 .build();
     }
 }

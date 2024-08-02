@@ -4,6 +4,7 @@ import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.security.PrincipleDetails;
 import app.cardcapture.template.dto.PromptRequestDto;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
+import app.cardcapture.template.dto.TemplateRequestDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
 import app.cardcapture.template.service.TemplateService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @Tag(name = "template", description = "The template API")
 @RequestMapping("/api/v1/template")
@@ -32,12 +35,12 @@ public class TemplateController {
     @PostMapping("/create")
     @Operation(summary = "템플릿 생성", description = "프롬프트 데이터를 받아 AI 포스터 템플릿을 생성합니다.")
     public ResponseEntity<SuccessResponseDto<TemplateEditorResponseDto>> createTemplate(
-            @Valid @RequestBody PromptRequestDto promptRequestDto,
+            @Valid @RequestBody TemplateRequestDto templateRequestDto,
             @AuthenticationPrincipal PrincipleDetails principle
     ) {
-        log.info("promptRequestDto = " + promptRequestDto);
+        log.info("templateRequestDto = " + templateRequestDto);
 
-        TemplateEditorResponseDto templateEditorResponseDto = templateService.createTemplate(promptRequestDto, principle.getUser());
+        TemplateEditorResponseDto templateEditorResponseDto = templateService.createTemplate(templateRequestDto, principle.getUser());
         SuccessResponseDto<TemplateEditorResponseDto> responseDto = SuccessResponseDto.create(templateEditorResponseDto);
         System.out.println("principle = " + principle);
         return ResponseEntity.ok(responseDto);
@@ -50,6 +53,17 @@ public class TemplateController {
     ) {
         TemplateResponseDto templateResponseDto = templateService.findById(id);
         SuccessResponseDto<TemplateResponseDto> responseDto = SuccessResponseDto.create(templateResponseDto);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/all")
+    @Operation(summary = "사용자 템플릿 조회", description = "사용자의 모든 템플릿을 조회합니다.")
+    public ResponseEntity<SuccessResponseDto<List<TemplateResponseDto>>> getAllTemplatesByUser(
+            @AuthenticationPrincipal PrincipleDetails principle
+    ) {
+        List<TemplateResponseDto> templateResponseDtos = templateService.findAllByUserId(principle.getUser().getId());
+        SuccessResponseDto<List<TemplateResponseDto>> responseDto = SuccessResponseDto.create(templateResponseDtos);
 
         return ResponseEntity.ok(responseDto);
     }

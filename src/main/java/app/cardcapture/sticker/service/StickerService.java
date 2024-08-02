@@ -13,12 +13,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StickerService {
 
-    private final TagService tagService;
+    private final StickerTagService stickerTagService;
     private final StickerRepository stickerRepository;
 
     public StickerResponseDto saveStickerWithTags(String fileUrl, List<TagDto> tagDtos) {
         Sticker savedSticker = saveOnlySticker(fileUrl);
-        tagService.saveTags(tagDtos, savedSticker);
+        stickerTagService.saveTags(tagDtos, savedSticker);
         return getStickerResponseDto(tagDtos, savedSticker);
     }
 
