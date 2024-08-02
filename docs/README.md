@@ -48,6 +48,6 @@ grant_type=authorization_code&code=AUTH_CODE&redirect_uri=YOUR_REDIRECT_URI&clie
   - [X] http://localhost:8080/swagger-ui.html
 
 - 유저는 자동 로그인을 할 수 있다.
-- 유저는 로그아웃을 할 수 있다.
+- [X] 유저는 로그아웃을 할 수 있다.
 - 유저는 회원탈퇴를 할 수 있다.
 - (유저는 회원정보를 수정할 수 있다.)

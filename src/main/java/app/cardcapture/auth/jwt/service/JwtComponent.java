@@ -18,11 +18,13 @@ public class JwtComponent {
     private final JwtConfig jwtConfig;
     private final Algorithm jwtHashAlgorithm;
     private final JWTVerifier jwtVerifier;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public JwtComponent(JwtConfig jwtConfig) {
+    public JwtComponent(JwtConfig jwtConfig, TokenBlacklistService tokenBlacklistService) {
         this.jwtConfig = jwtConfig;
         this.jwtHashAlgorithm = Algorithm.HMAC256(jwtConfig.getSecret());
         this.jwtVerifier = JWT.require(jwtHashAlgorithm).withIssuer(jwtConfig.getIssuer()).build();
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     public String create(Long userId, String role, Date createdAt) {
@@ -44,7 +46,10 @@ public class JwtComponent {
     }
 
     public Claims verify(String token) {
-        return new Claims(jwtVerifier.verify(token));
-
+        if (tokenBlacklistService.isTokenBlacklisted(token)) {
+            throw new RuntimeException("Token is blacklisted");
+        }
+        Claims claims = new Claims(jwtVerifier.verify(token));
+        return claims;
     }
 }
