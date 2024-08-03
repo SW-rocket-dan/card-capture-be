@@ -27,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PaymentCommonService {
 
+    private static final String UNVALID_PRODUCT_TOTAL_PRICE = "상품 가격의 합이 일치하지 않습니다.";
     private final PaymentRepository paymentRepository;
     private final RestClient restClient;
 
@@ -68,6 +69,14 @@ public class PaymentCommonService {
                 .toList();
 
         payment.setProducts(products);
+
+        int totalPrice = products.stream()
+                .mapToInt(Product::getTotalPrice)
+                .sum();
+        if (totalPrice != paymentStartCheckRequestDto.totalPrice()) {
+            throw new BusinessLogicException(UNVALID_PRODUCT_TOTAL_PRICE, HttpStatus.BAD_REQUEST);
+        }
+
         payment.setTotalPrice(paymentStartCheckRequestDto.totalPrice());
         payment.setRequestTime(paymentStartCheckRequestDto.requestTime());
 

@@ -23,4 +23,8 @@ public class Product {
 
     @Min(1)
     private int price;
+
+    public int getTotalPrice() {
+        return quantity * price;
+    }
 }

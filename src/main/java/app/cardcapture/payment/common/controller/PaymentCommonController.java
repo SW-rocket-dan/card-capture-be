@@ -30,7 +30,8 @@ public class PaymentCommonController {
     @PostMapping("/startCheck")
     @Operation(summary = "결제 가능 확인 및 고유 paymentId 발급",
             description = "사용자의 장바구니의 내용물이 결제 가능한지 확인하고, 결제 가능하다면 고유한 paymentId를 발급합니다. " +
-                    "결제 불가능한지는 40x(재고 부족), 402(결제 가능 금액 초과), 429(중복 요청), 400(요청이 정합성이 맞지 않음) 상태 코드로 응답합니다.")
+                    "결제 불가능한지는 40x(재고 부족), 402(결제 가능 금액 초과), 429(중복 요청), 400(요청이 정합성이 맞지 않음) 상태 코드로 응답합니다." +
+                    "요청 시 Product의 price에는 상품 하나당 가격이 들어가야 합니다.")
     public ResponseEntity<SuccessResponseDto<PaymentStartCheckResponseDto>> checkPayment(
             @RequestBody @Valid PaymentStartCheckRequestDto paymentStartCheckRequestDto
     ) {
