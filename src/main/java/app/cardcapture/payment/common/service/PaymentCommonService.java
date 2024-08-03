@@ -10,13 +10,13 @@ import app.cardcapture.payment.common.dto.PaymentStatusResponseDto;
 import app.cardcapture.payment.common.dto.PaymentTokenRequestDto;
 import app.cardcapture.payment.common.dto.PaymentTokenResponseDto;
 import app.cardcapture.payment.common.repository.PaymentRepository;
+import app.cardcapture.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class PaymentCommonService {
         return new PaymentStatusResponseDto("PAID");
     }
 
-    public PaymentStartCheckResponseDto startCheck(PaymentStartCheckRequestDto paymentStartCheckRequestDto) {
+    public PaymentStartCheckResponseDto startCheck(PaymentStartCheckRequestDto paymentStartCheckRequestDto, User user) {
         String paymentId = UUID.randomUUID().toString();
         while (paymentRepository.existsById(paymentId)) {
             paymentId = UUID.randomUUID().toString();
@@ -62,6 +62,7 @@ public class PaymentCommonService {
 
         Payment payment = new Payment();
         payment.setId(paymentId);
+        payment.setUser(user);
 
         List<Product> products = paymentStartCheckRequestDto.products()
                 .stream()
