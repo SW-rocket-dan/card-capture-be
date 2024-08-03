@@ -19,10 +19,14 @@ curl --request post \
 - [X] 백엔드에서 포트원 API 호출 시 RestClient를 사용합니다.
 
 ### [1~3]
-- 고객이 "구매하기" 버튼을 눌렀을 때, 프론트에서는 백엔드에 다음을 요청합니다.
-  구매가 가능한 상황을 확인하고 응답을 보내줘야 합니다.
-  - 구매 가능한지 요청 시 포맷
+- [X] 고객이 "구매하기" 버튼을 눌렀을 때, 프론트에서는 백엔드에 다음을 요청합니다.
+  - 구매 가능한가?
+  - [X] 고유한 paymentId 
+- [X] 프론트에서 요청하는 포맷은 다음과 같습니다.
 ~~~
+Header Authorization: Bearer {accessToken}
+
+Body
 {
   "paymentId": "example-payment-id", // 프론트에서 설정해주는 "결제의 고유 번호"
   "products": [
@@ -37,8 +41,8 @@ curl --request post \
       "price": 2000
     }
   ],
-  "totalAmount": 3000,
-  "timestamp": "2024-04-25T10:00:00.000Z",
+  "totalPrice": 3000,
+  "requestTime: "2024-04-25T10:00:00.000Z",
 }
 ~~~
 
