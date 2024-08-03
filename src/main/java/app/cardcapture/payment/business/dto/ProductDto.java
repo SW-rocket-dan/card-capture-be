@@ -13,11 +13,21 @@ public record ProductDto(
         @Min(1) int price
 ) {
     private final static String UNVALID_PRODUCT_ID = "유효한 상품 ID가 아닙니다.";
+    private final static String UNVALID_PRODUCT_PRICE = "유효한 상품 가격이 아닙니다.";
 
     public Product toEntity() {
+        validateProductId();
+        validateProductIdAndPrice();
+        return new Product(productId(), quantity(), price());
+    }
+
+    private void validateProductId() {
         ProductType.fromId(productId)
                 .orElseThrow(() -> new BusinessLogicException(UNVALID_PRODUCT_ID, HttpStatus.BAD_REQUEST));
+    }
 
-        return new Product(productId(), quantity(), price());
+    private void validateProductIdAndPrice() {
+        ProductType.fromIdAndDiscountPrice(productId, price)
+                .orElseThrow(() -> new BusinessLogicException(UNVALID_PRODUCT_PRICE, HttpStatus.BAD_REQUEST));
     }
 }

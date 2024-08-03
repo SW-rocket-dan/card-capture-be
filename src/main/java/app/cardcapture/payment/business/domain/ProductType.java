@@ -14,6 +14,12 @@ public enum ProductType {
     private final int originPrice;
     private final int discountPrice;
 
+    public static Optional<ProductType> fromIdAndDiscountPrice(String id, int discountPrice) {
+        return Arrays.stream(values())
+                .filter(product -> product.id.equals(id) && product.discountPrice == discountPrice)
+                .findFirst();
+    }
+
     public static Optional<ProductType> fromId(String id) {
         return Arrays.stream(values())
                 .filter(product -> product.id.equals(id))
