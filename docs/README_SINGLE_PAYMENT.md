@@ -1,10 +1,10 @@
 ## 단건 결제
 
 ![img.png](SinglePaymentV2.png)
-- 포트원의 결제 API를 호출하려면 "포트원 API Secret"을 헤더에 넣거나, "포트원 API Access Token"을 헤더에 넣어야 합니다.
-  - 해당 API들은 백엔드에서만 호출합니다.
-  - API Secret은 만료기간이 더 깁니다. 
-  - 어차피 백엔드에서는 secret알고있는 상황이고, 이 access token이 필요한 경우에는, secret을 모르는 사람에게 짧은 시간동안 권한을 빌려주기 위함이다. 
+- [X] 포트원의 결제 API를 호출하려면 "포트원 API Secret"을 헤더에 넣거나, "포트원 API Access Token"을 헤더에 넣어야 합니다.
+  - [X] 해당 API들은 백엔드에서만 호출합니다.
+  - [X] API Secret은 만료기간이 더 깁니다. 
+  - [X] 어차피 백엔드에서는 secret알고있는 상황이고, 이 access token이 필요한 경우에는, secret을 모르는 사람에게 짧은 시간동안 권한을 빌려주기 위함이다. 
    즉, 우리 입장에서는 필요가 없으므로, "포트원 API Secret"을 사용하도록 합니다.
 
 - ~~포트원 API Access Token 및 Refresh Token 발급받는 방법~~ 
@@ -16,7 +16,7 @@ curl --request post \
   --data '{"apiSecret":"your-api-secret"}'
 ~~~
 
-- 백엔드에서 포트원 API 호출 시 RestClient를 사용합니다.
+- [X] 백엔드에서 포트원 API 호출 시 RestClient를 사용합니다.
 
 ### [1~3]
 - 고객이 "구매하기" 버튼을 눌렀을 때, 프론트에서는 백엔드에 다음을 요청합니다.
