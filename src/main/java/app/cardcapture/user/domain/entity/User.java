@@ -1,5 +1,6 @@
 package app.cardcapture.user.domain.entity;
 
+import app.cardcapture.payment.common.domain.entity.Payment;
 import app.cardcapture.template.domain.entity.Template;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,6 +60,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Template> templates;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Payment> payments;
 
     @Column(nullable = false)
     @CreatedDate

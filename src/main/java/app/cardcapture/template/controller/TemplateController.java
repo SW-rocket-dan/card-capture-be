@@ -2,7 +2,6 @@ package app.cardcapture.template.controller;
 
 import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.security.PrincipleDetails;
-import app.cardcapture.template.dto.PromptRequestDto;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
 import app.cardcapture.template.dto.TemplateRequestDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
@@ -42,7 +41,6 @@ public class TemplateController {
 
         TemplateEditorResponseDto templateEditorResponseDto = templateService.createTemplate(templateRequestDto, principle.getUser());
         SuccessResponseDto<TemplateEditorResponseDto> responseDto = SuccessResponseDto.create(templateEditorResponseDto);
-        System.out.println("principle = " + principle);
         return ResponseEntity.ok(responseDto);
     }
 
