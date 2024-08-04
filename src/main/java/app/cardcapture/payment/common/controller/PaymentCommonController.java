@@ -1,5 +1,6 @@
 package app.cardcapture.payment.common.controller;
 
+import app.cardcapture.ai.bgcolor.dto.WebhookPayload;
 import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.payment.common.dto.PaymentStartCheckRequestDto;
 import app.cardcapture.payment.common.dto.PaymentStartCheckResponseDto;
@@ -7,6 +8,7 @@ import app.cardcapture.payment.common.dto.PaymentStatusRequestDto;
 import app.cardcapture.payment.common.dto.PaymentStatusResponseDto;
 import app.cardcapture.payment.common.service.PaymentCommonService;
 import app.cardcapture.security.PrincipleDetails;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,11 +45,16 @@ public class PaymentCommonController {
     @PostMapping("/endCheck")
     public ResponseEntity<SuccessResponseDto<PaymentStatusResponseDto>> endCheck(
             @RequestBody @Valid PaymentStatusRequestDto request) { //TODO: principle로 자기의 구매가 맞는지도 확인 필요한가?
-        try {
-            PaymentStatusResponseDto statusResponse = paymentCommonService.checkPaymentStatus(request.paymentId());
-            return ResponseEntity.ok(SuccessResponseDto.create(statusResponse));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(SuccessResponseDto.create(new PaymentStatusResponseDto("ERROR")));
-        }
+        PaymentStatusResponseDto statusResponse = paymentCommonService.checkPaymentStatus(request.paymentId());
+        SuccessResponseDto<PaymentStatusResponseDto> response = SuccessResponseDto.create(statusResponse);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/webhook")
+    @Hidden
+    public ResponseEntity<Void> handleWebhook(
+            @RequestBody WebhookPayload payload) {
+        paymentCommonService.validateWebhook(payload);
+        return ResponseEntity.ok().build();
     }
 }

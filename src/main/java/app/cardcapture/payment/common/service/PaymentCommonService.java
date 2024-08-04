@@ -1,5 +1,6 @@
 package app.cardcapture.payment.common.service;
 
+import app.cardcapture.ai.bgcolor.dto.WebhookPayload;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.payment.business.domain.entity.Product;
 import app.cardcapture.payment.business.dto.ProductDto;
@@ -15,6 +16,7 @@ import app.cardcapture.payment.common.repository.PaymentRepository;
 import app.cardcapture.payment.common.repository.TotalSalesRepository;
 import app.cardcapture.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -28,6 +30,7 @@ import java.util.UUID;
 
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PaymentCommonService {
 
@@ -40,10 +43,10 @@ public class PaymentCommonService {
     @Value("${portone.api.secret}")
     private String apiSecret;
 
-    public PaymentTokenResponseDto createPaymentToken() {
+    /*public PaymentTokenResponseDto createPaymentToken() {
         PaymentTokenRequestDto paymentTokenRequestDto = new PaymentTokenRequestDto(apiSecret);
 
-        PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
+PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
                 .uri("https://api.portone.io/login/api-secret")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(paymentTokenRequestDto)
@@ -54,16 +57,12 @@ public class PaymentCommonService {
                 .body(PaymentTokenResponseDto.class);
 
         return paymentTokenResponseDto;
-    }
-
-    public PaymentStatusResponseDto checkPaymentStatus(String paymentId) {
-        return new PaymentStatusResponseDto("PAID");
-    }
+    }*/
 
     @Transactional
     public PaymentStartCheckResponseDto startCheck(PaymentStartCheckRequestDto paymentStartCheckRequestDto, User user) {
         String paymentId = UUID.randomUUID().toString();
-        while (paymentRepository.existsById(paymentId)) {
+        while (paymentRepository.existsByPaymentId(paymentId)) {
             paymentId = UUID.randomUUID().toString();
         }
 
@@ -107,5 +106,27 @@ public class PaymentCommonService {
 
 
         return PaymentStartCheckResponseDto.from(savedPayment);
+    } //TODO: 구매최종완료되면 유저에게 이용권 횟수 +1 주기
+
+    public void validateWebhook(WebhookPayload payload) {
+        log.info("Received webhook:");
+        log.info("Type: " + payload.type());
+        log.info("Timestamp: " + payload.timestamp());
+        log.info("Payment ID: " + payload.data().paymentId());
+        log.info("Transaction ID: " + payload.data().transactionId());
+        log.info("Total Amount: " + payload.data().totalAmount());
+
+
+        // RESTCLIENT로 포트원의 결제 정보 확인 (메서드명은 checkPaymentStatusFromPortone
+        // DB에 쓰기가 완료됨.
+        // 포트원 에러 시 몇 번 시도 더 해봄? 해보고 안되면 DB UNCONNECTED 찍고 결제 취소 API 호출
+        // API 잘못 보낸 것은 1회로 실패찍기 / IOException은 3번은 OK => 네트워크 문제로 인한 에러
+        // checkPaymentStatus에서 복구 과정이 있기 때문에 IOException 횟수 줄이거나 1번만 해도 OK
+    }
+
+    public PaymentStatusResponseDto checkPaymentStatus(String paymentId) {
+        // DB에 payment status가 ARRIVED면, 포트원 API로 결제 정보 확인(checkPaymentStatusFromPortone)
+        // DB 업데이트 완료 후, PAID면 200, 아니면 404
+        return new PaymentStatusResponseDto("PAID");
     }
 }
