@@ -68,7 +68,7 @@ public class PaymentCommonService {
         }
 
         Payment payment = new Payment();
-        payment.setId(paymentId);
+        payment.setPaymentId(paymentId);
         payment.setUser(user);
 
         List<Product> products = paymentStartCheckRequestDto.products()
@@ -83,10 +83,11 @@ public class PaymentCommonService {
                 .sum();
         if (totalPrice != paymentStartCheckRequestDto.totalPrice()) {
             throw new BusinessLogicException(UNVALID_PRODUCT_TOTAL_PRICE, HttpStatus.BAD_REQUEST);
-        }
+        } // TODO: ProductType에서 가격 받아와서 다른지 확인하는걸로 바꾸기
 
         payment.setTotalPrice(paymentStartCheckRequestDto.totalPrice());
         payment.setRequestTime(paymentStartCheckRequestDto.requestTime());
+
 
         // 금액 xxx원 넘으면 안됨
         TotalSales totalSales = totalSalesRepository.findByIdForUpdate(1L)
@@ -101,7 +102,9 @@ public class PaymentCommonService {
         totalSales.setAccumulatedSales(newTotalSales);
         totalSalesRepository.save(totalSales);
 
+        payment.setStatus("ARRIVED");
         Payment savedPayment = paymentRepository.save(payment);
+
 
         return PaymentStartCheckResponseDto.from(savedPayment);
     }

@@ -7,6 +7,6 @@ public record PaymentStartCheckResponseDto(
     @NotBlank String paymentId
 ) {
     public static PaymentStartCheckResponseDto from(Payment payment) {
-        return new PaymentStartCheckResponseDto(payment.getId());
+        return new PaymentStartCheckResponseDto(payment.getPaymentId());
     }
 }
