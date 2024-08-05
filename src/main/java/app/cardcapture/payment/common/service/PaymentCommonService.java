@@ -126,11 +126,18 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
         // checkPaymentStatus에서 복구 과정이 있기 때문에 IOException 횟수 줄이거나 1번만 해도 OK
     }
 
+    @Transactional
     public PaymentStatusResponseDto checkPaymentStatus(String paymentId, User user) {
         // DB에 payment status가 ARRIVED면, 포트원 API로 결제 정보 확인(checkPaymentStatusFromPortone)
         // DB 업데이트 완료 후, PAID면 200, 아니면 404
-        Payment payment = paymentRepository.findByPaymentId(paymentId)
+        Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId) // (select for update 락 걸기)
                 .orElseThrow(() -> new BusinessLogicException(PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        if ("FINAL_PAID".equals(payment.getStatus())) {
+            return new PaymentStatusResponseDto("FINAL_PAID"); // Exception을 띄울지??
+        }
+        // 이미 이용권 반영 처리된 payment라면 아래 다 무시해야함
+        // * 동시성 처리. 이 checkPaymentStatus가 분산 환경에서 여러 번 호출될 수 있으니까, Payment status에 select for update 락 걸어야함
 
         // payment에서 모든 productId와 quantity를 조회한다.
         // 모든 productId에 대해, 각각 아래를 실행한다.
@@ -143,13 +150,21 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
         int quantity = product.getQuantity();
 
         ProductCategory productCategory = ProductCategory.AI_POSTER_PRODUCTION_TICKET; // DisplayProductId에서 ProductCategory를 찾아야 함. 일단 지금은 문제없으니 임시로 넣어놓음
-        UserProductCategory userProductCategory = new UserProductCategory();
-        userProductCategory.setProductCategory(productCategory);
-        userProductCategory.setQuantity(quantity); // DisplayProduct에서 여러 개의 ProductCategory를 제공할 경우, 각각의 상품에 대해 정해진 개수를 써야함. 그러면 이 quantity값이 아닌 DisplayProduct에서 가져와야함. 우선 임시로 넣어놓음
-        userProductCategory.setUser(user);
 
-        userProductCategoryRepository.save(userProductCategory);
-
-        return new PaymentStatusResponseDto("PAID");
+        // 이미 있는 값이면 업데이트해줘야 한다
+        if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) {
+            UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategory(user, productCategory)
+                    .orElseThrow(() -> new BusinessLogicException("UserProductCategory not found", HttpStatus.NOT_FOUND));
+            userProductCategory.setQuantity(userProductCategory.getQuantity() + quantity);
+            userProductCategoryRepository.save(userProductCategory);
+        } else {
+            UserProductCategory userProductCategory = new UserProductCategory();
+            userProductCategory.setProductCategory(productCategory);
+            userProductCategory.setQuantity(quantity);// DisplayProduct에서 여러 개의 ProductCategory를 제공할 경우, 각각의 상품에 대해 정해진 개수를 써야함. 그러면 이 quantity값이 아닌 DisplayProduct에서 가져와야함. 우선 임시로 넣어놓음
+            userProductCategory.setUser(user);
+            userProductCategoryRepository.save(userProductCategory);
+        }
+        payment.setStatus("FINAL_PAID");
+        return new PaymentStatusResponseDto("FINAL_PAID");
     }
 }

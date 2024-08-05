@@ -43,6 +43,9 @@ public class PaymentCommonController {
     }
 
     @PostMapping("/endCheck")
+    @Operation(summary = "결제 완료 확인",
+            description = "FINAL_PAID가 반환되면 결제 완료입니다. 나머지는 결제가 진행 중이거나 실패한 상태입니다." +
+                    " 프론트에서는 여러 번 백엔드에 이 엔드포인트로 폴링을 요청합니다. 폴링이 모두 실패할 경우, 사용자에게 마이페이지로 바로 가는 버튼을 줘서 처리가 완료됐을 때 수동으로 사용자가 결제 상태를 확인하게 합니다.")
     public ResponseEntity<SuccessResponseDto<PaymentStatusResponseDto>> endCheck(
             @RequestBody @Valid PaymentStatusRequestDto request,
             @AuthenticationPrincipal PrincipleDetails principle

@@ -123,4 +123,7 @@ https://api.portone.io/payments?requestBody=인코딩된_요청_바디
 [단품]
 - [X] 구매한 이용권 개수만큼 유저의 이용권 개수가 늘어난다.
 - 이용권을 사용하면 차감된다.
-  - 사용했다는 기준은 /api/v1/template/create로 템플릿을 생성했을 때이다. 
+  - 사용했다는 기준은 /api/v1/template/create로 템플릿을 생성했을 때이다.
+  - [X] 이미 이용권 반영 처리된 payment라면 또 이용권 추가시키면 안됨
+  - [X] 동시성 처리. 이 checkPaymentStatus가 분산 환경에서 여러 번 호출될 수 있으니까, 해당 Payment record status에 select for update 락 걸어야함
+  - [X] 이미 있는 값이면 새롭게 record를 넣는게 아니라 업데이트해줘야 한다
