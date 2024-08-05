@@ -3,6 +3,8 @@ package app.cardcapture.template.controller;
 import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.security.PrincipleDetails;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
+import app.cardcapture.template.dto.TemplateEditorUpdateRequestDto;
+import app.cardcapture.template.dto.TemplateEditorUpdateResponseDto;
 import app.cardcapture.template.dto.TemplateRequestDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
 import app.cardcapture.template.service.TemplateService;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +55,17 @@ public class TemplateController {
         TemplateResponseDto templateResponseDto = templateService.findById(id);
         SuccessResponseDto<TemplateResponseDto> responseDto = SuccessResponseDto.create(templateResponseDto);
 
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @PatchMapping("/update/editor")
+    @Operation(summary = "템플릿 Editor 수정", description = "템플릿 ID를 사용하여 템플릿 Editor만 수정합니다.") //TODO: 사용자 정보와 일치하는 경우에만 update시켜야할지?
+    public ResponseEntity<SuccessResponseDto<TemplateEditorUpdateResponseDto>> updateTemplate(
+            @Valid @RequestBody TemplateEditorUpdateRequestDto templateEditorUpdateRequestDto,
+            @AuthenticationPrincipal PrincipleDetails principle
+    ) {
+        TemplateEditorUpdateResponseDto templateEditorResponseDto = templateService.updateTemplateEditor(templateEditorUpdateRequestDto, principle.getUser());
+        SuccessResponseDto<TemplateEditorUpdateResponseDto> responseDto = SuccessResponseDto.create(templateEditorResponseDto);
         return ResponseEntity.ok(responseDto);
     }
 

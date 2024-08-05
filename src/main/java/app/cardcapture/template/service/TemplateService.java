@@ -5,6 +5,8 @@ import app.cardcapture.template.domain.entity.Prompt;
 import app.cardcapture.template.domain.entity.Template;
 import app.cardcapture.template.domain.entity.TemplateTag;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
+import app.cardcapture.template.dto.TemplateEditorUpdateRequestDto;
+import app.cardcapture.template.dto.TemplateEditorUpdateResponseDto;
 import app.cardcapture.template.dto.TemplateRequestDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
 import app.cardcapture.template.dto.TemplateTagRequestDto;
@@ -60,5 +62,21 @@ public class TemplateService {
         return templateRepository.findByUserId(userId).stream()
                 .map(template -> TemplateResponseDto.fromEntity(template))
                 .toList();
+    }
+
+    public TemplateEditorUpdateResponseDto updateTemplateEditor(TemplateEditorUpdateRequestDto templateEditorUpdateRequestDto, User user) {
+        Template template = templateRepository.findById(templateEditorUpdateRequestDto.id()).orElseThrow(()
+                -> new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.NOT_FOUND));
+        System.out.println("user = " + user.getId());
+        System.out.println("template.getUser() = " + template.getUser().getId());
+
+        if (template.getUser().getId()!= user.getId()) {
+            throw new BusinessLogicException("템플릿 수정 권한이 없습니다", HttpStatus.FORBIDDEN);
+        }
+
+        template.setEditor(templateEditorUpdateRequestDto.editor());
+        templateRepository.save(template);
+
+        return new TemplateEditorUpdateResponseDto(template.getId());
     }
 }

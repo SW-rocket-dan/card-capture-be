@@ -10,4 +10,5 @@
 - [X] 사용자는 템플릿을 조회할 수 있다.
   - [X] JSON 데이터, 이미지 Url 등 포함 
 - [] 사용자는 템플릿을 수정할 수 있다.
+  - [X] template의 id를 이용해서, 자신의 template인 경우 template editor json을 변경할 수 있다
 
