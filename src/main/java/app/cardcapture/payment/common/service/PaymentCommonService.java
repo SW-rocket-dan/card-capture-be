@@ -2,16 +2,17 @@ package app.cardcapture.payment.common.service;
 
 import app.cardcapture.ai.bgcolor.dto.WebhookPayload;
 import app.cardcapture.common.exception.BusinessLogicException;
-import app.cardcapture.payment.business.domain.entity.Product;
+import app.cardcapture.payment.business.domain.ProductCategory;
+import app.cardcapture.payment.business.domain.embed.PaymentProduct;
+import app.cardcapture.payment.business.domain.entity.UserProductCategory;
 import app.cardcapture.payment.business.dto.ProductDto;
+import app.cardcapture.payment.business.repository.UserProductCategoryRepository;
 import app.cardcapture.payment.common.config.PaymentConfig;
 import app.cardcapture.payment.common.domain.entity.Payment;
 import app.cardcapture.payment.common.domain.entity.TotalSales;
 import app.cardcapture.payment.common.dto.PaymentStartCheckRequestDto;
 import app.cardcapture.payment.common.dto.PaymentStartCheckResponseDto;
 import app.cardcapture.payment.common.dto.PaymentStatusResponseDto;
-import app.cardcapture.payment.common.dto.PaymentTokenRequestDto;
-import app.cardcapture.payment.common.dto.PaymentTokenResponseDto;
 import app.cardcapture.payment.common.repository.PaymentRepository;
 import app.cardcapture.payment.common.repository.TotalSalesRepository;
 import app.cardcapture.user.domain.entity.User;
@@ -19,8 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -35,8 +34,11 @@ import java.util.UUID;
 public class PaymentCommonService {
 
     private static final String UNVALID_PRODUCT_TOTAL_PRICE = "상품 가격의 합이 일치하지 않습니다.";
+    private static final String PAYMENT_NOT_FOUND = "결제 정보를 찾을 수 없습니다.";
+
     private final PaymentRepository paymentRepository;
     private final TotalSalesRepository totalSalesRepository;
+    private final UserProductCategoryRepository userProductCategoryRepository;
     private final RestClient restClient;
     private final PaymentConfig paymentConfig;
 
@@ -70,15 +72,15 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
         payment.setPaymentId(paymentId);
         payment.setUser(user);
 
-        List<Product> products = paymentStartCheckRequestDto.products()
+        List<PaymentProduct> paymentProducts = paymentStartCheckRequestDto.products()
                 .stream()
                 .map(ProductDto::toEntity)
                 .toList();
 
-        payment.setProducts(products);
+        payment.setPaymentProducts(paymentProducts);
 
-        int totalPrice = products.stream()
-                .mapToInt(Product::getTotalPrice)
+        int totalPrice = paymentProducts.stream()
+                .mapToInt(PaymentProduct::getTotalPrice)
                 .sum();
         if (totalPrice != paymentStartCheckRequestDto.totalPrice()) {
             throw new BusinessLogicException(UNVALID_PRODUCT_TOTAL_PRICE, HttpStatus.BAD_REQUEST);
@@ -124,9 +126,30 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
         // checkPaymentStatus에서 복구 과정이 있기 때문에 IOException 횟수 줄이거나 1번만 해도 OK
     }
 
-    public PaymentStatusResponseDto checkPaymentStatus(String paymentId) {
+    public PaymentStatusResponseDto checkPaymentStatus(String paymentId, User user) {
         // DB에 payment status가 ARRIVED면, 포트원 API로 결제 정보 확인(checkPaymentStatusFromPortone)
         // DB 업데이트 완료 후, PAID면 200, 아니면 404
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new BusinessLogicException(PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        // payment에서 모든 productId와 quantity를 조회한다.
+        // 모든 productId에 대해, 각각 아래를 실행한다.
+        // 각 상품(DisplayProduct)에 맞는 ProductCategory를 조회한다.
+        // 각 ProductCategory에 대해,
+
+        List<PaymentProduct> products = payment.getPaymentProducts();
+        PaymentProduct product = products.get(0);
+        String productId = product.getDisplayProductId();
+        int quantity = product.getQuantity();
+
+        ProductCategory productCategory = ProductCategory.AI_POSTER_PRODUCTION_TICKET; // DisplayProductId에서 ProductCategory를 찾아야 함. 일단 지금은 문제없으니 임시로 넣어놓음
+        UserProductCategory userProductCategory = new UserProductCategory();
+        userProductCategory.setProductCategory(productCategory);
+        userProductCategory.setQuantity(quantity); // DisplayProduct에서 여러 개의 ProductCategory를 제공할 경우, 각각의 상품에 대해 정해진 개수를 써야함. 그러면 이 quantity값이 아닌 DisplayProduct에서 가져와야함. 우선 임시로 넣어놓음
+        userProductCategory.setUser(user);
+
+        userProductCategoryRepository.save(userProductCategory);
+
         return new PaymentStatusResponseDto("PAID");
     }
 }

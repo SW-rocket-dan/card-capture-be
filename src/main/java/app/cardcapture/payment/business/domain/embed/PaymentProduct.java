@@ -1,4 +1,4 @@
-package app.cardcapture.payment.business.domain.entity;
+package app.cardcapture.payment.business.domain.embed;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Min;
@@ -13,10 +13,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class PaymentProduct {
 
     @NotBlank
-    private String productId;
+    private String displayProductId;
 
     @Min(1)
     private int quantity;

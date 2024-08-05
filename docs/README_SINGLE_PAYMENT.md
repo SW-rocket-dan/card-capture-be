@@ -28,7 +28,7 @@ Header Authorization: Bearer {accessToken}
 
 Body
 {
-  "products": [
+  "paymentProducts": [
     {
       "productId": "example-product-id", // 상품의 고유 번호
       "quantity": 1, // 상품의 수량
@@ -120,3 +120,7 @@ https://api.portone.io/payments?requestBody=인코딩된_요청_바디
 예) 인코딩_전_요청_바디={"page":{"number":2,"size":5},"filter":{"isTest":false,"from":"2024-07-25T00:00:00Z","until":"2024-07-25T23:59:59Z"}}
 ~~~
 
+[단품]
+- [X] 구매한 이용권 개수만큼 유저의 이용권 개수가 늘어난다.
+- 이용권을 사용하면 차감된다.
+  - 사용했다는 기준은 /api/v1/template/create로 템플릿을 생성했을 때이다. 

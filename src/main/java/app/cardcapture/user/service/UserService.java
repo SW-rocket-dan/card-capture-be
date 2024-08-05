@@ -1,6 +1,8 @@
     package app.cardcapture.user.service;
 
     import app.cardcapture.common.exception.BusinessLogicException;
+    import app.cardcapture.payment.business.domain.entity.UserProductCategory;
+    import app.cardcapture.payment.business.repository.UserProductCategoryRepository;
     import app.cardcapture.user.domain.entity.User;
     import app.cardcapture.user.dto.UserDto;
     import app.cardcapture.user.repository.UserRepository;
@@ -8,12 +10,14 @@
     import org.springframework.http.HttpStatus;
     import org.springframework.stereotype.Service;
 
+    import java.util.List;
     import java.util.Optional;
 
     @Service
     @AllArgsConstructor
     public class UserService {
         private static final String USER_INFO_RETRIEVAL_ERROR = "Failed to retrieve user info";
+        private final UserProductCategoryRepository userProductCategoryRepository;
         private final UserRepository userRepository;
 
         public UserDto findUserById(Long id) {
@@ -28,5 +32,9 @@
 
         public Optional<User> findByGoogleId(String googleId) {
             return userRepository.findByGoogleId(googleId);
+        }
+
+        public List<UserProductCategory> getUserProductCategories(User user) {
+            return userProductCategoryRepository.findByUser(user);
         }
     }

@@ -44,8 +44,10 @@ public class PaymentCommonController {
 
     @PostMapping("/endCheck")
     public ResponseEntity<SuccessResponseDto<PaymentStatusResponseDto>> endCheck(
-            @RequestBody @Valid PaymentStatusRequestDto request) { //TODO: principle로 자기의 구매가 맞는지도 확인 필요한가?
-        PaymentStatusResponseDto statusResponse = paymentCommonService.checkPaymentStatus(request.paymentId());
+            @RequestBody @Valid PaymentStatusRequestDto request,
+            @AuthenticationPrincipal PrincipleDetails principle
+    ) { //TODO: principle로 자기의 구매가 맞는지도 확인 필요한가?
+        PaymentStatusResponseDto statusResponse = paymentCommonService.checkPaymentStatus(request.paymentId(), principle.getUser());
         SuccessResponseDto<PaymentStatusResponseDto> response = SuccessResponseDto.create(statusResponse);
         return ResponseEntity.ok(response);
     }
