@@ -127,3 +127,5 @@ https://api.portone.io/payments?requestBody=인코딩된_요청_바디
   - [X] 이미 이용권 반영 처리된 payment라면 또 이용권 추가시키면 안됨
   - [X] 동시성 처리. 이 checkPaymentStatus가 분산 환경에서 여러 번 호출될 수 있으니까, 해당 Payment record status에 select for update 락 걸어야함
   - [X] 이미 있는 값이면 새롭게 record를 넣는게 아니라 업데이트해줘야 한다
+  - [X] ProductCategory에 식별 코드 추가
+  - [X] 구매하지 않은 ProductCategory에 대해서도 0이라는 default 값을 담아 모두 반환

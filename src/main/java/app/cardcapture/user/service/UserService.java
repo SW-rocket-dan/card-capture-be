@@ -35,6 +35,7 @@
         }
 
         public List<UserProductCategory> getUserProductCategories(User user) {
+
             return userProductCategoryRepository.findByUser(user);
         }
     }
