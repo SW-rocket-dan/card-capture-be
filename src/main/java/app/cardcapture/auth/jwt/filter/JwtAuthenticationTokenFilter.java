@@ -1,9 +1,12 @@
 package app.cardcapture.auth.jwt.filter;
 
 import app.cardcapture.auth.jwt.domain.Claims;
+import app.cardcapture.auth.jwt.exception.InvalidTokenException;
 import app.cardcapture.auth.jwt.service.JwtComponent;
+import app.cardcapture.common.dto.ErrorResponseDto;
 import app.cardcapture.security.PrincipleDetails;
 import app.cardcapture.security.PrincipleUserDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +26,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private final JwtComponent jwtComponent;
     private final PrincipleUserDetailsService userDetailsService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -31,32 +35,40 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         System.out.println("authHeader = " + authHeader);
         System.out.println("requestURI = " + request.getRequestURI());
 
-        if (authHeader != null && !authHeader.isEmpty()) {
-            if (authHeader.startsWith("Bearer ")) {
-                authHeader = authHeader.substring(7);
-            }
-            String authToken = authHeader;
-            Claims claims = jwtComponent.verifyAccessToken(authToken);
-            if (claims != null) {
-                Long userId = claims.getId();
-                if (userId != null) {
-                    PrincipleDetails userDetails = (PrincipleDetails) userDetailsService.loadUserByUsername(userId.toString());
+        try {
+            if (authHeader != null && !authHeader.isEmpty()) {
+                if (authHeader.startsWith("Bearer ")) {
+                    authHeader = authHeader.substring(7);
+                }
+                String authToken = authHeader;
+                Claims claims = jwtComponent.verifyAccessToken(authToken);
+                if (claims != null) {
+                    Long userId = claims.getId();
+                    if (userId != null) {
+                        PrincipleDetails userDetails = (PrincipleDetails) userDetailsService.loadUserByUsername(userId.toString());
 
-                    if (userDetails != null) {
-                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        if (userDetails != null) {
+                            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        } else {
+                            System.out.println("UserDetails is null for userId: " + userId);
+                        }
                     } else {
-                        System.out.println("UserDetails is null for userId: " + userId);
+                        System.out.println("UserId is null in claims");
                     }
                 } else {
-                    System.out.println("UserId is null in claims");
+                    System.out.println("Claims is null for token: " + authToken);
                 }
-            } else {
-                System.out.println("Claims is null for token: " + authToken);
             }
+            chain.doFilter(request, response);
+        } catch (InvalidTokenException ex) {
+            ErrorResponseDto<String> errorResponse = ErrorResponseDto.create(ex.getMessage(), null);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         }
-        chain.doFilter(request, response);
     }
 }
