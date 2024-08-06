@@ -44,13 +44,14 @@ public class GoogleAuthController {
     @GetMapping("/login")
     @Operation(summary = "구글 로그인 정보 제공", description = "구글 로그인 정보를 JSON 형태로 반환합니다.")
     public ResponseEntity<SuccessResponseDto<GoogleLoginRequestDto>> getGoogleLoginData() {
-        GoogleLoginRequestDto googleLoginRequestDto = GoogleLoginRequestDto.builder()
-                .loginBaseUrl(googleAuthConfig.getBaseUrl())
-                .scope(googleAuthConfig.getScope())
-                .redirectUri(googleAuthConfig.getRedirectUri())
-                .responseType(googleAuthConfig.getResponseType())
-                .clientId(googleAuthConfig.getClientId())
-                .build();
+        GoogleLoginRequestDto googleLoginRequestDto = new GoogleLoginRequestDto(
+                googleAuthConfig.getBaseUrl(),
+                googleAuthConfig.getClientId(),
+                googleAuthConfig.getRedirectUri(),
+                googleAuthConfig.getResponseType(),
+                googleAuthConfig.getScope(),
+                googleAuthConfig.getPrompt()
+        );
         SuccessResponseDto responseDto = SuccessResponseDto.create(googleLoginRequestDto);
 
         return ResponseEntity.ok(responseDto);
