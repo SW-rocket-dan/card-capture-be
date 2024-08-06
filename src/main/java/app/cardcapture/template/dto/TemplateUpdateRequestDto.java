@@ -9,7 +9,7 @@ import java.util.Set;
 
 public record TemplateUpdateRequestDto(
         @Min(1) Long id,
-        String editor,
+        String editor, // TODO: 길이 제한, format 확인
         String title,
         String description,
         String fileUrl,

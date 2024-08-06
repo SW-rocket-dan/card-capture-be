@@ -135,7 +135,7 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
                 .orElseThrow(() -> new BusinessLogicException(PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         if ("FINAL_PAID".equals(payment.getStatus())) {
-            return new PaymentStatusResponseDto("FINAL_PAID"); // Exception을 띄울지??
+            return new PaymentStatusResponseDto("FINAL_PAID"); // Exception을 띄울지?? 정상응답해도 상관없음
         }
         // 이미 이용권 반영 처리된 payment라면 아래 다 무시해야함
         // * 동시성 처리. 이 checkPaymentStatus가 분산 환경에서 여러 번 호출될 수 있으니까, Payment status에 select for update 락 걸어야함
@@ -147,10 +147,8 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
 
         List<PaymentProduct> products = payment.getPaymentProducts();
         PaymentProduct product = products.get(0);
-        String productId = product.getDisplayProductId();
+        ProductCategory productCategory = product.getProductCategory();
         int quantity = product.getQuantity();
-
-        ProductCategory productCategory = ProductCategory.AI_POSTER_PRODUCTION_TICKET; // DisplayProductId에서 ProductCategory를 찾아야 함. 일단 지금은 문제없으니 임시로 넣어놓음
 
         // 이미 있는 값이면 업데이트해줘야 한다
         if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) {

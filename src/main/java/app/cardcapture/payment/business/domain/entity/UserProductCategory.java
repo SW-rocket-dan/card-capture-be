@@ -1,6 +1,5 @@
 package app.cardcapture.payment.business.domain.entity;
 
-import app.cardcapture.payment.business.domain.DisplayProduct;
 import app.cardcapture.payment.business.domain.ProductCategory;
 import app.cardcapture.user.domain.entity.User;
 import jakarta.persistence.Column;

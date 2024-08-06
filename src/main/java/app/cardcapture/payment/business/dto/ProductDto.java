@@ -2,13 +2,14 @@ package app.cardcapture.payment.business.dto;
 
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.payment.business.domain.DisplayProduct;
+import app.cardcapture.payment.business.domain.ProductCategory;
 import app.cardcapture.payment.business.domain.embed.PaymentProduct;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 
 public record ProductDto(
-        @NotBlank String productId,
+        @NotBlank ProductCategory productCategory,
         @Min(1) int quantity,
         @Min(1) int price
 ) {
@@ -18,16 +19,16 @@ public record ProductDto(
     public PaymentProduct toEntity() { // TODO: Entity안으로 옮기고, Entity가 이 검증작업 하도록
         validateProductId();
         validateProductIdAndPrice();
-        return new PaymentProduct(productId(), quantity(), price());
+        return new PaymentProduct(productCategory(), quantity(), price());
     }
 
     private void validateProductId() {
-        DisplayProduct.fromId(productId)
+        DisplayProduct.fromProductCategory(productCategory)
                 .orElseThrow(() -> new BusinessLogicException(UNVALID_PRODUCT_ID, HttpStatus.BAD_REQUEST));
     }
 
     private void validateProductIdAndPrice() {
-        DisplayProduct.fromIdAndDiscountPrice(productId, price)
+        DisplayProduct.fromProductCategoryAndDiscountPrice(productCategory, price)
                 .orElseThrow(() -> new BusinessLogicException(UNVALID_PRODUCT_PRICE, HttpStatus.BAD_REQUEST));
     }
 }

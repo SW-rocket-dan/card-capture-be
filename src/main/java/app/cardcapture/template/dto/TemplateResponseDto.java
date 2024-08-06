@@ -1,9 +1,6 @@
 package app.cardcapture.template.dto;
 
-import app.cardcapture.template.domain.entity.Prompt;
 import app.cardcapture.template.domain.entity.Template;
-import app.cardcapture.template.domain.entity.TemplateTag;
-import app.cardcapture.user.domain.entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
