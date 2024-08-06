@@ -1,12 +1,13 @@
 package app.cardcapture.template.service;
 
 import app.cardcapture.common.exception.BusinessLogicException;
+import app.cardcapture.template.domain.TemplateAttribute;
 import app.cardcapture.template.domain.entity.Prompt;
 import app.cardcapture.template.domain.entity.Template;
 import app.cardcapture.template.domain.entity.TemplateTag;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
-import app.cardcapture.template.dto.TemplateEditorUpdateRequestDto;
-import app.cardcapture.template.dto.TemplateEditorUpdateResponseDto;
+import app.cardcapture.template.dto.TemplateUpdateRequestDto;
+import app.cardcapture.template.dto.TemplateUpdateResponseDto;
 import app.cardcapture.template.dto.TemplateRequestDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
 import app.cardcapture.template.dto.TemplateTagRequestDto;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 
 @Service
@@ -64,19 +66,33 @@ public class TemplateService {
                 .toList();
     }
 
-    public TemplateEditorUpdateResponseDto updateTemplateEditor(TemplateEditorUpdateRequestDto templateEditorUpdateRequestDto, User user) {
-        Template template = templateRepository.findById(templateEditorUpdateRequestDto.id()).orElseThrow(()
+    public TemplateUpdateResponseDto updateTemplateEditor(TemplateUpdateRequestDto templateUpdateRequestDto, User user) {
+        Template template = templateRepository.findById(templateUpdateRequestDto.id()).orElseThrow(()
                 -> new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.NOT_FOUND));
-        System.out.println("user = " + user.getId());
-        System.out.println("template.getUser() = " + template.getUser().getId());
 
         if (template.getUser().getId()!= user.getId()) {
             throw new BusinessLogicException("템플릿 수정 권한이 없습니다", HttpStatus.FORBIDDEN);
         }
 
-        template.setEditor(templateEditorUpdateRequestDto.editor());
+        Set<TemplateAttribute> updatedAttributes = templateUpdateRequestDto.updatedAttributes();
+
+        if (updatedAttributes.contains(TemplateAttribute.EDITOR)) {
+            template.setEditor(templateUpdateRequestDto.editor());
+        } // TODO: 메서드 분리
+
+        if (updatedAttributes.contains(TemplateAttribute.TITLE)) {
+            template.setTitle(templateUpdateRequestDto.title());
+        }
+
+        if (updatedAttributes.contains(TemplateAttribute.DESCRIPTION)) {
+            template.setDescription(templateUpdateRequestDto.description());
+        }
+
+        if (updatedAttributes.contains(TemplateAttribute.FILE_URL)) {
+            template.setFileUrl(templateUpdateRequestDto.fileUrl());
+        }
         templateRepository.save(template);
 
-        return new TemplateEditorUpdateResponseDto(template.getId());
+        return new TemplateUpdateResponseDto(template.getId());
     }
 }
