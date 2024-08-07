@@ -95,7 +95,7 @@ public class JwtComponent {
             throw new InvalidTokenException(INVALID_TOKEN);
         }
         return decodedJWT;
-    }
+    } //TODO: 한번 더 던져서 JWTExpiredException 처리
 
     private void verifyBlacklisted(String token) {
         if (tokenBlacklistService.isTokenBlacklisted(token)) {

@@ -50,11 +50,14 @@ grant_type=authorization_code&code=AUTH_CODE&redirect_uri=YOUR_REDIRECT_URI&clie
 - [X] 유저는 자동 로그인을 할 수 있다.
   - [X] refresh token을 발급할 수 있다.
   - [X] refresh token을 통해 access token을 재발급 받는다.
-  - [X] 프론트에서 access token 보낼 때 401 => refresh token 안보냄(사용자가 직접 로그아웃/블랙리스트 등)
-  - [X] 프론트에서 access token 보낼 때 403 => refresh token이 있으면 보내주세욥(모종의 이유로 토큰이 올바르지 않음. 재인증 필요)
+  - [X] 프론트에서 access token 보낼 때 403 => refresh token 안보냄(사용자가 직접 로그아웃/블랙리스트 등)
+  - [X] 프론트에서 access token 보낼 때 401 => refresh token이 있으면 보내주세욥(모종의 이유로 토큰이 올바르지 않음. 재인증 필요)
+//TODO: Expired면 refresh 보내라는 에러코드 만들기
 
 - [X] 유저는 로그아웃을 할 수 있다.
 - 유저는 회원탈퇴를 할 수 있다.
 - (유저는 회원정보를 수정할 수 있다.)
 
 - 블랙리스트를 직접 등록하여 차단할 수 있다.
+
+- [X] 신규 유저에게 5장의 무료 AI 템플릿 생성권을 지급한다

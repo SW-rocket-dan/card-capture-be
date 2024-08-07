@@ -1,25 +1,13 @@
 package app.cardcapture.auth.google.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
+import jakarta.validation.constraints.NotBlank;
 
-@Getter
-@Builder
-public class GoogleLoginRequestDto {
-
-    @NonNull
-    private String loginBaseUrl;
-
-    @NonNull
-    private String clientId;
-
-    @NonNull
-    private String redirectUri;
-
-    @NonNull
-    private String responseType;
-
-    @NonNull
-    private String scope;
+public record GoogleLoginRequestDto(
+        @NotBlank String loginBaseUrl,
+        @NotBlank String clientId,
+        @NotBlank String redirectUri,
+        @NotBlank String responseType,
+        @NotBlank String scope,
+        @NotBlank String prompt
+) {
 }

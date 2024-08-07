@@ -1,21 +1,20 @@
 package app.cardcapture.user.controller;
 
-import app.cardcapture.auth.jwt.dto.JwtAuthorizationDto;
 import app.cardcapture.common.dto.SuccessResponseDto;
+import app.cardcapture.payment.business.domain.entity.UserProductCategory;
+import app.cardcapture.payment.business.dto.UserProductCategoriesResponseDto;
 import app.cardcapture.security.PrincipleDetails;
 import app.cardcapture.user.dto.UserDto;
 import app.cardcapture.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/api/v1/user")
@@ -33,6 +32,20 @@ public class UserController {
         UserDto userDto = UserDto.from(principle.getUser());
         SuccessResponseDto<UserDto> response = SuccessResponseDto.create(userDto);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/product-categories")
+    @Operation(summary = "사용자 상품 카테고리 조회",
+            description = "현재 로그인한 사용자의 상품 카테고리를 조회합니다. JWT를 통해 사용자를 식별합니다.")
+    public ResponseEntity<SuccessResponseDto<UserProductCategoriesResponseDto>> getUserProductCategories(
+            @AuthenticationPrincipal PrincipleDetails principle
+    ) {
+        List<UserProductCategory> userProductCategories = userService.getUserProductCategories(principle.getUser());
+
+        UserProductCategoriesResponseDto userProductCategoriesResponseDto = UserProductCategoriesResponseDto.from(userProductCategories);
+
+        SuccessResponseDto<UserProductCategoriesResponseDto> response = SuccessResponseDto.create(userProductCategoriesResponseDto);
         return ResponseEntity.ok(response);
     }
 }

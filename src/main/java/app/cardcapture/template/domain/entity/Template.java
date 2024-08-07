@@ -59,7 +59,7 @@ public class Template {
     private String editor;
 
     @Column(nullable = false)
-    private String fileUrl;
+    private String fileUrl; //TODO: 처음 template이 생길때 null임
 
     @Column(nullable = false)
     @OneToMany(mappedBy = "template", fetch = FetchType.LAZY)
