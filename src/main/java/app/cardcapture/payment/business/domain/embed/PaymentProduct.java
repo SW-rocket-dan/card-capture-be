@@ -3,9 +3,9 @@ package app.cardcapture.payment.business.domain.embed;
 import app.cardcapture.payment.business.domain.ProductCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PaymentProduct {
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductCategory productCategory;
 
