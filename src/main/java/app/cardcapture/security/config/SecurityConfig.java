@@ -26,8 +26,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((requests)
                         -> requests
-                        .requestMatchers("/api/v1/auth/google/**", "/api/v1/ai/bgcolor/webhook", "/health",
-                                swaggerPath + "/**", "/swagger-ui/**", "/login.html", "/me.html", "/s3.html" // TODO: 추후 관리자 role만 접속 가능
+                        .requestMatchers("/api/v1/auth/google/**", "/api/v1/ai/bgcolor/webhook", "/health", "/favicon.ico",
+                                swaggerPath + "/**", "/swagger-ui/**", "/login.html", "/me.html", "/s3.html", "/generateImage.html", "/generate-image", "/generateTemplate.html","/generate-template" // TODO: 추후 관리자 role만 접속 가능
                                 //,"/actuator/prometheus"
                         ).permitAll()
                         .anyRequest().authenticated()

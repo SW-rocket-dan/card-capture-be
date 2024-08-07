@@ -1,5 +1,6 @@
 package app.cardcapture.template.service;
 
+import app.cardcapture.ai.openai.service.OpenAiTextService;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.template.domain.TemplateAttribute;
 import app.cardcapture.template.domain.entity.Prompt;
@@ -29,14 +30,20 @@ import java.util.Set;
 public class TemplateService {
 
     private static final String USER_INFO_RETRIEVAL_ERROR = "유저 정보를 찾을 수 없습니다";
-    private static final String editorJson = "{ \"cards\": [ { \"id\": 0, \"background\": { \"url\": \"\", \"opacity\": 100, \"color\": \"#FFD1DC\" }, \"layers\": [ { \"id\": 1, \"type\": \"text\", \"position\": { \"x\": 100, \"y\": 100, \"width\": 100, \"height\": 100, \"rotate\": 0, \"zIndex\": 2, \"opacity\": 100 }, \"content\": { \"content\": { \"ops\": [ { \"insert\": \"안녕하세요\" } ] } } }, { \"id\": 2, \"type\": \"text\", \"position\": { \"x\": 180, \"y\": 180, \"width\": 50, \"height\": 50, \"rotate\": 0, \"zIndex\": 1, \"opacity\": 100 }, \"content\": { \"content\": { \"ops\": [ { \"insert\": \"테스트입니다\" } ] } } }, { \"id\": 3, \"type\": \"text\", \"position\": { \"x\": 200, \"y\": 200, \"width\": 50, \"height\": 50, \"rotate\": 0, \"zIndex\": 1, \"opacity\": 100 }, \"content\": { \"content\": { \"ops\": [ { \"insert\": \"반가워요!\" } ] } } } ] } ] }";
     private final TemplateRepository templateRepository;
     private final TemplateTagRepository templateTagRepository;
     private final PromptRepository promptRepository;
     private final TemplateTagService templateTagService;
+    private final OpenAiTextService openAiTextService;
 
     @Transactional
     public TemplateEditorResponseDto createTemplate(TemplateRequestDto templateRequestDto, User user) {
+        if (templateRepository.findAllWithLock().size()>50) {
+            throw new BusinessLogicException("현재 템플릿은 50개까지만 생성할 수 있습니다", HttpStatus.BAD_REQUEST);
+        }
+
+        // TODO: 횟수가 없으면 아예 하면 안된다 (뭐 기획에 따라 생성 전까지만 하든지)
+
         Prompt prompt = templateRequestDto.promptRequestDto().toEntity();
         Prompt savedPrompt = promptRepository.save(prompt);
 
@@ -44,15 +51,21 @@ public class TemplateService {
 
         Template template = templateRequestDto.toEntity(savedPrompt);
 
+        // TODO: 사용자의 횟수를 한 번 차감시켜야한다
+
         // template에 무언가를 열심히 설정한다
         template.setUser(user);
-        template.setEditor(editorJson); //TODO: AI에서 만들어줘야 합니다
+        String editorJson = openAiTextService.generateText(templateRequestDto.promptRequestDto());
+
+        template.setEditor(editorJson);
+
+
+
 
         Template savedTemplate = templateRepository.save(template);
         List<TemplateTag> savedTags = templateTagService.saveTags(tags, savedTemplate);
 
-
-        return new TemplateEditorResponseDto(template.getEditor());
+        return new TemplateEditorResponseDto(savedTemplate.getId(), savedTemplate.getEditor());
     }
 
     public TemplateResponseDto findById(Long id) {
