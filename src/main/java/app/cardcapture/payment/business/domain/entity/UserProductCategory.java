@@ -56,4 +56,8 @@ public class UserProductCategory {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    public void deductUsage() {
+        this.quantity--;
+    }
 }

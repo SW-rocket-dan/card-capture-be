@@ -2,6 +2,9 @@ package app.cardcapture.template.service;
 
 import app.cardcapture.ai.openai.service.OpenAiTextService;
 import app.cardcapture.common.exception.BusinessLogicException;
+import app.cardcapture.payment.business.domain.ProductCategory;
+import app.cardcapture.payment.business.domain.entity.UserProductCategory;
+import app.cardcapture.payment.business.repository.UserProductCategoryRepository;
 import app.cardcapture.template.domain.TemplateAttribute;
 import app.cardcapture.template.domain.entity.Prompt;
 import app.cardcapture.template.domain.entity.Template;
@@ -35,14 +38,15 @@ public class TemplateService {
     private final PromptRepository promptRepository;
     private final TemplateTagService templateTagService;
     private final OpenAiTextService openAiTextService;
+    private final UserProductCategoryRepository userProductCategoryRepository;
 
     @Transactional
     public TemplateEditorResponseDto createTemplate(TemplateRequestDto templateRequestDto, User user) {
-        if (templateRepository.findAllWithLock().size()>50) {
-            throw new BusinessLogicException("현재 템플릿은 50개까지만 생성할 수 있습니다", HttpStatus.BAD_REQUEST);
-        }
-
-        // TODO: 횟수가 없으면 아예 하면 안된다 (뭐 기획에 따라 생성 전까지만 하든지)
+        ProductCategory productCategory = ProductCategory.AI_POSTER_PRODUCTION_TICKET;
+        UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategory(user, productCategory)
+                .orElseThrow(() -> new BusinessLogicException("이용권이 없습니다", HttpStatus.FORBIDDEN));
+        userProductCategory.deductUsage();
+        userProductCategoryRepository.save(userProductCategory);
 
         Prompt prompt = templateRequestDto.promptRequestDto().toEntity();
         Prompt savedPrompt = promptRepository.save(prompt);
@@ -51,7 +55,6 @@ public class TemplateService {
 
         Template template = templateRequestDto.toEntity(savedPrompt);
 
-        // TODO: 사용자의 횟수를 한 번 차감시켜야한다
 
         // template에 무언가를 열심히 설정한다
         template.setUser(user);

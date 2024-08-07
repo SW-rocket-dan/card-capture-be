@@ -35,7 +35,7 @@ public class TemplateController {
     private final TemplateService templateService;
 
     @PostMapping("/create")
-    @Operation(summary = "템플릿 생성", description = "프롬프트 데이터를 받아 AI 포스터 템플릿을 생성합니다.")
+    @Operation(summary = "템플릿 생성", description = "프롬프트 데이터를 받아 AI 포스터 템플릿을 생성합니다. 이용권이 없는 사람이 요청하면 403이 뜹니다.")
     public ResponseEntity<SuccessResponseDto<TemplateEditorResponseDto>> createTemplate(
             @Valid @RequestBody TemplateRequestDto templateRequestDto,
             @AuthenticationPrincipal PrincipleDetails principle
@@ -62,7 +62,7 @@ public class TemplateController {
     @Operation(summary = "템플릿 수정",
             description = "템플릿 ID를 사용하여 템플릿의 원하는 요소를 수정합니다. Optional한 요소들 때문에, 변경된 요소를 같이 알려줘야 합니다." +
                     "필수: templateId,바뀐요소들 / 선택: 나머지 모두 다." +
-                    "") //TODO: 사용자 정보와 일치하는 경우에만 update시켜야할지?
+                    "자신이 소유한 템플릿이 아니라면 403이 뜨며 수정이 거부됩니다")
     public ResponseEntity<SuccessResponseDto<TemplateUpdateResponseDto>> updateTemplate(
             @Valid @RequestBody TemplateUpdateRequestDto templateUpdateRequestDto,
             @AuthenticationPrincipal PrincipleDetails principle
