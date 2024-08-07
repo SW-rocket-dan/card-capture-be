@@ -166,4 +166,17 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
         payment.setStatus("FINAL_PAID");
         return new PaymentStatusResponseDto("FINAL_PAID");
     }
+
+    @Transactional
+    public void saveUserProductCategory(ProductCategory productCategory, int count, User user) {
+        if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) {
+            throw new BusinessLogicException("이미 가입된 유저입니다.", HttpStatus.BAD_REQUEST);
+        } else {
+            UserProductCategory userProductCategory = new UserProductCategory();
+            userProductCategory.setProductCategory(productCategory);
+            userProductCategory.setQuantity(count);
+            userProductCategory.setUser(user);
+            userProductCategoryRepository.save(userProductCategory);
+        }
+    }
 }

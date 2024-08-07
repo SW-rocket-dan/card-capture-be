@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -26,5 +27,6 @@ public class TotalSales {
     private Long id;
 
     @Column(nullable = false)
+    @ColumnDefault("0")
     private Long accumulatedSales;
 }

@@ -59,3 +59,5 @@ grant_type=authorization_code&code=AUTH_CODE&redirect_uri=YOUR_REDIRECT_URI&clie
 - (유저는 회원정보를 수정할 수 있다.)
 
 - 블랙리스트를 직접 등록하여 차단할 수 있다.
+
+- [X] 신규 유저에게 5장의 무료 AI 템플릿 생성권을 지급한다

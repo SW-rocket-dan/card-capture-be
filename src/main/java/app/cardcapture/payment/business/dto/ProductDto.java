@@ -5,11 +5,11 @@ import app.cardcapture.payment.business.domain.DisplayProduct;
 import app.cardcapture.payment.business.domain.ProductCategory;
 import app.cardcapture.payment.business.domain.embed.PaymentProduct;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 
 public record ProductDto(
-        @NotBlank ProductCategory productCategory,
+        @NotNull ProductCategory productCategory,
         @Min(1) int quantity,
         @Min(1) int price
 ) {
