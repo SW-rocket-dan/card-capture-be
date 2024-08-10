@@ -1,6 +1,6 @@
 package app.cardcapture.payment.common.controller;
 
-import app.cardcapture.ai.bgcolor.dto.WebhookPayload;
+import app.cardcapture.payment.common.dto.PortoneWebhookReqeustDto;
 import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.payment.common.dto.PaymentStartCheckRequestDto;
 import app.cardcapture.payment.common.dto.PaymentStartCheckResponseDto;
@@ -57,9 +57,10 @@ public class PaymentCommonController {
 
     @PostMapping("/webhook")
     @Hidden
-    public ResponseEntity<Void> handleWebhook(
-            @RequestBody WebhookPayload payload) {
-        paymentCommonService.validateWebhook(payload);
+    public ResponseEntity<Void> handleWebhook( // TODO: nginx에서 포트원의 ip("52.78.5.241")만 접근 가능하도록 막기
+        @RequestBody PortoneWebhookReqeustDto portoneWebhookReqeustDto
+    ) {
+        paymentCommonService.validateWebhook(portoneWebhookReqeustDto);
         return ResponseEntity.ok().build();
     }
 }

@@ -1,6 +1,6 @@
 package app.cardcapture.payment.common.service;
 
-import app.cardcapture.ai.bgcolor.dto.WebhookPayload;
+import app.cardcapture.payment.common.dto.PortoneWebhookReqeustDto;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.payment.business.domain.ProductCategory;
 import app.cardcapture.payment.business.domain.embed.PaymentProduct;
