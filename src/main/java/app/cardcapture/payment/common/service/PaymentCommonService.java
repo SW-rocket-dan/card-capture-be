@@ -1,6 +1,6 @@
 package app.cardcapture.payment.common.service;
 
-import app.cardcapture.payment.common.dto.PortoneWebhookReqeustDto;
+import app.cardcapture.payment.portone.dto.PortoneWebhookReqeustDto;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.payment.business.domain.ProductCategory;
 import app.cardcapture.payment.business.domain.embed.PaymentProduct;
@@ -8,19 +8,22 @@ import app.cardcapture.payment.business.domain.entity.UserProductCategory;
 import app.cardcapture.payment.business.dto.ProductDto;
 import app.cardcapture.payment.business.repository.UserProductCategoryRepository;
 import app.cardcapture.payment.common.config.PaymentConfig;
+import app.cardcapture.payment.portone.config.PortoneConfig;
 import app.cardcapture.payment.common.domain.PaymentStatus;
 import app.cardcapture.payment.common.domain.entity.Payment;
 import app.cardcapture.payment.common.domain.entity.TotalSales;
 import app.cardcapture.payment.common.dto.PaymentStartCheckRequestDto;
 import app.cardcapture.payment.common.dto.PaymentStartCheckResponseDto;
 import app.cardcapture.payment.common.dto.PaymentStatusResponseDto;
+import app.cardcapture.payment.portone.dto.PortonePaymentInquiryResponseDto;
 import app.cardcapture.payment.common.repository.PaymentRepository;
 import app.cardcapture.payment.common.repository.TotalSalesRepository;
 import app.cardcapture.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -43,25 +46,7 @@ public class PaymentCommonService {
     private final UserProductCategoryRepository userProductCategoryRepository;
     private final RestClient restClient;
     private final PaymentConfig paymentConfig;
-
-    @Value("${portone.api.secret}")
-    private String apiSecret;
-
-    /*public PaymentTokenResponseDto createPaymentToken() {
-        PaymentTokenRequestDto paymentTokenRequestDto = new PaymentTokenRequestDto(apiSecret);
-
-PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
-                .uri("https://api.portone.io/login/api-secret")
-                .accept(MediaType.APPLICATION_JSON)
-                .body(paymentTokenRequestDto)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    throw new BusinessLogicException(response.getStatusText(), HttpStatus.BAD_REQUEST);
-                })
-                .body(PaymentTokenResponseDto.class);
-
-        return paymentTokenResponseDto;
-    }*/
+    private final PortoneConfig portoneConfig;
 
     @Transactional
     public PaymentStartCheckResponseDto startCheck(PaymentStartCheckRequestDto paymentStartCheckRequestDto, User user) {
@@ -110,16 +95,12 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
 
 
         return PaymentStartCheckResponseDto.from(savedPayment);
-    } //TODO: 구매최종완료되면 유저에게 이용권 횟수 +1 주기
+    }
 
-    public void validateWebhook(WebhookPayload payload) {
-        log.info("Received webhook:");
-        log.info("Type: " + payload.type());
-        log.info("Timestamp: " + payload.timestamp());
-        log.info("Payment ID: " + payload.data().paymentId());
-        log.info("Transaction ID: " + payload.data().transactionId());
-        log.info("Total Amount: " + payload.data().totalAmount());
-
+    @Transactional
+    public void validateWebhook(PortoneWebhookReqeustDto payload) {
+        log.info("validateWebhook payload: " + payload.toString());
+        // 여기있는 정보는 믿을 수 없음
 
         // RESTCLIENT로 포트원의 결제 정보 확인 (메서드명은 checkPaymentStatusFromPortone
         // DB에 쓰기가 완료됨.
@@ -127,21 +108,94 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
         // API 잘못 보낸 것은 1회로 실패찍기 / IOException은 3번은 OK => 네트워크 문제로 인한 에러
         // checkPaymentStatus에서 복구 과정이 있기 때문에 IOException 횟수 줄이거나 1번만 해도 OK
 
+        checkAndAddProductCategoryWithPortone(payload.data().paymentId());
     }
+
 
     @Transactional
     public PaymentStatusResponseDto checkPaymentStatus(String paymentId, User user) {
         // DB에 payment status가 ARRIVED면, 포트원 API로 결제 정보 확인(checkPaymentStatusFromPortone)
         // DB 업데이트 완료 후, PAID면 200, 아니면 404
-        Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId) // (select for update 락 걸기)
-                .orElseThrow(() -> new BusinessLogicException(PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
 
-        if ("FINAL_PAID".equals(payment.getStatus())) {
-            return new PaymentStatusResponseDto("FINAL_PAID"); // Exception을 띄울지?? 정상응답해도 상관없음
-        }
         // 이미 이용권 반영 처리된 payment라면 아래 다 무시해야함
         // * 동시성 처리. 이 checkPaymentStatus가 분산 환경에서 여러 번 호출될 수 있으니까, Payment status에 select for update 락 걸어야함
 
+        Payment savedPayment = checkAndAddProductCategoryWithPortone(paymentId);
+        return new PaymentStatusResponseDto(savedPayment.getPaymentStatus());
+    }
+
+    @Transactional
+    public Payment checkAndAddProductCategoryWithPortone(String unchekcedPaymentId) {
+        log.info("checkAndAddProductCategoryWithPortone unchekcedPaymentId: " + unchekcedPaymentId);
+        PortonePaymentInquiryResponseDto portonePaymentInquiryResponseDto = restClient.get()
+                .uri("https://api.portone.io/payments/" + unchekcedPaymentId)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", portoneConfig.getApiSecret())
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (request, response) -> {
+                    log.info("Portone API error: " + response.getStatusCode());
+                    canclePayment(unchekcedPaymentId);
+                    throw new BusinessLogicException( //TODO: 일단 바로 취소되게 해놨는데 ,나중에 여러 번 시도하는 걸로 바꾸기
+                            "결제 확인에 실패했습니다. 만약 결제된 내역이 있으면, 취소됩니다. 잠시 후 다시 결제해주시고, 계속 결제가 실패한다면 고객센터로 문의주세요.",
+                            HttpStatus.INTERNAL_SERVER_ERROR);
+                })
+                .body(PortonePaymentInquiryResponseDto.class);
+
+        log.info("portonePaymentInquiryResponseDto = " + portonePaymentInquiryResponseDto.toString());
+
+        // 여기 있는 정보부터 믿을 수 있음
+        PaymentStatus paymentStatus = PaymentStatus.valueOf(portonePaymentInquiryResponseDto.status());
+        String paymentId = portonePaymentInquiryResponseDto.id();
+        int totalPrice = portonePaymentInquiryResponseDto.amount().total();
+        String currency = portonePaymentInquiryResponseDto.currency();
+
+        Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId) // (select for update 락 걸기)
+                .orElseThrow(() -> new BusinessLogicException(PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        if (totalPrice != payment.getTotalPrice()) {
+            canclePayment(payment);
+            throw new BusinessLogicException("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!currency.equals("KRW")) {
+            canclePayment(payment);
+            throw new BusinessLogicException("결제 통화가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        payment.setPaymentStatus(paymentStatus);
+
+        User user = payment.getUser();
+
+        if (PAID.equals(paymentStatus)) { //PAID 됐을때만 +1
+            return addProductCategoryQuantity(user, payment);
+        }
+        return payment;
+    }
+
+    @Transactional
+    public void canclePayment(Payment payment) {
+        restClient.post()
+                .uri("https://api.portone.io/payments/" + payment.getPaymentId() + "/cancel")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", portoneConfig.getApiSecret())
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (request, response) -> {
+                    // TODO: 관리자 알람을 주든지 따로 모아놓고 배치를 주든지 해야함
+                    throw new BusinessLogicException("결제 취소에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+                });
+    }
+
+    @Transactional
+    public void canclePayment(String paymentId) {
+        Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId)
+                .orElseThrow(() -> new BusinessLogicException(PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        canclePayment(payment);
+    }
+
+
+    @Transactional
+    public Payment addProductCategoryQuantity(User user, Payment payment) {
         // payment에서 모든 productId와 quantity를 조회한다.
         // 모든 productId에 대해, 각각 아래를 실행한다.
         // 각 상품(DisplayProduct)에 맞는 ProductCategory를 조회한다.
@@ -154,7 +208,7 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
 
         // 이미 있는 값이면 업데이트해줘야 한다
         if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) {
-            UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategory(user, productCategory)
+            UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategoryWithLock(user, productCategory)
                     .orElseThrow(() -> new BusinessLogicException("UserProductCategory not found", HttpStatus.NOT_FOUND));
             userProductCategory.setQuantity(userProductCategory.getQuantity() + quantity);
             userProductCategoryRepository.save(userProductCategory);
@@ -165,8 +219,8 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
             userProductCategory.setUser(user);
             userProductCategoryRepository.save(userProductCategory);
         }
-        payment.setStatus("FINAL_PAID");
-        return new PaymentStatusResponseDto("FINAL_PAID");
+        payment.setPaymentStatus(FINAL_PAID);
+        return paymentRepository.save(payment);
     }
 
     @Transactional

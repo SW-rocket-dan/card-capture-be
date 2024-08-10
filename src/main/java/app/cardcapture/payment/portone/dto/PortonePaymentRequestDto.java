@@ -1,4 +1,4 @@
-package app.cardcapture.payment.common.dto;
+package app.cardcapture.payment.portone.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
