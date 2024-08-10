@@ -42,7 +42,7 @@ public class TemplateController {
     ) {
         log.info("templateRequestDto = " + templateRequestDto);
 
-        TemplateEditorResponseDto templateEditorResponseDto = templateService.createTemplate(templateRequestDto, principle.getUser());
+        TemplateEditorResponseDto templateEditorResponseDto = templateService.createTemplate(templateRequestDto, templateRequestDto.count(), principle.getUser());
         SuccessResponseDto<TemplateEditorResponseDto> responseDto = SuccessResponseDto.create(templateEditorResponseDto);
         return ResponseEntity.ok(responseDto);
     }
@@ -61,7 +61,7 @@ public class TemplateController {
     @PatchMapping("/update")
     @Operation(summary = "템플릿 수정",
             description = "템플릿 ID를 사용하여 템플릿의 원하는 요소를 수정합니다. Optional한 요소들 때문에, 변경된 요소를 같이 알려줘야 합니다." +
-                    "필수: templateId,바뀐요소들 / 선택: 나머지 모두 다." +
+                    "필수: templateId,바뀐요소들 / 선택: EDITOR, TITLE, DESCRIPTION, FILE_URL" +
                     "자신이 소유한 템플릿이 아니라면 403이 뜨며 수정이 거부됩니다")
     public ResponseEntity<SuccessResponseDto<TemplateUpdateResponseDto>> updateTemplate(
             @Valid @RequestBody TemplateUpdateRequestDto templateUpdateRequestDto,

@@ -1,9 +1,11 @@
 package app.cardcapture.ai.openai.service;
 
-import app.cardcapture.s3.service.S3Service;
+import static app.cardcapture.ai.common.AiModel.DALL_E_3;
+
 import app.cardcapture.template.dto.PromptRequestDto;
 import app.cardcapture.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.image.ImageMessage;
@@ -11,86 +13,65 @@ import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.OpenAiImageModel;
-import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OpenAiFacadeService {
+
     private final OpenAiImageService openAiImageService;
     private final OpenAiTextService openAiTextService;
-    private final OpenAiImageModel openAiImageModel;
     private final OpenAiChatModel openAiChatModel;
-    private final S3Service s3Service;
+    private final AiInstuctionGenerator aiInstuctionGenerator;
 
-    public String generateImage(PromptRequestDto promptRequestDto, User user) {
-        // ImageMessage 생성
-        String instruction = "an solo illustration\n" +
-                "of " + openAiTextService.translateToEnglish(promptRequestDto.purpose(), user) + "and " + openAiTextService.translateToEnglish(String.join(",", promptRequestDto.phrases().phrases()),user) + "." +
-                " I like images that are easy to pick from the background with a thick, dark outline that encloses everything. " +
-                "The background color is all " + promptRequestDto.color() + "." +
-                "\n" +
-                //"the key word is " + prompt.phrases().firstEmphasis() + " and " +prompt.phrases().secondEmphasis() +
-                "\n" +
-                "There shouldn't be any letters in the image\n" +
-                "Draw a cute illustration." +
-                "I want the color to be more pastel";
-
-        /*String instruction = "an solo illustration of " +
-                "Non-covered price increase notice. " +
-                "The background color is all white(#FFFFFF). I like images that are easy to pick from the background with a thick, dark outline that encloses everything." +
-                //" There shouldn't be any letters in the image." +
-                " Draw a cute illustration. I want the color to be more pastel.";*/
-        System.out.println("instruction = " + instruction);
-        ImageMessage imageMessage = new ImageMessage(instruction);
-
-        // ImagePrompt 생성
-        OpenAiImageOptions openAiImageOptions = OpenAiImageOptions.builder()
-                .withModel("dall-e-3")
-                .withN(1)
-                .withQuality("hd")
-                .withResponseFormat("url")
-                .withUser(String.valueOf(2L))
-                .withWidth(1024)
-                .withHeight(1024)
-                .build();
-
-        ImagePrompt imagePrompt = new ImagePrompt(List.of(imageMessage), openAiImageOptions);
-
-        // 이미지 생성 요청
-        ImageResponse response = openAiImageModel.call(imagePrompt);
-
-        // 응답에서 이미지 URL 또는 base64 반환
-        System.out.println("response.toString() = " + response.toString());
-        String openAiImageUrl = response.getResult().getOutput().getUrl();
-        String fileName = UUID.randomUUID() + LocalDateTime.now().toString();
-
-        String s3ImageUrl = s3Service.uploadImageFromUrl(openAiImageUrl, fileName, "png", user);
-        return s3ImageUrl;
+    public String generateImage(PromptRequestDto promptRequestDto, int count, User user) {
+        ImageMessage imageMessage = makeImageMessage(promptRequestDto, user);
+        return openAiImageService.generateImageAndSaveToUrl(count, user, imageMessage);
     }
 
-    public String generateText(PromptRequestDto promptRequestDto, User user) {
+    private ImageMessage makeImageMessage(PromptRequestDto promptRequestDto, User user) {
+        String untranslatedPurpose = promptRequestDto.purpose();
+        String color = promptRequestDto.color();
+        List<String> untranslatedPhrases = promptRequestDto.phraseDetails().phrases();
+        String boundPhrases = String.join(", ", untranslatedPhrases);
 
-        String imageUrl = generateImage(promptRequestDto, user);
+        String purpose = openAiTextService.translateToEnglish(untranslatedPurpose, user);
+        String phrases = openAiTextService.translateToEnglish(boundPhrases, user);
+
+        String instruction = aiInstuctionGenerator.makeTemplateBackgroundImageInstruction(
+            purpose,
+            color,
+            phrases);
+        ImageMessage imageMessage = new ImageMessage(instruction);
+        return imageMessage;
+    }
+
+
+    public String generateText(PromptRequestDto promptRequestDto, int count, User user) {
+        String imageUrl = generateImage(promptRequestDto, count, user);
 
         // Message 생성
-        String instruction = "This model processes a given description from the ‘editor’ JSON structure and outputs the associated texts and images. The JSON data is organized into objects representing each element of the card news, which include fields such as ‘id’, ‘background’, ‘layers’, and their respective attributes.\n" +
+        String instruction =
+            "This model processes a given description from the ‘editor’ JSON structure and outputs the associated texts and images. The JSON data is organized into objects representing each element of the card news, which include fields such as ‘id’, ‘background’, ‘layers’, and their respective attributes.\n"
+                +
                 "\n" +
                 "1. Data Structure Overview:\n" +
-                "    • background: Contains details about the background of the card such as URL, opacity, and color.\n" +
-                "    • layers: An array of objects, each representing a layer on the card. Layers can be of type ‘text’ or ‘image’, and each has properties related to content and position.\n" +
+                "    • background: Contains details about the background of the card such as URL, opacity, and color.\n"
+                +
+                "    • layers: An array of objects, each representing a layer on the card. Layers can be of type ‘text’ or ‘image’, and each has properties related to content and position.\n"
+                +
                 "\n" +
                 "2. Usage:\n" +
                 "    • Input the JSON object from the editor.\n" +
                 "    • The model will parse the JSON structure and output:\n" +
-                "        • All texts associated with that card, showing the text’s content, positioning, and style details.\n" +
-                "        • One image, listing the image’s URL as " +  imageUrl + ", size, and positioning within the card.\n" +
+                "        • All texts associated with that card, showing the text’s content, positioning, and style details.\n"
+                +
+                "        • One image, listing the image’s URL as " + imageUrl
+                + ", size, and positioning within the card.\n" +
                 "\n" +
                 "3. Practical Example:\n" +
                 "    • Provide the following JSON input:\n" +
@@ -183,7 +164,8 @@ public class OpenAiFacadeService {
                 "            \"id\": 4,\n" +
                 "            \"type\": \"image\",\n" +
                 "            \"content\": {\n" +
-                "              \"url\": \"https://cardcaptureposterimage.s3.ap-northeast-2.amazonaws.com/test/65727aec-0e20-4fd6-932a-0d553d07280c_cat.png\",\n" +
+                "              \"url\": \"https://cardcaptureposterimage.s3.ap-northeast-2.amazonaws.com/test/65727aec-0e20-4fd6-932a-0d553d07280c_cat.png\",\n"
+                +
                 "              \"cropStartX\": 0,\n" +
                 "              \"cropStartY\": 0,\n" +
                 "              \"cropWidth\": 0,\n" +
@@ -204,14 +186,17 @@ public class OpenAiFacadeService {
                 "      ```\n" +
                 "\n" +
                 "4. Data Dependencies:\n" +
-                "    • Ensure that the JSON input is correctly formatted with all necessary attributes filled in as described. This is essential for the model to accurately parse and return the relevant data.\n" +
+                "    • Ensure that the JSON input is correctly formatted with all necessary attributes filled in as described. This is essential for the model to accurately parse and return the relevant data.\n"
+                +
                 "\n" +
                 "5. Output Format:\n" +
-                "    • The output will be clearly structured, presenting texts first followed by one image, each in their respective sections with details as specified in the JSON structure. The image URL will be set as \"abcd\".\n" +
+                "    • The output will be clearly structured, presenting texts first followed by one image, each in their respective sections with details as specified in the JSON structure. The image URL will be set as \"abcd\".\n"
+                +
                 "\n" +
-                "Give the texts and images when it promotes '"+  promptRequestDto.purpose() + "'" +
-                "texts의 insert는" +  String.join(" / " , promptRequestDto.phrases().phrases()) + "이렇게" +
-                promptRequestDto.phrases().phrases().size() + "가지만 있어야 해. " +
+                "Give the texts and images when it promotes '" + promptRequestDto.purpose() + "'" +
+                "texts의 insert는" + String.join(" / ", promptRequestDto.phraseDetails().phrases())
+                + "이렇게" +
+                promptRequestDto.phraseDetails().phrases().size() + "가지만 있어야 해. " +
                 "Please return the results in JSON format. An example of a return is as follows" +
                 "6. Output Example:\n" +
                 "    ```json\n" +
@@ -326,11 +311,12 @@ public class OpenAiFacadeService {
         System.out.println("instruction = " + instruction);
 
         OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
-                .withModel(OpenAiApi.ChatModel.GPT_4_O)
-                .withN(1)
-                .withResponseFormat(new OpenAiApi.ChatCompletionRequest.ResponseFormat("json_object")) // 생성 결과물이 json임을 보장합니다
-                .withUser(String.valueOf(user.getId()))
-                .build();
+            .withModel(OpenAiApi.ChatModel.GPT_4_O)
+            .withN(1)
+            .withResponseFormat(new OpenAiApi.ChatCompletionRequest.ResponseFormat(
+                "json_object")) // 생성 결과물이 json임을 보장합니다
+            .withUser(String.valueOf(user.getId()))
+            .build();
 
         Prompt prompt = new Prompt(instruction, openAiChatOptions);
         ChatResponse response = openAiChatModel.call(prompt);
