@@ -1,5 +1,6 @@
 package app.cardcapture.template.service;
 
+import app.cardcapture.ai.openai.service.OpenAiFacadeService;
 import app.cardcapture.ai.openai.service.OpenAiTextService;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.payment.business.domain.ProductCategory;
@@ -58,7 +59,7 @@ public class TemplateService {
 
         // template에 무언가를 열심히 설정한다
         template.setUser(user);
-        String editorJson = openAiTextService.generateText(templateRequestDto.promptRequestDto());
+        String editorJson = openAiFacadeService.generateText(templateRequestDto.prompt(), user);
 
         template.setEditor(editorJson);
 
