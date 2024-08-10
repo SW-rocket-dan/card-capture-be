@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Phrase {
+public class PhraseDetails {
 
     @ElementCollection
     @ValidPhrase

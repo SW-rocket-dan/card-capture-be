@@ -1,26 +1,26 @@
 package app.cardcapture.template.dto;
 
 import app.cardcapture.template.domain.embed.Emphasis;
-import app.cardcapture.template.domain.embed.Phrase;
+import app.cardcapture.template.domain.embed.PhraseDetails;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
-public record PhraseRequestDto(
+public record PhraseDetailsRequestDto(
         @NotEmpty @Size(max=10) List<@Size(max=50) String> phrases,
         @NotBlank @Size(max=50) String firstEmphasis,
         @Size(max=50) String secondEmphasis
 ) {
-    public Phrase toEntity() {
-        Phrase phrase = new Phrase();
+    public PhraseDetails toEntity() {
+        PhraseDetails phraseDetails = new PhraseDetails();
         Emphasis emphasis = getEmphasis();
 
-        phrase.setPhrases(phrases);
-        phrase.setEmphasis(emphasis);
+        phraseDetails.setPhrases(phrases);
+        phraseDetails.setEmphasis(emphasis);
 
-        return phrase;
+        return phraseDetails;
     }
 
     private Emphasis getEmphasis() {

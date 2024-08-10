@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 
 public record PromptResponseDto(
-    @NonNull PhraseResponseDto phrases,
+    @NonNull PhraseDetailsResponseDto phraseDetails,
     @NotBlank String purpose,
     @NotBlank String color,
     @NotBlank AiModel model
@@ -14,7 +14,7 @@ public record PromptResponseDto(
 
     public static PromptResponseDto fromEntity(Prompt prompt) {
         return new PromptResponseDto(
-            PhraseResponseDto.fromEntity(prompt.getPhrase()),
+            PhraseDetailsResponseDto.fromEntity(prompt.getPhraseDetails()),
             prompt.getPurpose(),
             prompt.getColor(),
             prompt.getModel()

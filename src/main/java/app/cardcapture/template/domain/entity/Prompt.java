@@ -1,7 +1,7 @@
 package app.cardcapture.template.domain.entity;
 
 import app.cardcapture.ai.common.AiModel;
-import app.cardcapture.template.domain.embed.Phrase;
+import app.cardcapture.template.domain.embed.PhraseDetails;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -40,7 +40,7 @@ public class Prompt {
     @Embedded //TODO: prompt_phrase 중간 테이블 만들고 있는데, N+1안생길지 확인할것
     @Valid
     @NotNull
-    private Phrase phrase;
+    private PhraseDetails phraseDetails;
 
     @Column(nullable = false)
     private String purpose;
