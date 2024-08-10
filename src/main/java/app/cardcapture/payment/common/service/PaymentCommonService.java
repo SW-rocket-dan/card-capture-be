@@ -8,6 +8,7 @@ import app.cardcapture.payment.business.domain.entity.UserProductCategory;
 import app.cardcapture.payment.business.dto.ProductDto;
 import app.cardcapture.payment.business.repository.UserProductCategoryRepository;
 import app.cardcapture.payment.common.config.PaymentConfig;
+import app.cardcapture.payment.common.domain.PaymentStatus;
 import app.cardcapture.payment.common.domain.entity.Payment;
 import app.cardcapture.payment.common.domain.entity.TotalSales;
 import app.cardcapture.payment.common.dto.PaymentStartCheckRequestDto;
@@ -27,6 +28,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 import java.util.UUID;
 
+import static app.cardcapture.payment.common.domain.PaymentStatus.*;
 
 @Service
 @Slf4j
@@ -103,7 +105,7 @@ PaymentTokenResponseDto paymentTokenResponseDto = restClient.post()
         totalSales.setAccumulatedSales(newTotalSales);
         totalSalesRepository.save(totalSales);
 
-        payment.setStatus("ARRIVED");
+        payment.setPaymentStatus(ARRIVED);
         Payment savedPayment = paymentRepository.save(payment);
 
 

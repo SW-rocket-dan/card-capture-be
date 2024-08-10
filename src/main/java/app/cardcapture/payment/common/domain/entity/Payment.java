@@ -1,11 +1,14 @@
 package app.cardcapture.payment.common.domain.entity;
 
 import app.cardcapture.payment.business.domain.embed.PaymentProduct;
+import app.cardcapture.payment.common.domain.PaymentStatus;
 import app.cardcapture.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -57,5 +60,6 @@ public class Payment {
     private LocalDateTime requestTime;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
 }
