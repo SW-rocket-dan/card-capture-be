@@ -1,11 +1,13 @@
 package app.cardcapture.template.domain.entity;
 
-import app.cardcapture.template.domain.embed.Emphasis;
+import app.cardcapture.ai.common.AiModel;
 import app.cardcapture.template.domain.embed.Phrase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -47,7 +49,8 @@ public class Prompt {
     private String color;
 
     @Column(nullable = false)
-    private String model;
+    @Enumerated(EnumType.STRING)
+    private AiModel model;
 
     @Column(nullable = false)
     @CreatedDate
