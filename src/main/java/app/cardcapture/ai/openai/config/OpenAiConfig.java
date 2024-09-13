@@ -8,17 +8,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "openai.image")
+@ConfigurationProperties(prefix = "spring.ai.openai")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Getter
 @Setter
-public class OpenAiImageConfig {
-
-    private String backgroundImageFilePath;
-    private String instruction;
-    private String extension;
-    private String quality;
-    private String responseFormat;
-    private int width;
-    private int height;
+public class OpenAiConfig {
+    private String apiKey;
 }
