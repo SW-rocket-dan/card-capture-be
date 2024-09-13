@@ -59,3 +59,4 @@ testJson.json
 generatedJson.json
 generateTemplate.html
 generateImage.html
+/src/main/resources/private/**
