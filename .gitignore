@@ -51,3 +51,12 @@ legacy/*
 .ssh/*
 Procfile
 deployment-package.zip
+
+### test files
+TestController.java
+realJson.json
+testJson.json
+generatedJson.json
+generateTemplate.html
+generateImage.html
+/src/main/resources/private/**

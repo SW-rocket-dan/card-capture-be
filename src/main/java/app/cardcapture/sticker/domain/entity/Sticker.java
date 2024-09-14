@@ -1,14 +1,19 @@
 package app.cardcapture.sticker.domain.entity;
 
 
+import app.cardcapture.ai.common.AiImage;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +43,10 @@ public class Sticker {
     @Column(nullable = false)
     private String fileUrl;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sticker_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private AiImage aiImage;
+
     @Column(nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
@@ -47,4 +56,11 @@ public class Sticker {
 
     @OneToMany(mappedBy = "sticker", fetch = FetchType.LAZY)
     private List<StickerTag> stickerTags;
+
+    public Long getAiImageId() {
+        if (aiImage == null) {
+            return 2L;
+        }
+        return aiImage.getId();
+    }
 }

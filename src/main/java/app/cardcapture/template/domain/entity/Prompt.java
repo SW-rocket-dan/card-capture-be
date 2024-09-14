@@ -1,11 +1,13 @@
 package app.cardcapture.template.domain.entity;
 
-import app.cardcapture.template.domain.embed.Emphasis;
-import app.cardcapture.template.domain.embed.Phrase;
+import app.cardcapture.ai.common.AiModel;
+import app.cardcapture.template.domain.embed.PhraseDetails;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,7 +40,7 @@ public class Prompt {
     @Embedded //TODO: prompt_phrase 중간 테이블 만들고 있는데, N+1안생길지 확인할것
     @Valid
     @NotNull
-    private Phrase phrase;
+    private PhraseDetails phraseDetails;
 
     @Column(nullable = false)
     private String purpose;
@@ -47,7 +49,8 @@ public class Prompt {
     private String color;
 
     @Column(nullable = false)
-    private String model;
+    @Enumerated(EnumType.STRING)
+    private AiModel model;
 
     @Column(nullable = false)
     @CreatedDate

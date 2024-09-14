@@ -15,7 +15,7 @@ public class StickerResponseDto {
 
     public static StickerResponseDto from(Sticker sticker) {
         return new StickerResponseDto(
-                sticker.getId(),
+                sticker.getAiImageId(),
                 sticker.getFileUrl(),
                 sticker.getStickerTags().stream()
                         .map(tag -> TagDto.from(tag))

@@ -59,7 +59,8 @@
                 window.location.href = data.data.loginBaseUrl + '?client_id=' + data.data.clientId +
                     '&redirect_uri=' + data.data.redirectUri +
                     '&scope=' + data.data.scope +
-                    '&response_type=' + data.data.responseType;
+                    '&response_type=' + data.data.responseType +
+                    '&prompt=select_account'; // Add prompt parameter to force account selection
             });
     }
 

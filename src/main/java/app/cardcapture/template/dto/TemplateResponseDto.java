@@ -1,9 +1,6 @@
 package app.cardcapture.template.dto;
 
-import app.cardcapture.template.domain.entity.Prompt;
 import app.cardcapture.template.domain.entity.Template;
-import app.cardcapture.template.domain.entity.TemplateTag;
-import app.cardcapture.user.domain.entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +17,8 @@ public record TemplateResponseDto(
         int purchaseCount,
         @NotBlank String editor,
         @NotBlank String fileUrl,
-        @NotEmpty List<TemplateTagResponseDto> templateTags,
-        @NotNull PromptResponseDto prompt,
+        @NotEmpty List<TemplateTagResponseDto> templateTags, //TODO: NotEmpty 동작안하고있음
+        PromptResponseDto prompt,
         @NotNull LocalDateTime createdAt,
         @NotNull LocalDateTime updatedAt
 ) {

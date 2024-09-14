@@ -17,6 +17,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
@@ -54,7 +57,8 @@ public class StickerServiceTest {
         savedSticker.setFileUrl(fileUrl);
         savedSticker.setStickerTags(new ArrayList<>());
 
-        when(stickerRepository.save(any(Sticker.class))).thenReturn(savedSticker);
+        //  BDD given when then방식 이 위치는 when이아니라 given으로 쓰면됨
+        given(stickerRepository.save(any(Sticker.class))).willReturn(savedSticker);
 
         // when
         StickerResponseDto result = stickerService.saveStickerWithTags(fileUrl, tagDtos);
@@ -66,7 +70,9 @@ public class StickerServiceTest {
                 () -> assertThat(result.getFileUrl()).isEqualTo(savedSticker.getFileUrl()),
                 () -> assertThat(result.getTags()).isEqualTo(tagDtos)
         );
-        verify(stickerTagService).saveTags(tagDtos, savedSticker);
+
+        // 여기도 then을쓰고 should안에 times로 몇 번 호출됐는지도 정해줄 수 있다
+        then(stickerTagService).should(times(1)).saveTags(tagDtos, savedSticker);
     }
 
     @Test
@@ -100,4 +106,4 @@ public class StickerServiceTest {
                 () -> assertThat(results.get(1).getFileUrl()).isEqualTo(sticker2.getFileUrl())
         );
     }
-}
+} //TODO: 컨트롤러 테스트 https://velog.io/@as9587/WebMvcTest%EB%A5%BC-%EC%A0%81%EC%9A%A9%ED%95%9C-Controller-Test-Code%EC%97%90-Spring-Security-%EC%B6%94%EA%B0%80%ED%95%98%EA%B8%B0

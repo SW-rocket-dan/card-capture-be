@@ -32,7 +32,8 @@ public class StickerController {
     ) {
         StickerResponseDto stickerResponseDto = stickerService.saveStickerWithTags(
                 stickerSaveRequestDto.getFileUrl(),
-                stickerSaveRequestDto.getTags());
+                stickerSaveRequestDto.getTags(),
+                stickerSaveRequestDto.getPrompt());
         return ResponseEntity.ok(stickerResponseDto);
     }
 

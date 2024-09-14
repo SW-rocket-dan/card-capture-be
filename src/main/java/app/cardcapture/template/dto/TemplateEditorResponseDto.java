@@ -1,10 +1,10 @@
 package app.cardcapture.template.dto;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 
-@Getter
-@RequiredArgsConstructor
-public class TemplateEditorResponseDto {
-    private final String editor;
+public record TemplateEditorResponseDto(
+        @Min(1) Long id,
+        @NotBlank String editor
+){
 }
