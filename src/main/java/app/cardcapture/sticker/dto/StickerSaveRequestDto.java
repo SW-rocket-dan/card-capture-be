@@ -9,4 +9,5 @@ import java.util.List;
 public class StickerSaveRequestDto {
     @Size(max=300) private String fileUrl;
     private List<TagDto> tags;
+    private String prompt;
 }

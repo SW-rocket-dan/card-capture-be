@@ -8,7 +8,7 @@ public class StringUtils {
     private StringUtils() {
     }
 
-    public static String makeUniqueFileName(String prefix) {
-        return prefix + UUID.randomUUID() + LocalDateTime.now();
+    public static String makeUniqueFileName() {
+        return UUID.randomUUID() + LocalDateTime.now().toString();
     }
 }
