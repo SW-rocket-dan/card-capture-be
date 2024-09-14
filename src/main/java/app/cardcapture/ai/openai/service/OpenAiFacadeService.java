@@ -3,7 +3,7 @@ package app.cardcapture.ai.openai.service;
 import app.cardcapture.ai.common.AiImage;
 import app.cardcapture.ai.common.AiModel;
 import app.cardcapture.ai.common.repository.AiImageRepository;
-import app.cardcapture.ai.common.service.AiInstuctionGenerator;
+import app.cardcapture.ai.common.service.AiInstructionGenerator;
 import app.cardcapture.ai.openai.dto.AiImageChangeReqeustDto;
 import app.cardcapture.ai.openai.dto.AiImageChangeResponseDto;
 import app.cardcapture.ai.stabilityai.service.StabilityAiImageService;
@@ -30,7 +30,7 @@ public class OpenAiFacadeService {
     private final OpenAiImageService openAiImageService;
     private final OpenAiTextService openAiTextService;
     private final OpenAiChatModel openAiChatModel;
-    private final AiInstuctionGenerator aiInstuctionGenerator;
+    private final AiInstructionGenerator aiInstructionGenerator;
     private final StabilityAiImageService stabilityAiImageService;
     private final AiImageRepository aiImageRepository;
 
@@ -66,7 +66,7 @@ public class OpenAiFacadeService {
         String purpose = openAiTextService.translateToEnglish(untranslatedPurpose, user);
         String phrases = openAiTextService.translateToEnglish(boundPhrases, user);
 
-        String instruction = aiInstuctionGenerator.makeTemplateBackgroundImageInstruction(
+        String instruction = aiInstructionGenerator.makeTemplateBackgroundImageInstruction(
             purpose,
             color,
             phrases);
@@ -120,7 +120,7 @@ public class OpenAiFacadeService {
             List.of("초록색", "노란색", "파란색", "하얀색", "분홍색", "보라색").get(new Random().nextInt(6)),
             user);
 
-        String instruction = aiInstuctionGenerator.makeTemplateEditorTextInstruction(
+        String instruction = aiInstructionGenerator.makeTemplateEditorTextInstruction(
             promptRequestDto,
             mainImage,
             changedBackgroundImage);

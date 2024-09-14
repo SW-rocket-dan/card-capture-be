@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AiInstuctionGenerator {
+public class AiInstructionGenerator {
 
     private final UserRepository userRepository;
 
