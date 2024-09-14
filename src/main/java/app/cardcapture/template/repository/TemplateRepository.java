@@ -15,5 +15,5 @@ public interface TemplateRepository extends JpaRepository<Template, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT t FROM Template t")
-    List<Template> findAllWithLock();
+    List<Template> findAllWithLock(); // TODO: N+1 문제 해결해야함
 }

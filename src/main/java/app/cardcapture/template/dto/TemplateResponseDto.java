@@ -17,8 +17,8 @@ public record TemplateResponseDto(
         int purchaseCount,
         @NotBlank String editor,
         @NotBlank String fileUrl,
-        @NotEmpty List<TemplateTagResponseDto> templateTags,
-        @NotNull PromptResponseDto prompt,
+        @NotEmpty List<TemplateTagResponseDto> templateTags, //TODO: NotEmpty 동작안하고있음
+        PromptResponseDto prompt,
         @NotNull LocalDateTime createdAt,
         @NotNull LocalDateTime updatedAt
 ) {

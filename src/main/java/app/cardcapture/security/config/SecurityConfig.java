@@ -24,22 +24,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((requests)
-                        -> requests
-                        .requestMatchers("/api/v1/auth/google/**", "/api/v1/ai/bgcolor/webhook", "/health", "/favicon.ico",
-                                swaggerPath + "/**", "/swagger-ui/**", "/login.html", "/me.html", "/s3.html", "/generateImage.html", "/generate-image", "/generateTemplate.html","/generate-template" // TODO: 추후 관리자 role만 접속 가능
-                                //,"/actuator/prometheus"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(
-                        (session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .csrf(csrf -> csrf.disable())
-                .addFilterBefore(jwtAuthenticationTokenFilter, ExceptionTranslationFilter.class)
-                .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .formLogin(formLogin -> formLogin.disable());
+            .authorizeHttpRequests((requests)
+                -> requests
+                .requestMatchers("/api/v1/auth/google/**", "/api/v1/payment/single/webhook",
+                    "/health", "/favicon.ico",
+                    swaggerPath + "/**", "/swagger-ui/**", "/login.html" // TODO: 추후 관리자 role만 접속 가능
+                    //,"/actuator/prometheus"
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(
+                (session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .csrf(csrf -> csrf.disable())
+            .addFilterBefore(
+                jwtAuthenticationTokenFilter,
+                ExceptionTranslationFilter.class)
+            .addFilterBefore(
+                jwtAuthenticationTokenFilter,
+                UsernamePasswordAuthenticationFilter.class)
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .formLogin(formLogin -> formLogin.disable());
 
         return http.build();
     }

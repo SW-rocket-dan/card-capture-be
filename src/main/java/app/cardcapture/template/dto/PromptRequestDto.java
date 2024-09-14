@@ -11,7 +11,7 @@ import lombok.NonNull;
 public record PromptRequestDto(
         @NonNull @Valid PhraseDetailsRequestDto phraseDetails,
         @NotBlank @Size(max=100) String purpose,
-        @NotBlank @Size(max=15) String color,
+        @NotBlank @Size(max=15) String color, //TODO: 형식 제한
         @NotNull AiModel model
 ) {
     public Prompt toEntity() {

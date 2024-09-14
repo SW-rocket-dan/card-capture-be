@@ -21,37 +21,36 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OpenAiTextService {
 
-  private final OpenAiChatModel openAiChatModel;
-  private final ObjectMapper jacksonObjectMapper;
+    private final OpenAiChatModel openAiChatModel;
+    private final ObjectMapper jacksonObjectMapper;
 
-  public String translateToEnglish(String text, User user) {
-    OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
-        .withModel("gpt-4o-mini")
-        .withN(1)
-        .withResponseFormat(new OpenAiApi.ChatCompletionRequest.ResponseFormat("json_object"))
-        .withUser(String.valueOf(user.getId()))
-        .build();
+    public String translateToEnglish(String text, User user) {
+        OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
+            .withModel("gpt-4o-mini")
+            .withN(1)
+            .withResponseFormat(new OpenAiApi.ChatCompletionRequest.ResponseFormat("json_object"))
+            .withUser(String.valueOf(user.getId()))
+            .build();
 
-    String instruction = "Translate '" + text + "' into English." +
-        "output format is json and key name is translated_text." +
-        "input example: \"나는 귀여워. 나는 선물을 좋아해.\". output example: { \"translated_text\": \"I'm cute. I love gifts.\" }";
+        String instruction = "Translate '" + text + "' into English." +
+            "output format is json and key name is translated_text." +
+            "input example: \"나는 귀여워. 나는 선물을 좋아해.\". output example: { \"translated_text\": \"I'm cute. I love gifts.\" }";
 
-    Prompt prompt = new Prompt(instruction, openAiChatOptions);
-    ChatResponse response = openAiChatModel.call(prompt);
-    log.info("response = " + response.toString());
+        Prompt prompt = new Prompt(instruction, openAiChatOptions);
+        ChatResponse response = openAiChatModel.call(prompt);
+        log.info("response = " + response.toString());
 
-    return getTranslatedText(response);
-  }
-
-  private String getTranslatedText(ChatResponse response) {
-    try {
-      AiTranslationResponseDto chatResponseDTO = jacksonObjectMapper.readValue(
-          response.getResult().getOutput().getContent(), AiTranslationResponseDto.class);
-      return chatResponseDTO.translatedText();
-    } catch (IOException e) {
-      log.error("Error parsing JSON response", e);
-      throw new BusinessLogicException("Error parsing JSON response", HttpStatus.BAD_REQUEST);
+        return getTranslatedText(response);
     }
-  }
 
+    private String getTranslatedText(ChatResponse response) {
+        try {
+            AiTranslationResponseDto chatResponseDTO = jacksonObjectMapper.readValue(
+                response.getResult().getOutput().getContent(), AiTranslationResponseDto.class);
+            return chatResponseDTO.translatedText();
+        } catch (IOException e) {
+            log.error("Error parsing JSON response", e);
+            throw new BusinessLogicException("Error parsing JSON response", HttpStatus.BAD_REQUEST);
+        }
+    }
 }

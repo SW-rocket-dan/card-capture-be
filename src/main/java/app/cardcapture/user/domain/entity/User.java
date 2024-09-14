@@ -1,7 +1,5 @@
 package app.cardcapture.user.domain.entity;
 
-import app.cardcapture.payment.business.domain.ProductCategory;
-import app.cardcapture.payment.business.domain.entity.UserDisplayProduct;
 import app.cardcapture.payment.business.domain.entity.UserProductCategory;
 import app.cardcapture.payment.common.domain.entity.Payment;
 import app.cardcapture.template.domain.entity.Template;
@@ -29,7 +27,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Builder
+@Builder // TODO: 빌더 제거
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")

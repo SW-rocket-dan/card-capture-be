@@ -47,7 +47,7 @@ public class Template {
     private String title;
 
     @Column(nullable = false)
-    private String description = "";
+    private String description; // TODO: 초기값 설정 필요
 
     @Column(nullable = false)
     private int likes = 0;
@@ -61,7 +61,7 @@ public class Template {
     @Column(nullable = false)
     private String fileUrl; //TODO: 처음 template이 생길때 null임
 
-    @Column(nullable = false)
+    // @Column(nullable = false)
     @OneToMany(mappedBy = "template", fetch = FetchType.LAZY)
     private List<TemplateTag> templateTags;
 

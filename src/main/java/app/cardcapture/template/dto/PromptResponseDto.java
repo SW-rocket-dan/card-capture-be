@@ -13,6 +13,10 @@ public record PromptResponseDto(
 ) {
 
     public static PromptResponseDto fromEntity(Prompt prompt) {
+        if (prompt == null) {
+            return null;
+        } //TODO: 수정하면서 싹 갈아엎어야 함
+
         return new PromptResponseDto(
             PhraseDetailsResponseDto.fromEntity(prompt.getPhraseDetails()),
             prompt.getPurpose(),

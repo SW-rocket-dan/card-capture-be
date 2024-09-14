@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 @Slf4j
 public class GoogleAuthService {
+
     private static final String GOOGLE_TOKEN_RETRIEVAL_ERROR = "Failed to retrieve Google token";
     private static final String USER_INFO_RETRIEVAL_ERROR = "Failed to retrieve user info";
     private static final String UNEXPECTED_ERROR = "An unexpected error occurred";
@@ -37,7 +38,7 @@ public class GoogleAuthService {
         String userInfoUrl = googleAuthConfig.getApiUrl();
         HttpHeaders headers = getHttpHeaders(accessToken);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        
+
         return getUserResponseWithErrorHandling(userInfoUrl, entity);
     }
 
@@ -65,15 +66,14 @@ public class GoogleAuthService {
         return bodyParams;
     }
 
-    private static GoogleTokenResponseDto
-    getTokenWithExceptionHandling(RestTemplate restTemplate,
-                                  String tokenUrl,
-                                  HttpEntity<MultiValueMap<String, String>> request) {
+    private static GoogleTokenResponseDto getTokenWithExceptionHandling(RestTemplate restTemplate,
+        String tokenUrl,
+        HttpEntity<MultiValueMap<String, String>> request) {
         try {
             ResponseEntity<GoogleTokenResponseDto> response = restTemplate.postForEntity(
-                    tokenUrl,
-                    request,
-                    GoogleTokenResponseDto.class);
+                tokenUrl,
+                request,
+                GoogleTokenResponseDto.class);
             return response.getBody();
         } catch (RestClientException e) {
             log.error("{}: {}", GOOGLE_TOKEN_RETRIEVAL_ERROR, e.getMessage(), e);
@@ -84,9 +84,11 @@ public class GoogleAuthService {
         }
     }
 
-    private UserDto getUserResponseWithErrorHandling(String userInfoUrl, HttpEntity<String> entity) {
+    private UserDto getUserResponseWithErrorHandling(String userInfoUrl,
+        HttpEntity<String> entity) {
         try {
-            ResponseEntity<UserDto> response = restTemplate.exchange(userInfoUrl, HttpMethod.GET, entity, UserDto.class);
+            ResponseEntity<UserDto> response = restTemplate.exchange(userInfoUrl, HttpMethod.GET,
+                entity, UserDto.class);
             return response.getBody();
         } catch (RestClientException e) {
             log.error("{}: {}", USER_INFO_RETRIEVAL_ERROR, e.getMessage(), e);
