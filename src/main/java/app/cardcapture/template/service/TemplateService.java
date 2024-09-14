@@ -9,13 +9,12 @@ import app.cardcapture.payment.business.repository.UserProductCategoryRepository
 import app.cardcapture.template.domain.TemplateAttribute;
 import app.cardcapture.template.domain.entity.Prompt;
 import app.cardcapture.template.domain.entity.Template;
-import app.cardcapture.template.domain.entity.TemplateTag;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
+import app.cardcapture.template.dto.TemplateEmptyResponseDto;
 import app.cardcapture.template.dto.TemplateUpdateRequestDto;
 import app.cardcapture.template.dto.TemplateUpdateResponseDto;
 import app.cardcapture.template.dto.TemplateRequestDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
-import app.cardcapture.template.dto.TemplateTagRequestDto;
 import app.cardcapture.template.repository.PromptRepository;
 import app.cardcapture.template.repository.TemplateRepository;
 import app.cardcapture.template.repository.TemplateTagRepository;
@@ -40,54 +39,75 @@ public class TemplateService {
     private final TemplateTagService templateTagService;
     private final OpenAiTextService openAiTextService;
     private final UserProductCategoryRepository userProductCategoryRepository;
+    private final OpenAiFacadeService openAiFacadeService;
 
-    @Transactional
-    public TemplateEditorResponseDto createTemplate(TemplateRequestDto templateRequestDto, User user) {
+    @Transactional // TODO: 템플릿 생성 버튼 눌렀을 때, 사용자가 마이페이지에서 확인할 수 있게 프론트랑 뭐 같이 해야할 듯
+    public TemplateEditorResponseDto createTemplate(TemplateRequestDto templateRequestDto,
+        User user) {
         ProductCategory productCategory = ProductCategory.AI_POSTER_PRODUCTION_TICKET;
-        UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategory(user, productCategory)
-                .orElseThrow(() -> new BusinessLogicException("이용권이 없습니다", HttpStatus.FORBIDDEN));
+
+        UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategoryWithLock(
+                user, productCategory)
+            .orElseThrow(() -> new BusinessLogicException("이용권이 없습니다", HttpStatus.FORBIDDEN));
+
+        // 사용 가능한 이용권이 있는지 확인
+        if (userProductCategory.getQuantity() < 1) {
+            throw new BusinessLogicException("이용권이 부족합니다", HttpStatus.FORBIDDEN);
+        }
+
         userProductCategory.deductUsage();
         userProductCategoryRepository.save(userProductCategory);
 
-        Prompt prompt = templateRequestDto.promptRequestDto().toEntity();
+        Prompt prompt = templateRequestDto.prompt().toEntity();
         Prompt savedPrompt = promptRepository.save(prompt);
 
-        List<TemplateTagRequestDto> tags = templateRequestDto.templateTagRequestDtos();
+        // TODO: tag 관련 기획 확정되면 template create dto 설계 다시해야할듯
+        // List<TemplateTagRequestDto> tags = templateRequestDto.templateTags();
 
         Template template = templateRequestDto.toEntity(savedPrompt);
 
-
         // template에 무언가를 열심히 설정한다
         template.setUser(user);
-        String editorJson = openAiFacadeService.generateText(templateRequestDto.prompt(), user);
+        String editorJson = openAiFacadeService.generateText(templateRequestDto.prompt(),
+            templateRequestDto.count(), user);
 
         template.setEditor(editorJson);
-
-
-
+        template.setTitle(templateRequestDto.prompt().phraseDetails().phrases().get(0));
+        template.setDescription(templateRequestDto.prompt().purpose());
+        template.setFileUrl(
+            "https://cardcaptureposterimage.s3.ap-northeast-2.amazonaws.com/default/incompleteAnnouncement.png"); //TODO: 잘못됐어 대기열넣고 뜯어고쳐야함
 
         Template savedTemplate = templateRepository.save(template);
-        List<TemplateTag> savedTags = templateTagService.saveTags(tags, savedTemplate);
+        // List<TemplateTag> savedTags = templateTagService.saveTags(tags, savedTemplate);
 
         return new TemplateEditorResponseDto(savedTemplate.getId(), savedTemplate.getEditor());
     }
 
-    public TemplateResponseDto findById(Long id) {
-        Template template = templateRepository.findById(id).orElseThrow(() -> new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.NOT_FOUND));
+    public TemplateResponseDto findById(Long id, User user) {
+        Template template = templateRepository.findById(id).orElseThrow(
+            () -> new BusinessLogicException("존재하지 않는 템플릿입니다.", HttpStatus.NOT_FOUND));
+
+        //TODO: 자기 템플릿 아니면 안보이게
+        if (template.getUser().getId()!=user.getId()) {
+            throw new BusinessLogicException("템플릿 조회 권한이 없습니다", HttpStatus.FORBIDDEN);
+        }
+
         return TemplateResponseDto.fromEntity(template);
     }
 
     public List<TemplateResponseDto> findAllByUserId(Long userId) {
         return templateRepository.findByUserId(userId).stream()
-                .map(template -> TemplateResponseDto.fromEntity(template))
-                .toList();
+            .map(template -> TemplateResponseDto.fromEntity(template))
+            .toList();
     }
 
-    public TemplateUpdateResponseDto updateTemplateEditor(TemplateUpdateRequestDto templateUpdateRequestDto, User user) {
-        Template template = templateRepository.findById(templateUpdateRequestDto.id()).orElseThrow(()
+    public TemplateUpdateResponseDto updateTemplateEditor(
+        TemplateUpdateRequestDto templateUpdateRequestDto, User user) {
+        Template template = templateRepository.findById(templateUpdateRequestDto.id())
+            .orElseThrow(()
                 -> new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.NOT_FOUND));
 
-        if (template.getUser().getId()!= user.getId()) {
+        if (template.getUser().getId() != user.getId()) {
             throw new BusinessLogicException("템플릿 수정 권한이 없습니다", HttpStatus.FORBIDDEN);
         }
 
@@ -111,5 +131,27 @@ public class TemplateService {
         templateRepository.save(template);
 
         return new TemplateUpdateResponseDto(template.getId());
+    }
+
+    public TemplateEmptyResponseDto createEmptyTemplate(User user) {
+        Template template = new Template();
+        template.setEditor(String.format("""
+            [{
+              "id": %s,
+              "background": {
+                "url": "",
+                "opacity": 100,
+                "color": "#FFFFFF",
+              },
+              "layers": [],
+            }];
+            """.replace("\n", ""),user.getId()));
+        template.setTitle("제목이 없습니다.");
+        template.setDescription("설명이 없습니다.");
+        template.setFileUrl(
+            "https://cardcaptureposterimage.s3.ap-northeast-2.amazonaws.com/default/incompleteAnnouncement.png");
+        template.setUser(user);
+
+        return TemplateEmptyResponseDto.fromEntity(templateRepository.save(template));
     }
 }
