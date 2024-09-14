@@ -37,7 +37,8 @@ import static app.cardcapture.payment.common.domain.PaymentStatus.*;
 @Slf4j
 @RequiredArgsConstructor
 public class PaymentCommonService {
-
+    // TODO: 세부 예외를 만들어놓고, 이를 호출하는 곳에서 에러메세지 정하는 방식으로 빼주기
+    // 예외가 너무 많아지니까, NOT_FOUND같은 건 common_not_found
     private static final String UNVALID_PRODUCT_TOTAL_PRICE = "상품 가격의 합이 일치하지 않습니다.";
     private static final String PAYMENT_NOT_FOUND = "결제 정보를 찾을 수 없습니다.";
 
@@ -47,6 +48,8 @@ public class PaymentCommonService {
     private final RestClient restClient;
     private final PaymentConfig paymentConfig;
     private final PortoneConfig portoneConfig;
+
+    // TODO: 한 사용자가 n초 내에 얼마 이상 구매요청 못하게 limit 있어야함
 
     @Transactional
     public PaymentStartCheckResponseDto startCheck(PaymentStartCheckRequestDto paymentStartCheckRequestDto, User user) {
@@ -121,8 +124,11 @@ public class PaymentCommonService {
         // * 동시성 처리. 이 checkPaymentStatus가 분산 환경에서 여러 번 호출될 수 있으니까, Payment status에 select for update 락 걸어야함
 
         Payment savedPayment = checkAndAddProductCategoryWithPortone(paymentId);
+        System.out.println("savedPayment = " + savedPayment.getPaymentStatus());
         return new PaymentStatusResponseDto(savedPayment.getPaymentStatus());
-    }
+    } // TODO: 리팩터링할 때, 정석적인 방법으로는 테스트코드를 먼저 짜놓고, 이게 깨지지 않는지 확인하면서 하는것이 맞다
+    // 하지만 애매한 부분은, 아래에서 restClient직접호출하는 부분은 portoneService로 빼줄 수도 있다.
+    // 여기서 그러면 테스트코드를 StickerService, PortoneService 둘 다 계속 바꿔야하기때문에 이번에는 리팩터링먼저하고 짜기
 
     @Transactional
     public Payment checkAndAddProductCategoryWithPortone(String unchekcedPaymentId) {
@@ -162,6 +168,15 @@ public class PaymentCommonService {
             throw new BusinessLogicException("결제 통화가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
 
+        // TODO: 각 경우에 맞게 다시 설계해야함 안전하게 모든 경우의 수 다 적는것도 방법?
+        // FINAL_PAID와 PAID는 변동이 없음
+        if (FINAL_PAID.equals(payment.getPaymentStatus()) && PAID.equals(paymentStatus)) {
+            log.info("이미 PAID 상태입니다.");
+            return payment;
+        }
+
+
+        
         payment.setPaymentStatus(paymentStatus);
 
         User user = payment.getUser();
@@ -169,7 +184,8 @@ public class PaymentCommonService {
         if (PAID.equals(paymentStatus)) { //PAID 됐을때만 +1
             return addProductCategoryQuantity(user, payment);
         }
-        return payment;
+
+        return paymentRepository.save(payment);
     }
 
     @Transactional
@@ -193,14 +209,16 @@ public class PaymentCommonService {
         canclePayment(payment);
     }
 
-
     @Transactional
     public Payment addProductCategoryQuantity(User user, Payment payment) {
         // payment에서 모든 productId와 quantity를 조회한다.
         // 모든 productId에 대해, 각각 아래를 실행한다.
         // 각 상품(DisplayProduct)에 맞는 ProductCategory를 조회한다.
         // 각 ProductCategory에 대해,
-
+        if (payment.isVoucherIssued()) {
+            log.info("이미 이용권이 발급된 payment입니다.");
+            return payment; // TODO: 이름 Voucher로 통일하기
+        }
         List<PaymentProduct> products = payment.getPaymentProducts();
         PaymentProduct product = products.get(0);
         ProductCategory productCategory = product.getProductCategory();
@@ -220,6 +238,9 @@ public class PaymentCommonService {
             userProductCategoryRepository.save(userProductCategory);
         }
         payment.setPaymentStatus(FINAL_PAID);
+        payment.setVoucherIssued(true);
+        log.info("이용권이 발급되었습니다."+payment.getPaymentStatus()+payment.isVoucherIssued());
+
         return paymentRepository.save(payment);
     }
 

@@ -13,4 +13,7 @@ public record PaymentStartCheckRequestDto(
         @Min(1) int totalPrice,
         LocalDateTime requestTime
 ) {
+    public PaymentStartCheckRequestDto {
+        requestTime = LocalDateTime.now();
+    }
 }

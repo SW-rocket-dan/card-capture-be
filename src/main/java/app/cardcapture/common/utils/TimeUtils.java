@@ -2,6 +2,7 @@ package app.cardcapture.common.utils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 public class TimeUtils {
@@ -50,5 +51,9 @@ public class TimeUtils {
 
     public static boolean isCurrentTimeOverInSeconds(LocalDateTime localDateTime) {
         return System.currentTimeMillis() / 1000 > toEpochSecond(localDateTime);
+    }
+
+    public static ZonedDateTime toSeoulZonedDateTime(ZonedDateTime zonedDateTime) {
+        return zonedDateTime.withZoneSameInstant(ZoneId.of("Asia/Seoul"));
     }
 }

@@ -57,6 +57,9 @@ public class Payment {
     int totalPrice;
 
     @Column(nullable = false)
+    private boolean isVoucherIssued = false;
+
+    @Column(nullable = false)
     private LocalDateTime requestTime;
 
     @Column(nullable = false)
