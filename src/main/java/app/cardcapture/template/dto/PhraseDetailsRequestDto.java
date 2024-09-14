@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record PhraseDetailsRequestDto(
-        @NotEmpty @Size(max=10) List<@Size(max=50) String> phrases,
+        @NotEmpty @Size(max=10) List<@Size(max=100) String> phrases,
         @NotBlank @Size(max=50) String firstEmphasis,
         @Size(max=50) String secondEmphasis
 ) {
