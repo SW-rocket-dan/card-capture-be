@@ -13,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,7 +26,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Builder // TODO: 빌더 제거
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")

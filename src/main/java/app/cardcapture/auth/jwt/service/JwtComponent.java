@@ -5,7 +5,7 @@ import app.cardcapture.auth.jwt.domain.Claims;
 import app.cardcapture.auth.jwt.exception.InvalidTokenException;
 import app.cardcapture.auth.jwt.exception.TokenBlacklistedException;
 import app.cardcapture.common.utils.TimeUtils;
-import app.cardcapture.user.dto.UserDto;
+import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.service.UserService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
@@ -104,7 +104,7 @@ public class JwtComponent {
     }
 
     private void verifyActualUser(Claims claims) {
-        UserDto foundUserById = userService.findUserById(claims.getId());
+        User foundUserById = userService.findUserById(claims.getId());
         long foundUserSecond = TimeUtils.toEpochSecond(foundUserById.getCreatedAt());
         long claimsSecond = TimeUtils.toEpochSecond(claims.getLoalDateCreatedAt());
 

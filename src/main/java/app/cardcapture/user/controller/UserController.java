@@ -4,7 +4,9 @@ import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.payment.business.domain.entity.UserProductCategory;
 import app.cardcapture.payment.business.dto.UserProductCategoriesResponseDto;
 import app.cardcapture.security.PrincipleDetails;
-import app.cardcapture.user.dto.UserDto;
+import app.cardcapture.user.dto.UserMapper;
+import app.cardcapture.user.dto.UserGoogleAuthResponseDto;
+import app.cardcapture.user.dto.UserProfileResponseDto;
 import app.cardcapture.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -21,16 +23,18 @@ import java.util.List;
 @AllArgsConstructor
 public class UserController {
 
+    private final UserMapper userMapper;
     private final UserService userService;
 
     @GetMapping("/me")
     @Operation(summary = "사용자 정보 조회",
             description = "현재 로그인한 사용자의 정보를 조회합니다. JWT를 통해 사용자를 식별합니다. ")
-    public ResponseEntity<SuccessResponseDto<UserDto>> getUserDetails(
+    public ResponseEntity<SuccessResponseDto<UserProfileResponseDto>> getUserDetails(
             @AuthenticationPrincipal PrincipleDetails principle
     ) {
-        UserDto userDto = UserDto.from(principle.getUser());
-        SuccessResponseDto<UserDto> response = SuccessResponseDto.create(userDto);
+        UserProfileResponseDto userProfileResponseDto = userMapper.toUserProfileResponseDto(principle.getUser());
+        SuccessResponseDto<UserProfileResponseDto> response = SuccessResponseDto.create(
+            userProfileResponseDto);
 
         return ResponseEntity.ok(response);
     }
