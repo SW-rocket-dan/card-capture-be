@@ -12,6 +12,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,7 +57,8 @@ public class User {
     private String picture;
 
     @Column(nullable = false)
-    private String role = "ROLE_USER";
+    @OneToMany(mappedBy = "user")
+    private Set<UserRole> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Template> templates;

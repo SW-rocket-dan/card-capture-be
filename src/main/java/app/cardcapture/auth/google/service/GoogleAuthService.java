@@ -11,16 +11,15 @@ import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.common.utils.TimeUtils;
 import app.cardcapture.user.domain.entity.User;
+import app.cardcapture.user.domain.Role;
 import app.cardcapture.user.dto.UserGoogleAuthResponseDto;
 import app.cardcapture.user.service.UserService;
-import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -51,8 +50,7 @@ public class GoogleAuthService {
     }
 
     private JwtResponseDto issueJwt(User user) {
-        String jwt = jwtComponent.createAccessToken(user.getId(), "ROLE_USER",
-            //TODO: ROLE 객체로 숨기기, 에러코드
+        String jwt = jwtComponent.createAccessToken(user.getId(), Role.USER,
             Date.from(user.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant()));
         String refreshToken = jwtComponent.createRefreshToken(user.getId());
 
@@ -100,7 +98,7 @@ public class GoogleAuthService {
         User user = userService.findUserById(userId);
         Date userCreatedAt = TimeUtils.toDate(user.getCreatedAt());
 
-        String newJwt = jwtComponent.createAccessToken(userId, "ROLE_USER", userCreatedAt);
+        String newJwt = jwtComponent.createAccessToken(userId, Role.USER, userCreatedAt);
         String newRefreshToken = jwtComponent.createRefreshToken(userId);
 
         return new JwtResponseDto(newJwt, newRefreshToken);

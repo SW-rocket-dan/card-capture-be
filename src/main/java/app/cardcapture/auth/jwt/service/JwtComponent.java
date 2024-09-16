@@ -5,6 +5,7 @@ import app.cardcapture.auth.jwt.domain.Claims;
 import app.cardcapture.auth.jwt.exception.InvalidTokenException;
 import app.cardcapture.auth.jwt.exception.TokenBlacklistedException;
 import app.cardcapture.common.utils.TimeUtils;
+import app.cardcapture.user.domain.Role;
 import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.service.UserService;
 import com.auth0.jwt.JWT;
@@ -13,6 +14,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import java.util.List;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -39,8 +41,8 @@ public class JwtComponent {
         this.userService = userService;
     }
 
-    public String createAccessToken(Long userId, String role, Date createdAt) {
-        return this.createAccessToken(Claims.of(userId, role, jwtConfig.getIssuer(), createdAt));
+    public String createAccessToken(Long userId, Role role, Date createdAt) {
+        return this.createAccessToken(Claims.of(userId, List.of(role), jwtConfig.getIssuer(), createdAt));
     }
 
     public String createAccessToken(Claims claims) {
@@ -51,7 +53,7 @@ public class JwtComponent {
         builder.withIssuedAt(now);
         builder.withExpiresAt(jwtConfig.getAccessExpirationDate(now));
         builder.withClaim("id", claims.getId());
-        builder.withArrayClaim("roles", claims.getRoles());
+        builder.withClaim("roles", claims.getRoles());
         builder.withClaim("created_at", claims.getCreatedAt());
 
         return builder.sign(jwtHashAlgorithm);

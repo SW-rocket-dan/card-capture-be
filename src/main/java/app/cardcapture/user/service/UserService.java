@@ -10,12 +10,10 @@ import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.dto.UserMapper;
 import app.cardcapture.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
