@@ -7,6 +7,7 @@ import app.cardcapture.ai.common.service.AiInstructionGenerator;
 import app.cardcapture.ai.openai.dto.AiImageChangeReqeustDto;
 import app.cardcapture.ai.openai.dto.AiImageChangeResponseDto;
 import app.cardcapture.ai.stabilityai.service.StabilityAiImageService;
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ImageDto;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.template.dto.PosterMainImageDto;
@@ -17,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.image.ImageMessage;
 import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -95,7 +95,7 @@ public class OpenAiFacadeService {
         User user) {
         AiImage aiImage = aiImageRepository.findById(aiImageChangeReqeustDto.aiImageId())
             .orElseThrow(
-                () -> new BusinessLogicException("해당 이미지가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+                () -> new BusinessLogicException(ErrorCode.IMAGE_RETREIVAL_FAILED));
 
         ImageMessage changeImageMessage = new ImageMessage(
             "기존에 이런 이미지가 있어." + aiImage.getPrompt() + "여기서 조금 더" + aiImageChangeReqeustDto.message()

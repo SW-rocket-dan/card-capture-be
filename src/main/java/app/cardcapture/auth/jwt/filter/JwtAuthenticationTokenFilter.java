@@ -3,6 +3,7 @@ package app.cardcapture.auth.jwt.filter;
 import app.cardcapture.auth.jwt.domain.Claims;
 import app.cardcapture.auth.jwt.exception.InvalidTokenException;
 import app.cardcapture.auth.jwt.service.JwtComponent;
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ErrorResponseDto;
 import app.cardcapture.security.PrincipleDetails;
 import app.cardcapture.security.PrincipleUserDetailsService;
@@ -64,7 +65,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             }
             chain.doFilter(request, response);
         } catch (InvalidTokenException ex) {
-            ErrorResponseDto<String> errorResponse = ErrorResponseDto.create(ex.getMessage(), null);
+            ErrorResponseDto<String> errorResponse = ErrorResponseDto.create(ErrorCode.INVALID_TOKEN);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");

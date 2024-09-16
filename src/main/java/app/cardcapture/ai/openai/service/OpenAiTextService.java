@@ -1,6 +1,7 @@
 package app.cardcapture.ai.openai.service;
 
 import app.cardcapture.ai.openai.dto.AiTranslationResponseDto;
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.user.domain.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +12,6 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class OpenAiTextService {
             return chatResponseDTO.translatedText();
         } catch (IOException e) {
             log.error("Error parsing JSON response", e);
-            throw new BusinessLogicException("Error parsing JSON response", HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(ErrorCode.JSON_PARSING_ERROR);
         }
     }
 }

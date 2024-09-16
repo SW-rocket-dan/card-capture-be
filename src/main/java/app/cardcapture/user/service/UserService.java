@@ -1,5 +1,6 @@
 package app.cardcapture.user.service;
 
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.payment.business.domain.NewUserProductCategory;
 import app.cardcapture.payment.business.domain.entity.UserProductCategory;
@@ -20,7 +21,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserService {
 
-    private static final String USER_INFO_RETRIEVAL_ERROR = "Failed to retrieve user info";
     private final PaymentCommonService paymentCommonService;
     private final UserProductCategoryRepository userProductCategoryRepository;
     private final UserRepository userRepository;
@@ -29,7 +29,7 @@ public class UserService {
     public User findUserById(Long id) {
         return userRepository.findById(id)
             .orElseThrow(
-                () -> new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.NOT_FOUND));
+                () -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
     }
 
     @Transactional
@@ -43,8 +43,13 @@ public class UserService {
         return user;
     }
 
-    public Optional<User> findByGoogleId(String googleId) {
-        return userRepository.findByGoogleId(googleId);
+    public boolean existsByGoogleId(String googleId) {
+        return userRepository.existsByGoogleId(googleId);
+    }
+
+    public User findByGoogleId(String googleId) {
+        return userRepository.findByGoogleId(googleId)
+            .orElseThrow(() -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
     }
 
     public List<UserProductCategory> getUserProductCategories(User user) {

@@ -1,8 +1,8 @@
 package app.cardcapture.common.exception;
 
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,13 +17,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessLogicException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleBusinessLogicException(BusinessLogicException ex) {
-        log.error(ex.getMessage(), ex);
+        log.error("BusinessLogicException: {}",ex.getMessage(), ex);
 
-        ErrorResponseDto<String> response = ErrorResponseDto.create(ex.getMessage(), null);
-        return new ResponseEntity<>(response, ex.getStatus());
+        ErrorCode errorCode = ex.getErrorCode();
+        ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler(MethodArgumentNotValidException.class) // TODO: @valid에서 이거 호출되는지 확인하기
     public ResponseEntity<ErrorResponseDto<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         log.error("Validation error: {}", ex.getMessage(), ex);
 
@@ -31,15 +32,17 @@ public class GlobalExceptionHandler {
                 .map(ObjectError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
 
-        ErrorResponseDto<String> response = ErrorResponseDto.create(errorMessage, null);
-        return new ResponseEntity<>(response, ex.getStatusCode());
+        ErrorCode errorCode = ErrorCode.REQUEST_VALIDATION_FAILED;
+        ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleGeneralException(RuntimeException ex) {
-        log.error(ex.getMessage(), ex);
+        log.error("RuntimeException: {}", ex.getMessage(), ex);
 
-        ErrorResponseDto<String> response = ErrorResponseDto.create(ex.getMessage(), null);
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-    } // TODO: https://velog.io/@ollie221/Error-Code-%EC%A0%81%EC%9A%A9%EA%B8%B0 status만으로 판단하기 어려운 경우 에러 코드를 직접 정의해서 클라이언트에서 에러 상황에 따라 행동할 수 있게함
+        ErrorCode errorCode = ErrorCode.UNEXPECTED_RUNTIME_EXCEPTION;
+        ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
 }

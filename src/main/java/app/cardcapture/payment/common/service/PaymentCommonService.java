@@ -1,5 +1,6 @@
 package app.cardcapture.payment.common.service;
 
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.payment.portone.dto.PortoneWebhookReqeustDto;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.payment.business.domain.ProductCategory;
@@ -37,10 +38,6 @@ import static app.cardcapture.payment.common.domain.PaymentStatus.*;
 @Slf4j
 @RequiredArgsConstructor
 public class PaymentCommonService {
-    // TODO: 세부 예외를 만들어놓고, 이를 호출하는 곳에서 에러메세지 정하는 방식으로 빼주기
-    // 예외가 너무 많아지니까, NOT_FOUND같은 건 common_not_found
-    private static final String UNVALID_PRODUCT_TOTAL_PRICE = "상품 가격의 합이 일치하지 않습니다.";
-    private static final String PAYMENT_NOT_FOUND = "결제 정보를 찾을 수 없습니다.";
 
     private final PaymentRepository paymentRepository;
     private final TotalSalesRepository totalSalesRepository;
@@ -52,7 +49,8 @@ public class PaymentCommonService {
     // TODO: 한 사용자가 n초 내에 얼마 이상 구매요청 못하게 limit 있어야함
 
     @Transactional
-    public PaymentStartCheckResponseDto startCheck(PaymentStartCheckRequestDto paymentStartCheckRequestDto, User user) {
+    public PaymentStartCheckResponseDto startCheck(
+        PaymentStartCheckRequestDto paymentStartCheckRequestDto, User user) {
         String paymentId = UUID.randomUUID().toString();
         while (paymentRepository.existsByPaymentId(paymentId)) {
             paymentId = UUID.randomUUID().toString();
@@ -63,31 +61,30 @@ public class PaymentCommonService {
         payment.setUser(user);
 
         List<PaymentProduct> paymentProducts = paymentStartCheckRequestDto.products()
-                .stream()
-                .map(ProductDto::toEntity)
-                .toList();
+            .stream()
+            .map(ProductDto::toEntity)
+            .toList();
 
         payment.setPaymentProducts(paymentProducts);
 
         int totalPrice = paymentProducts.stream()
-                .mapToInt(PaymentProduct::getTotalPrice)
-                .sum();
+            .mapToInt(PaymentProduct::getTotalPrice)
+            .sum();
         if (totalPrice != paymentStartCheckRequestDto.totalPrice()) {
-            throw new BusinessLogicException(UNVALID_PRODUCT_TOTAL_PRICE, HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(ErrorCode.UNMATCHED_PURCHAGE_PRODUCT_TOTAL_PRICE);
         } // TODO: ProductType에서 가격 받아와서 다른지 확인하는걸로 바꾸기
 
         payment.setTotalPrice(paymentStartCheckRequestDto.totalPrice());
         payment.setRequestTime(paymentStartCheckRequestDto.requestTime());
 
-
         // 금액 xxx원 넘으면 안됨
         TotalSales totalSales = totalSalesRepository.findByIdForUpdate(1L)
-                .orElseThrow(() -> new RuntimeException("TotalSales record not found"));
+            .orElseThrow(() -> new RuntimeException("TotalSales record not found"));
 
         long newTotalSales = totalSales.getAccumulatedSales() + payment.getTotalPrice();
 
         if (newTotalSales > paymentConfig.getMaxSalesAmount()) {
-            throw new BusinessLogicException("이번 달 판매액을 초과하였습니다.", HttpStatus.PAYMENT_REQUIRED);
+            throw new BusinessLogicException(ErrorCode.MONTHLY_SALES_LIMIT_EXCEEDED);
         }
 
         totalSales.setAccumulatedSales(newTotalSales);
@@ -95,7 +92,6 @@ public class PaymentCommonService {
 
         payment.setPaymentStatus(ARRIVED);
         Payment savedPayment = paymentRepository.save(payment);
-
 
         return PaymentStartCheckResponseDto.from(savedPayment);
     }
@@ -134,38 +130,39 @@ public class PaymentCommonService {
     public Payment checkAndAddProductCategoryWithPortone(String unchekcedPaymentId) {
         log.info("checkAndAddProductCategoryWithPortone unchekcedPaymentId: " + unchekcedPaymentId);
         PortonePaymentInquiryResponseDto portonePaymentInquiryResponseDto = restClient.get()
-                .uri("https://api.portone.io/payments/" + unchekcedPaymentId)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", portoneConfig.getApiSecret())
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    log.info("Portone API error: " + response.getStatusCode());
-                    canclePayment(unchekcedPaymentId);
-                    throw new BusinessLogicException( //TODO: 일단 바로 취소되게 해놨는데 ,나중에 여러 번 시도하는 걸로 바꾸기
-                            "결제 확인에 실패했습니다. 만약 결제된 내역이 있으면, 취소됩니다. 잠시 후 다시 결제해주시고, 계속 결제가 실패한다면 고객센터로 문의주세요.",
-                            HttpStatus.INTERNAL_SERVER_ERROR);
-                })
-                .body(PortonePaymentInquiryResponseDto.class);
+            .uri("https://api.portone.io/payments/" + unchekcedPaymentId)
+            .accept(MediaType.APPLICATION_JSON)
+            .header("Authorization", portoneConfig.getApiSecret())
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, (request, response) -> {
+                log.info("Portone API error: " + response.getStatusCode());
+                canclePayment(unchekcedPaymentId);
+                throw new BusinessLogicException(ErrorCode.PAYMENT_VERIFICATION_FAILED);  //TODO: 일단 바로 취소되게 해놨는데 ,나중에 여러 번 시도하는 걸로 바꾸기
+            })
+            .body(PortonePaymentInquiryResponseDto.class);
 
-        log.info("portonePaymentInquiryResponseDto = " + portonePaymentInquiryResponseDto.toString());
+        log.info(
+            "portonePaymentInquiryResponseDto = " + portonePaymentInquiryResponseDto.toString());
 
         // 여기 있는 정보부터 믿을 수 있음
-        PaymentStatus paymentStatus = PaymentStatus.valueOf(portonePaymentInquiryResponseDto.status());
+        PaymentStatus paymentStatus = PaymentStatus.valueOf(
+            portonePaymentInquiryResponseDto.status());
         String paymentId = portonePaymentInquiryResponseDto.id();
         int totalPrice = portonePaymentInquiryResponseDto.amount().total();
         String currency = portonePaymentInquiryResponseDto.currency();
 
-        Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId) // (select for update 락 걸기)
-                .orElseThrow(() -> new BusinessLogicException(PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
+        Payment payment = paymentRepository.findByPaymentIdWithLock(
+                paymentId) // (select for update 락 걸기)
+            .orElseThrow(() -> new BusinessLogicException(ErrorCode.PAYMENT_RETRIEVAL_FAILED));
 
         if (totalPrice != payment.getTotalPrice()) {
             canclePayment(payment);
-            throw new BusinessLogicException("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(ErrorCode.UNMATCHED_PURCHAGE_PRODUCT_TOTAL_PRICE);
         }
 
         if (!currency.equals("KRW")) {
             canclePayment(payment);
-            throw new BusinessLogicException("결제 통화가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(ErrorCode.UNMATECHED_PAYMENT_CURRENCY);
         }
 
         // TODO: 각 경우에 맞게 다시 설계해야함 안전하게 모든 경우의 수 다 적는것도 방법?
@@ -175,8 +172,6 @@ public class PaymentCommonService {
             return payment;
         }
 
-
-        
         payment.setPaymentStatus(paymentStatus);
 
         User user = payment.getUser();
@@ -191,20 +186,20 @@ public class PaymentCommonService {
     @Transactional
     public void canclePayment(Payment payment) {
         restClient.post()
-                .uri("https://api.portone.io/payments/" + payment.getPaymentId() + "/cancel")
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", portoneConfig.getApiSecret())
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    // TODO: 관리자 알람을 주든지 따로 모아놓고 배치를 주든지 해야함
-                    throw new BusinessLogicException("결제 취소에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-                });
+            .uri("https://api.portone.io/payments/" + payment.getPaymentId() + "/cancel")
+            .accept(MediaType.APPLICATION_JSON)
+            .header("Authorization", portoneConfig.getApiSecret())
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, (request, response) -> {
+                // TODO: 관리자 알람을 주든지 따로 모아놓고 배치를 주든지 해야함
+                throw new BusinessLogicException(ErrorCode.PAYMENT_CANCELLATION_FAILED);
+            });
     }
 
     @Transactional
     public void canclePayment(String paymentId) {
         Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId)
-                .orElseThrow(() -> new BusinessLogicException(PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new BusinessLogicException(ErrorCode.PAYMENT_RETRIEVAL_FAILED));
 
         canclePayment(payment);
     }
@@ -225,21 +220,23 @@ public class PaymentCommonService {
         int quantity = product.getQuantity();
 
         // 이미 있는 값이면 업데이트해줘야 한다
-        if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) {
-            UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategoryWithLock(user, productCategory)
-                    .orElseThrow(() -> new BusinessLogicException("UserProductCategory not found", HttpStatus.NOT_FOUND));
+        if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) { // TODO: 동시성 이슈 확인하기
+            UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategoryWithLock(
+                    user, productCategory)
+                .orElseThrow(() -> new BusinessLogicException(ErrorCode.USER_PRODUCT_CATEGORY_RETRIEVAL_FAILED));
             userProductCategory.setQuantity(userProductCategory.getQuantity() + quantity);
             userProductCategoryRepository.save(userProductCategory);
         } else {
             UserProductCategory userProductCategory = new UserProductCategory();
             userProductCategory.setProductCategory(productCategory);
-            userProductCategory.setQuantity(quantity);// DisplayProduct에서 여러 개의 ProductCategory를 제공할 경우, 각각의 상품에 대해 정해진 개수를 써야함. 그러면 이 quantity값이 아닌 DisplayProduct에서 가져와야함. 우선 임시로 넣어놓음
+            userProductCategory.setQuantity(
+                quantity);// DisplayProduct에서 여러 개의 ProductCategory를 제공할 경우, 각각의 상품에 대해 정해진 개수를 써야함. 그러면 이 quantity값이 아닌 DisplayProduct에서 가져와야함. 우선 임시로 넣어놓음
             userProductCategory.setUser(user);
             userProductCategoryRepository.save(userProductCategory);
         }
         payment.setPaymentStatus(FINAL_PAID);
         payment.setVoucherIssued(true);
-        log.info("이용권이 발급되었습니다."+payment.getPaymentStatus()+payment.isVoucherIssued());
+        log.info("이용권이 발급되었습니다." + payment.getPaymentStatus() + payment.isVoucherIssued());
 
         return paymentRepository.save(payment);
     }
@@ -247,7 +244,7 @@ public class PaymentCommonService {
     @Transactional
     public void saveUserProductCategory(ProductCategory productCategory, int count, User user) {
         if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) {
-            throw new BusinessLogicException("이미 가입된 유저입니다.", HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(ErrorCode.USER_ALREADY_RECEIVED_SIGNUP_REWARD);
         } else {
             UserProductCategory userProductCategory = new UserProductCategory();
             userProductCategory.setProductCategory(productCategory);

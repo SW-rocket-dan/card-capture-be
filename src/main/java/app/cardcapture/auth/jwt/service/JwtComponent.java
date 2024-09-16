@@ -95,7 +95,7 @@ public class JwtComponent {
             throw new InvalidTokenException(INVALID_TOKEN);
         }
         return decodedJWT;
-    } //TODO: 한번 더 던져서 JWTExpiredException 처리
+    } //TODO: 한번 더 던져서 JWTExpiredException 처리 => filter에서 처리해야함! (controllerhandler에서 하는게 아닌게 맞는지 postman으로테스트하기)
 
     private void verifyBlacklisted(String token) {
         if (tokenBlacklistService.isTokenBlacklisted(token)) {

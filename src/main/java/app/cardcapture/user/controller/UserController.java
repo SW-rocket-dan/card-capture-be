@@ -31,6 +31,7 @@ public class UserController {
     public ResponseEntity<SuccessResponseDto<UserProfileResponseDto>> getUserDetails(
         @AuthenticationPrincipal PrincipleDetails principle
     ) {
+        System.out.println("me");
         UserProfileResponseDto userProfileResponseDto = userMapper.toUserProfileResponseDto(
             principle.getUser());
         SuccessResponseDto<UserProfileResponseDto> response = SuccessResponseDto.create(

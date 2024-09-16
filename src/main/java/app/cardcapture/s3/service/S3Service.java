@@ -2,6 +2,7 @@ package app.cardcapture.s3.service;
 
 import app.cardcapture.ai.common.AiImage;
 import app.cardcapture.ai.common.repository.AiImageRepository;
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ImageDto;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.user.domain.entity.User;
@@ -96,7 +97,7 @@ public class S3Service {
         String revisedPrompt, String extension, User user) {
         URL url = convertToURL(imageUrl);
 
-        HttpURLConnection connection = getHttpURLConnection(imageUrl, url);
+        HttpURLConnection connection = getHttpURLConnection(url);
 
         try (InputStream inputStream = connection.getInputStream()) {
             byte[] imageBytes = IOUtils.toByteArray(inputStream);
@@ -123,17 +124,17 @@ public class S3Service {
                     savedAiImage.getId());
             }
         } catch (IOException e) {
-            throw new BusinessLogicException("Error while reading the image from the URL: " + imageUrl, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessLogicException(ErrorCode.IMAGE_URL_READ_FAILED);
         }
     }
 
-    private HttpURLConnection getHttpURLConnection(String imageUrl, URL url) {
+    private HttpURLConnection getHttpURLConnection(URL url) {
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             return connection;
         } catch (IOException e) {
-            throw new BusinessLogicException("Error while connecting to the image URL: " + imageUrl, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessLogicException(ErrorCode.IMAGE_URL_READ_FAILED);
         }
     }
 
@@ -141,7 +142,7 @@ public class S3Service {
         try {
             return new URL(imageUrl);
         } catch (MalformedURLException e) {
-            throw new BusinessLogicException("Invalid image URL: " + imageUrl, HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(ErrorCode.MALFORMED_IMAGE_URL);
         }
     }
 
@@ -154,9 +155,7 @@ public class S3Service {
             amazonS3.putObject(bucket+path, fileName+user.getId()+"."+extension, byteArrayInputStream, metadata);
             return String.format("https://%s.s3.%s.amazonaws.com"+path+"/%s", bucket, "ap-northeast-2", fileName+user.getId()+"."+extension);
         } catch (IOException e) {
-            throw new BusinessLogicException("Error while reading the image from the byte array", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessLogicException(ErrorCode.IMAGE_RAW_READ_FAILED);
         }
-
-
     }
 }

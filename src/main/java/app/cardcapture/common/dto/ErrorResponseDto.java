@@ -8,10 +8,10 @@ import lombok.Getter;
 public class ErrorResponseDto<T> {
 
     private final ResponseStatus status;
+    private final ErrorCode errorCode;
     private final String message;
-    private final T data;
 
-    public static <T>ErrorResponseDto<T> create(String message, T data) {
-        return new ErrorResponseDto<>(ResponseStatus.FAILURE, message, data);
+    public static <T>ErrorResponseDto<T> create(ErrorCode errorCode) {
+        return new ErrorResponseDto<>(ResponseStatus.FAILURE, errorCode, errorCode.getMessage());
     }
 }

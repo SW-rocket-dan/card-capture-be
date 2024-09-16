@@ -2,6 +2,7 @@ package app.cardcapture.template.service;
 
 import app.cardcapture.ai.openai.service.OpenAiFacadeService;
 import app.cardcapture.ai.openai.service.OpenAiTextService;
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.payment.business.domain.ProductCategory;
 import app.cardcapture.payment.business.domain.entity.UserProductCategory;
@@ -20,7 +21,6 @@ import app.cardcapture.template.repository.TemplateRepository;
 import app.cardcapture.template.repository.TemplateTagRepository;
 import app.cardcapture.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +32,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class TemplateService {
 
-    private static final String USER_INFO_RETRIEVAL_ERROR = "유저 정보를 찾을 수 없습니다";
     private final TemplateRepository templateRepository;
     private final TemplateTagRepository templateTagRepository;
     private final PromptRepository promptRepository;
@@ -48,11 +47,11 @@ public class TemplateService {
 
         UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategoryWithLock(
                 user, productCategory)
-            .orElseThrow(() -> new BusinessLogicException("이용권이 없습니다", HttpStatus.FORBIDDEN));
+            .orElseThrow(() -> new BusinessLogicException(ErrorCode.PRODUCT_VOUCHER_RETRIEVAL_FAILED));
 
         // 사용 가능한 이용권이 있는지 확인
         if (userProductCategory.getQuantity() < 1) {
-            throw new BusinessLogicException("이용권이 부족합니다", HttpStatus.FORBIDDEN);
+            throw new BusinessLogicException(ErrorCode.INSUFFICIENT_PRODUCT_VOUCHER);
         }
 
         userProductCategory.deductUsage();
@@ -85,11 +84,10 @@ public class TemplateService {
 
     public TemplateResponseDto findById(Long id, User user) {
         Template template = templateRepository.findById(id).orElseThrow(
-            () -> new BusinessLogicException("존재하지 않는 템플릿입니다.", HttpStatus.NOT_FOUND));
+            () -> new BusinessLogicException(ErrorCode.TEMPLTE_RETRIEVAL_FAILED));
 
-        //TODO: 자기 템플릿 아니면 안보이게
         if (template.getUser().getId()!=user.getId()) {
-            throw new BusinessLogicException("템플릿 조회 권한이 없습니다", HttpStatus.FORBIDDEN);
+            throw new BusinessLogicException(ErrorCode.TEMPLATE_ACCESS_DENIED);
         }
 
         return TemplateResponseDto.fromEntity(template);
@@ -105,10 +103,10 @@ public class TemplateService {
         TemplateUpdateRequestDto templateUpdateRequestDto, User user) {
         Template template = templateRepository.findById(templateUpdateRequestDto.id())
             .orElseThrow(()
-                -> new BusinessLogicException(USER_INFO_RETRIEVAL_ERROR, HttpStatus.NOT_FOUND));
+                -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
 
         if (template.getUser().getId() != user.getId()) {
-            throw new BusinessLogicException("템플릿 수정 권한이 없습니다", HttpStatus.FORBIDDEN);
+            throw new BusinessLogicException(ErrorCode.TEMPLATE_MODIFICATION_ACCESS_DENIED);
         }
 
         Set<TemplateAttribute> updatedAttributes = templateUpdateRequestDto.updatedAttributes();
