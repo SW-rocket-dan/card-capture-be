@@ -6,7 +6,7 @@ import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ErrorResponseDto;
 import app.cardcapture.security.PrincipalDetails;
-import app.cardcapture.security.PrincipleUserDetailsService;
+import app.cardcapture.security.PrincipalUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,7 +26,7 @@ import java.io.IOException;
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private final JwtComponent jwtComponent;
-    private final PrincipleUserDetailsService userDetailsService;
+    private final PrincipalUserDetailsService userDetailsService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
