@@ -5,7 +5,7 @@ import app.cardcapture.auth.jwt.exception.InvalidTokenException;
 import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ErrorResponseDto;
-import app.cardcapture.security.PrincipleDetails;
+import app.cardcapture.security.PrincipalDetails;
 import app.cardcapture.security.PrincipleUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -46,7 +46,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 if (claims != null) {
                     Long userId = claims.getId();
                     if (userId != null) {
-                        PrincipleDetails userDetails = (PrincipleDetails) userDetailsService.loadUserByUsername(userId.toString());
+                        PrincipalDetails userDetails = (PrincipalDetails) userDetailsService.loadUserByUsername(userId.toString());
 
                         if (userDetails != null) {
                             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

@@ -24,7 +24,7 @@ public abstract class AuthenticatedControllerTest {
     protected JwtComponent jwtComponent;
 
     @MockBean
-    protected PrincipleDetails principleDetails;
+    protected PrincipalDetails principalDetails;
 
     @MockBean
     private PrincipleUserDetailsService principleUserDetailsService;
@@ -49,10 +49,10 @@ public abstract class AuthenticatedControllerTest {
 
         mockUser.setRoles(Set.of(userRole));
 
-        given(principleDetails.getUser()).willReturn(mockUser);
+        given(principalDetails.getUser()).willReturn(mockUser);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-            principleDetails, null, principleDetails.getAuthorities());
+            principalDetails, null, principalDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 

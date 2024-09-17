@@ -3,7 +3,7 @@ package app.cardcapture.user.controller;
 import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.payment.business.domain.entity.UserProductCategory;
 import app.cardcapture.payment.business.dto.UserProductCategoriesResponseDto;
-import app.cardcapture.security.PrincipleDetails;
+import app.cardcapture.security.PrincipalDetails;
 import app.cardcapture.user.dto.UserMapper;
 import app.cardcapture.user.dto.UserProfileResponseDto;
 import app.cardcapture.user.service.UserService;
@@ -29,7 +29,7 @@ public class UserController {
     @Operation(summary = "사용자 정보 조회",
         description = "현재 로그인한 사용자의 정보를 조회합니다. JWT를 통해 사용자를 식별합니다. ")
     public ResponseEntity<SuccessResponseDto<UserProfileResponseDto>> getUserDetails(
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         System.out.println("me");
         UserProfileResponseDto userProfileResponseDto = userMapper.toUserProfileResponseDto(
@@ -44,7 +44,7 @@ public class UserController {
     @Operation(summary = "사용자 상품 카테고리 조회",
         description = "현재 로그인한 사용자의 상품 카테고리를 조회합니다. JWT를 통해 사용자를 식별합니다.")
     public ResponseEntity<SuccessResponseDto<UserProductCategoriesResponseDto>> getUserProductCategories(
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         List<UserProductCategory> userProductCategories = userService.getUserProductCategories(
             principle.getUser());

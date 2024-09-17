@@ -11,7 +11,7 @@ import java.util.Collection;
 
 @Getter
 @RequiredArgsConstructor
-public class PrincipleDetails implements UserDetails {
+public class PrincipalDetails implements UserDetails {
 
     private final User user;
 

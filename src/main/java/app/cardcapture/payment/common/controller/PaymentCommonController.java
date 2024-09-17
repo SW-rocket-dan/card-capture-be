@@ -7,7 +7,7 @@ import app.cardcapture.payment.common.dto.PaymentStartCheckResponseDto;
 import app.cardcapture.payment.common.dto.PaymentStatusRequestDto;
 import app.cardcapture.payment.common.dto.PaymentStatusResponseDto;
 import app.cardcapture.payment.common.service.PaymentCommonService;
-import app.cardcapture.security.PrincipleDetails;
+import app.cardcapture.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +36,7 @@ public class PaymentCommonController {
             "요청 시 Product의 price에는 상품 하나당 가격이 들어가야 합니다.")
     public ResponseEntity<SuccessResponseDto<PaymentStartCheckResponseDto>> checkPayment(
         @RequestBody @Valid PaymentStartCheckRequestDto paymentStartCheckRequestDto,
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         PaymentStartCheckResponseDto paymentStartCheckResponseDto = paymentCommonService.startCheck(
             paymentStartCheckRequestDto, principle.getUser());
@@ -51,7 +51,7 @@ public class PaymentCommonController {
             " 프론트에서는 여러 번 백엔드에 이 엔드포인트로 폴링을 요청합니다. 폴링이 모두 실패할 경우, 사용자에게 마이페이지로 바로 가는 버튼을 줘서 처리가 완료됐을 때 수동으로 사용자가 결제 상태를 확인하게 합니다.")
     public ResponseEntity<SuccessResponseDto<PaymentStatusResponseDto>> endCheck(
         @RequestBody @Valid PaymentStatusRequestDto request,
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) { //TODO: principle로 자기의 구매가 맞는지도 확인 필요한가?
         PaymentStatusResponseDto statusResponse = paymentCommonService.checkPaymentStatus(
             request.paymentId(),
