@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_product_categories")
+@Table(name = "user_product_categories",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "product_category"})})
 @EntityListeners(AuditingEntityListener.class)
 public class UserProductCategory {
 

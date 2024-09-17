@@ -67,7 +67,7 @@ public class User {
     private List<Payment> payments;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<UserProductCategory> userProductCategories;
+    private Set<UserProductCategory> userProductCategories;
 
     @Column(nullable = false)
     @CreatedDate
