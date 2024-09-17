@@ -27,7 +27,6 @@ public class UserService {
     private final PaymentCommonService paymentCommonService;
     private final UserProductCategoryRepository userProductCategoryRepository;
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
     private final UserRoleRepository userRoleRepository;
 
     public User findUserById(Long id) {
@@ -57,7 +56,6 @@ public class UserService {
     }
 
     private void assignAndSaveUserRole(User user) {
-
         userRoleRepository.findByUserAndRole(user, Role.USER)
             .ifPresentOrElse(
                 userRole -> {
