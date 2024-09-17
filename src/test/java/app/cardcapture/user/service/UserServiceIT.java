@@ -19,9 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -104,10 +101,9 @@ public class UserServiceIT {
                     if (e.getErrorCode() == ErrorCode.DUPLICATED_USER) {
                         failCount.incrementAndGet(); // 중복 예외 발생한 경우
                     }
-                }catch (DataIntegrityViolationException e) {
+                } catch (DataIntegrityViolationException e) {
                     failCount.incrementAndGet(); // 중복 예외 발생한 경우
-                }
-                finally {
+                } finally {
                     latch.countDown(); // 쓰레드 작업 완료 시 latch 감소
                 }
             });
@@ -127,7 +123,8 @@ public class UserServiceIT {
     }
 
     private void cleanUpTestData() {
-        jdbcTemplate.execute("DELETE FROM user_roles WHERE user_id IN (SELECT id FROM users WHERE google_id = '1234567890')");
+        jdbcTemplate.execute(
+            "DELETE FROM user_roles WHERE user_id IN (SELECT id FROM users WHERE google_id = '1234567890')");
         jdbcTemplate.execute("DELETE FROM users WHERE google_id = '1234567890'");
     }
 }
