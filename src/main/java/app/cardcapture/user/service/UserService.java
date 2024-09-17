@@ -9,7 +9,6 @@ import app.cardcapture.payment.common.service.PaymentCommonService;
 import app.cardcapture.user.domain.Role;
 import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.domain.entity.UserRole;
-import app.cardcapture.user.dto.UserMapper;
 import app.cardcapture.user.repository.UserRepository;
 import app.cardcapture.user.repository.UserRoleRepository;
 import java.util.Set;
