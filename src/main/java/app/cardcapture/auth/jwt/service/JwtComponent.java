@@ -42,7 +42,7 @@ public class JwtComponent {
     }
 
     public String createAccessToken(Long userId, Role role, Date createdAt) {
-        return this.createAccessToken(Claims.of(userId, List.of(role), jwtConfig.getIssuer(), createdAt));
+        return this.createAccessToken(Claims.of(userId, List.of(role.name()), jwtConfig.getIssuer(), createdAt));
     }
 
     public String createAccessToken(Claims claims) {

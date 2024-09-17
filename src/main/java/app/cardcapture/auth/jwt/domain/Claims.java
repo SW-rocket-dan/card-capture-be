@@ -12,7 +12,7 @@ import java.util.Date;
 @Getter
 public class Claims { //TODO: Access Token, Refresh Token 용 Claims 구분하기(NullpointerException 방지)
     private Long id;
-    private List<Role> roles;
+    private List<String> roles;
     private Date issuedAt;
     private Date expiresAt;
     private String issuer;
@@ -22,14 +22,14 @@ public class Claims { //TODO: Access Token, Refresh Token 용 Claims 구분하�
 
     public Claims(DecodedJWT decodedJWT) {
         this.id = decodedJWT.getClaim("id").asLong();
-        this.roles = decodedJWT.getClaim("roles").asList(Role.class);
+        this.roles = decodedJWT.getClaim("roles").asList(String.class);
         this.issuedAt = decodedJWT.getIssuedAt();
         this.expiresAt = decodedJWT.getExpiresAt();
         this.issuer = decodedJWT.getIssuer();
         this.createdAt = decodedJWT.getClaim("created_at").asDate();
     }
 
-    public static Claims of(Long id, List<Role> roles, String issuer, Date createdAt) {
+    public static Claims of(Long id, List<String> roles, String issuer, Date createdAt) {
         Claims claims = new Claims();
 
         claims.id = id;
