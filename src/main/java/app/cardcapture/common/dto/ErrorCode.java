@@ -15,6 +15,7 @@ public enum ErrorCode {
 
     REQUEST_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "Request validation failed"),
     UNEXPECTED_RUNTIME_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected runtime exception"),
+    DATA_INTEGRITY_VIOLATION(HttpStatus.CONFLICT, "Data integrity violation"),
 
     NON_EXISTENT_PRODUCT_ID(HttpStatus.BAD_REQUEST, "Product ID does not exist"),
     INVALID_PRODUCT_PRICE(HttpStatus.BAD_REQUEST, "The product price is not valid"),
