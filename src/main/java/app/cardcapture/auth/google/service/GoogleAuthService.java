@@ -19,10 +19,11 @@ import java.time.ZoneId;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,7 +51,7 @@ public class GoogleAuthService {
     }
 
     private JwtResponseDto issueJwt(User user) {
-        String jwt = jwtComponent.createAccessToken(user.getId(), Role.USER,
+        String jwt = jwtComponent.createAccessToken(user.getId(), Role.USER, // TODO: ROLE.USER바꿔야함
             Date.from(user.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant()));
         String refreshToken = jwtComponent.createRefreshToken(user.getId());
 
@@ -71,11 +72,8 @@ public class GoogleAuthService {
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
 
-            try {
-                return userService.save(user);
-            } catch (DuplicateKeyException e) {
-                throw new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED);
-            }
+            //TODO: UserRoleRespository에 저장해야하고 이 메서드 UserSerivce로 옮기든지하고 Transaction달아야할듯
+            return userService.save(user);
         }
 
         User user = userService.findByGoogleId(googleId);
@@ -98,7 +96,7 @@ public class GoogleAuthService {
         User user = userService.findUserById(userId);
         Date userCreatedAt = TimeUtils.toDate(user.getCreatedAt());
 
-        String newJwt = jwtComponent.createAccessToken(userId, Role.USER, userCreatedAt);
+        String newJwt = jwtComponent.createAccessToken(userId, Role.USER, userCreatedAt);// TODO: ROLE.USER바꿔야함
         String newRefreshToken = jwtComponent.createRefreshToken(userId);
 
         return new JwtResponseDto(newJwt, newRefreshToken);
@@ -116,6 +114,16 @@ public class GoogleAuthService {
             .getBody();
     }
 
+    private MultiValueMap<String, String> convertToFormData(GoogleTokenRequestDto googleTokenRequestDto) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("code", googleTokenRequestDto.getCode());
+        formData.add("client_id", googleTokenRequestDto.getClientId());
+        formData.add("client_secret", googleTokenRequestDto.getClientSecret());
+        formData.add("redirect_uri", googleTokenRequestDto.getRedirectUri());
+        formData.add("grant_type", googleTokenRequestDto.getGrantType());
+        return formData;
+    }
+
     private GoogleTokenResponseDto getGoogleToken(String authCode) {
         String tokenUrl = googleAuthConfig.getOauthUrl();
         GoogleTokenRequestDto googleTokenRequestDto = new GoogleTokenRequestDto(
@@ -128,7 +136,8 @@ public class GoogleAuthService {
         return restClient.post()
             .uri(tokenUrl)
             .headers(headers -> headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED))
-            .body(googleTokenRequestDto)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(convertToFormData(googleTokenRequestDto))  // DTO를 formData로 변환
             .retrieve()
             .onStatus(HttpStatusCode::isError, (request, response) -> {
                 throw new BusinessLogicException(ErrorCode.GOOGLE_ACCESS_TOKEN_RETRIEVAL_ERROR);})

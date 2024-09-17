@@ -3,6 +3,7 @@ package app.cardcapture.common.exception;
 import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,6 +21,15 @@ public class GlobalExceptionHandler {
         log.error("BusinessLogicException: {}",ex.getMessage(), ex);
 
         ErrorCode errorCode = ex.getErrorCode();
+        ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDto<String>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        log.error("DataIntegrityViolationException: {}", ex.getMessage(), ex);
+
+        ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;
         ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }

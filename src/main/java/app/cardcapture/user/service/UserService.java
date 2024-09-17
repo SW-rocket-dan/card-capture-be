@@ -14,7 +14,6 @@ import app.cardcapture.user.repository.UserRepository;
 import app.cardcapture.user.repository.UserRoleRepository;
 import java.util.Set;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,24 +39,38 @@ public class UserService {
     @Transactional(propagation = Propagation.REQUIRED)
     public User save(User user) {
 
-        // TODO: unique constraint에 대해서 try catch로 받는게 맞는지? 아니면 그냥 Data integrity violation exception을 handler가 처리하게 하는게 맞는지?
-        try {
-            userRepository.save(user);
-            assignAndSaveSignupReward(user);
-            assignAndSaveUserRole(user);
-        } catch (DataIntegrityViolationException e) {
-            throw new BusinessLogicException(ErrorCode.DATA_INTEGRITY_VIOLATION);
-        }
+        saveUniqueUser(user);
+        assignAndSaveSignupReward(user);
+        assignAndSaveUserRole(user);
 
         return user;
     }
 
+    private void saveUniqueUser(User user) {
+        userRepository.findByGoogleId(user.getGoogleId())
+            .ifPresentOrElse(exists -> {
+                    throw new BusinessLogicException(ErrorCode.DUPLICATED_USER);
+                },
+                () -> {
+                    userRepository.save(user);
+                });
+    }
+
     private void assignAndSaveUserRole(User user) {
-        UserRole userRole = new UserRole();
-        userRole.setUser(user);
-        userRole.setRole(Role.USER);
-        user.setRoles(Set.of(userRole));
-        userRoleRepository.save(userRole);
+
+        userRoleRepository.findByUserAndRole(user, Role.USER)
+            .ifPresentOrElse(
+                userRole -> {
+                    throw new BusinessLogicException(ErrorCode.DUPLICATED_USER);
+                },
+                () -> {
+                    UserRole userRole = new UserRole();
+                    userRole.setUser(user);
+                    userRole.setRole(Role.USER);
+                    user.setRoles(Set.of(userRole));
+                    userRoleRepository.save(userRole);
+                }
+            );
     }
 
     private void assignAndSaveSignupReward(User user) {

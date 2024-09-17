@@ -137,7 +137,8 @@ public class PaymentCommonService {
             .onStatus(HttpStatusCode::isError, (request, response) -> {
                 log.info("Portone API error: " + response.getStatusCode());
                 canclePayment(unchekcedPaymentId);
-                throw new BusinessLogicException(ErrorCode.PAYMENT_VERIFICATION_FAILED);  //TODO: 일단 바로 취소되게 해놨는데 ,나중에 여러 번 시도하는 걸로 바꾸기
+                throw new BusinessLogicException(
+                    ErrorCode.PAYMENT_VERIFICATION_FAILED);  //TODO: 일단 바로 취소되게 해놨는데 ,나중에 여러 번 시도하는 걸로 바꾸기
             })
             .body(PortonePaymentInquiryResponseDto.class);
 
@@ -220,10 +221,12 @@ public class PaymentCommonService {
         int quantity = product.getQuantity();
 
         // 이미 있는 값이면 업데이트해줘야 한다
-        if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) { // TODO: 동시성 이슈 확인하기
+        if (userProductCategoryRepository.existsByUserAndProductCategory(user,
+            productCategory)) { // TODO: 동시성 이슈 확인하기
             UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategoryWithLock(
                     user, productCategory)
-                .orElseThrow(() -> new BusinessLogicException(ErrorCode.USER_PRODUCT_CATEGORY_RETRIEVAL_FAILED));
+                .orElseThrow(() -> new BusinessLogicException(
+                    ErrorCode.USER_PRODUCT_CATEGORY_RETRIEVAL_FAILED));
             userProductCategory.setQuantity(userProductCategory.getQuantity() + quantity);
             userProductCategoryRepository.save(userProductCategory);
         } else {
@@ -243,14 +246,16 @@ public class PaymentCommonService {
 
     @Transactional
     public void saveUserProductCategory(ProductCategory productCategory, int count, User user) {
-        if (userProductCategoryRepository.existsByUserAndProductCategory(user, productCategory)) {
-            throw new BusinessLogicException(ErrorCode.USER_ALREADY_RECEIVED_SIGNUP_REWARD);
-        } else {
-            UserProductCategory userProductCategory = new UserProductCategory();
-            userProductCategory.setProductCategory(productCategory);
-            userProductCategory.setQuantity(count);
-            userProductCategory.setUser(user);
-            userProductCategoryRepository.save(userProductCategory);
-        }
+        userProductCategoryRepository.findByUserAndProductCategory(user, productCategory)
+            .ifPresentOrElse(userProductCategory -> {
+                    throw new BusinessLogicException(ErrorCode.USER_PRODUCT_CATEGORY_RETRIEVAL_FAILED);
+                },
+                () -> {
+                    UserProductCategory userProductCategory = new UserProductCategory();
+                    userProductCategory.setProductCategory(productCategory);
+                    userProductCategory.setQuantity(count);
+                    userProductCategory.setUser(user);
+                    userProductCategoryRepository.save(userProductCategory);
+                });
     }
 }
