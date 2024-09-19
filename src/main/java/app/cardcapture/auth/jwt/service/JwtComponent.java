@@ -5,8 +5,8 @@ import app.cardcapture.auth.jwt.domain.Claims;
 import app.cardcapture.auth.jwt.exception.InvalidTokenException;
 import app.cardcapture.auth.jwt.exception.TokenBlacklistedException;
 import app.cardcapture.common.utils.TimeUtils;
-import app.cardcapture.user.domain.Role;
 import app.cardcapture.user.domain.entity.User;
+import app.cardcapture.user.domain.entity.UserRole;
 import app.cardcapture.user.service.UserService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
@@ -15,6 +15,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,8 @@ public class JwtComponent {
     private final TokenBlacklistService tokenBlacklistService;
     private final UserService userService;
 
-    public JwtComponent(JwtConfig jwtConfig, TokenBlacklistService tokenBlacklistService, UserService userService) {
+    public JwtComponent(JwtConfig jwtConfig, TokenBlacklistService tokenBlacklistService,
+        UserService userService) {
         this.jwtConfig = jwtConfig;
         this.jwtHashAlgorithm = Algorithm.HMAC256(jwtConfig.getSecret());
         this.jwtVerifier = JWT.require(jwtHashAlgorithm).withIssuer(jwtConfig.getIssuer()).build();
@@ -41,8 +43,14 @@ public class JwtComponent {
         this.userService = userService;
     }
 
-    public String createAccessToken(Long userId, Role role, Date createdAt) {
-        return this.createAccessToken(Claims.of(userId, List.of(role.name()), jwtConfig.getIssuer(), createdAt));
+    public String createAccessToken(Long userId, Set<UserRole> role, Date createdAt) {
+        return this.createAccessToken(
+            Claims.of(
+                userId,
+                role.stream()
+                    .map(userRole -> userRole.getRole().name())
+                    .toList(),
+                jwtConfig.getIssuer(), createdAt));
     }
 
     public String createAccessToken(Claims claims) {
@@ -64,11 +72,11 @@ public class JwtComponent {
         Date expirationDate = jwtConfig.getRefreshExpirationDate(now);
 
         return JWT.create()
-                .withIssuer(jwtConfig.getIssuer())
-                .withIssuedAt(now)
-                .withExpiresAt(expirationDate)
-                .withClaim("id", userId)
-                .sign(jwtHashAlgorithm);
+            .withIssuer(jwtConfig.getIssuer())
+            .withIssuedAt(now)
+            .withExpiresAt(expirationDate)
+            .withClaim("id", userId)
+            .sign(jwtHashAlgorithm);
     }
 
     public Claims verifyAccessToken(String token) {

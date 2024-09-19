@@ -13,6 +13,7 @@ import app.cardcapture.common.utils.TimeUtils;
 import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.domain.Role;
 import app.cardcapture.user.dto.UserGoogleAuthResponseDto;
+import app.cardcapture.user.repository.UserRepository;
 import app.cardcapture.user.service.UserService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,6 +38,7 @@ public class GoogleAuthService {
     private final GoogleAuthConfig googleAuthConfig;
     protected final RestTemplate restTemplate;
     private final RestClient restClient;
+    private final UserRepository userRepository;
 
     public JwtResponseDto handleGoogleRedirect(String authCode) {
         GoogleTokenResponseDto googleTokenResponseDto = getGoogleToken(authCode);
@@ -44,47 +46,52 @@ public class GoogleAuthService {
             googleTokenResponseDto.getAccessToken());
 
         String googleId = userGoogleAuthResponseDto.googleId();
-        boolean existsByGoogleId = userService.existsByGoogleId(googleId);
-        User user = processUser(existsByGoogleId, googleId, userGoogleAuthResponseDto);
+        User user = findOrCreateUser(googleId, userGoogleAuthResponseDto);
+
+        userRepository.save(user);
 
         return issueJwt(user);
     }
 
+    private User findOrCreateUser(String googleId,
+        UserGoogleAuthResponseDto userGoogleAuthResponseDto) {
+        return userRepository.findByGoogleId(googleId)
+            .map(existingUser -> updateUser(existingUser, userGoogleAuthResponseDto))
+            .orElseGet(() -> createUser(googleId, userGoogleAuthResponseDto));
+    }
+
+    private User updateUser(User user, UserGoogleAuthResponseDto dto) {
+        user.setEmail(dto.email());
+        user.setName(dto.name());
+        user.setGivenName(dto.givenName());
+        user.setFamilyName(dto.familyName());
+        user.setPicture(dto.picture());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return user;
+    }
+
+    private User createUser(String googleId, UserGoogleAuthResponseDto dto) {
+        User newUser = new User();
+
+        newUser.setGoogleId(googleId);
+        newUser.setEmail(dto.email());
+        newUser.setName(dto.name());
+        newUser.setGivenName(dto.givenName());
+        newUser.setFamilyName(dto.familyName());
+        newUser.setPicture(dto.picture());
+        newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setUpdatedAt(LocalDateTime.now());
+
+        return newUser;
+    }
+
     private JwtResponseDto issueJwt(User user) {
-        String jwt = jwtComponent.createAccessToken(user.getId(), Role.USER, // TODO: ROLE.USER바꿔야함
+        String jwt = jwtComponent.createAccessToken(user.getId(), user.getRoles(),
             Date.from(user.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant()));
         String refreshToken = jwtComponent.createRefreshToken(user.getId());
 
         return new JwtResponseDto(jwt, refreshToken);
-    }
-
-    private User processUser(boolean existsByGoogleId, String googleId,
-        UserGoogleAuthResponseDto userGoogleAuthResponseDto) {
-        if (!existsByGoogleId) {
-            User user = new User();
-
-            user.setGoogleId(googleId);
-            user.setEmail(userGoogleAuthResponseDto.email());
-            user.setName(userGoogleAuthResponseDto.name());
-            user.setGivenName(userGoogleAuthResponseDto.givenName());
-            user.setFamilyName(userGoogleAuthResponseDto.familyName());
-            user.setPicture(userGoogleAuthResponseDto.picture());
-            user.setCreatedAt(LocalDateTime.now());
-            user.setUpdatedAt(LocalDateTime.now());
-
-            //TODO: UserRoleRespository에 저장해야하고 이 메서드 UserSerivce로 옮기든지하고 Transaction달아야할듯
-            return userService.save(user);
-        }
-
-        User user = userService.findByGoogleId(googleId);
-        user.setEmail(userGoogleAuthResponseDto.email());
-        user.setName(userGoogleAuthResponseDto.name());
-        user.setGivenName(userGoogleAuthResponseDto.givenName());
-        user.setFamilyName(userGoogleAuthResponseDto.familyName());
-        user.setPicture(userGoogleAuthResponseDto.picture());
-        user.setUpdatedAt(LocalDateTime.now());
-
-        return user;
     }
 
     public JwtResponseDto refreshJwt(RefreshTokenRequestDto refreshTokenRequest) {
@@ -96,7 +103,7 @@ public class GoogleAuthService {
         User user = userService.findUserById(userId);
         Date userCreatedAt = TimeUtils.toDate(user.getCreatedAt());
 
-        String newJwt = jwtComponent.createAccessToken(userId, Role.USER, userCreatedAt);// TODO: ROLE.USER바꿔야함
+        String newJwt = jwtComponent.createAccessToken(userId, user.getRoles(), userCreatedAt);
         String newRefreshToken = jwtComponent.createRefreshToken(userId);
 
         return new JwtResponseDto(newJwt, newRefreshToken);
@@ -114,13 +121,16 @@ public class GoogleAuthService {
             .getBody();
     }
 
-    private MultiValueMap<String, String> convertToFormData(GoogleTokenRequestDto googleTokenRequestDto) {
+    private MultiValueMap<String, String> convertToFormData(
+        GoogleTokenRequestDto googleTokenRequestDto) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+
         formData.add("code", googleTokenRequestDto.getCode());
         formData.add("client_id", googleTokenRequestDto.getClientId());
         formData.add("client_secret", googleTokenRequestDto.getClientSecret());
         formData.add("redirect_uri", googleTokenRequestDto.getRedirectUri());
         formData.add("grant_type", googleTokenRequestDto.getGrantType());
+
         return formData;
     }
 
@@ -137,10 +147,11 @@ public class GoogleAuthService {
             .uri(tokenUrl)
             .headers(headers -> headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED))
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(convertToFormData(googleTokenRequestDto))  // DTO를 formData로 변환
+            .body(convertToFormData(googleTokenRequestDto))
             .retrieve()
             .onStatus(HttpStatusCode::isError, (request, response) -> {
-                throw new BusinessLogicException(ErrorCode.GOOGLE_ACCESS_TOKEN_RETRIEVAL_ERROR);})
+                throw new BusinessLogicException(ErrorCode.GOOGLE_ACCESS_TOKEN_RETRIEVAL_ERROR);
+            })
             .toEntity(GoogleTokenResponseDto.class)
             .getBody();
     }

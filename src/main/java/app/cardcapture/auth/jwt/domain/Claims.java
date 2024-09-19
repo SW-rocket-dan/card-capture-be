@@ -1,7 +1,6 @@
 package app.cardcapture.auth.jwt.domain;
 
 import app.cardcapture.common.utils.TimeUtils;
-import app.cardcapture.user.domain.Role;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import java.util.List;
 import lombok.Getter;
