@@ -47,7 +47,7 @@ public class GoogleAuthConfigStub extends GoogleAuthConfig {
 
     @Override
     public String getApiUrl() {
-        return "https://www.googleapis.com/oauth2/v1/userinfo";
+        return "https://www.googleapis.com/oauth2/v3/userinfo";
     }
 
     @Override

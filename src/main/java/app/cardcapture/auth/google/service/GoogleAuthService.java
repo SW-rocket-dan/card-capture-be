@@ -11,7 +11,6 @@ import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.common.utils.TimeUtils;
 import app.cardcapture.user.domain.entity.User;
-import app.cardcapture.user.domain.Role;
 import app.cardcapture.user.dto.UserGoogleAuthResponseDto;
 import app.cardcapture.user.repository.UserRepository;
 import app.cardcapture.user.service.UserService;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -36,14 +34,13 @@ public class GoogleAuthService {
     private final UserService userService;
     private final JwtComponent jwtComponent;
     private final GoogleAuthConfig googleAuthConfig;
-    protected final RestTemplate restTemplate;
-    private final RestClient restClient;
+    private final RestClient.Builder builder;
     private final UserRepository userRepository;
 
     public JwtResponseDto handleGoogleRedirect(String authCode) {
         GoogleTokenResponseDto googleTokenResponseDto = getGoogleToken(authCode);
         UserGoogleAuthResponseDto userGoogleAuthResponseDto = getUserInfo(
-            googleTokenResponseDto.getAccessToken());
+            googleTokenResponseDto.accessToken());
 
         String googleId = userGoogleAuthResponseDto.googleId();
         User user = findOrCreateUser(googleId, userGoogleAuthResponseDto);
@@ -109,7 +106,9 @@ public class GoogleAuthService {
         return new JwtResponseDto(newJwt, newRefreshToken);
     }
 
-    private UserGoogleAuthResponseDto getUserInfo(String accessToken) {
+    protected UserGoogleAuthResponseDto getUserInfo(String accessToken) {
+        RestClient restClient = builder.build();
+
         return restClient.get()
             .uri(googleAuthConfig.getApiUrl())
             .headers(headers -> headers.setBearerAuth(accessToken))
@@ -134,7 +133,9 @@ public class GoogleAuthService {
         return formData;
     }
 
-    private GoogleTokenResponseDto getGoogleToken(String authCode) {
+    protected GoogleTokenResponseDto getGoogleToken(String authCode) {
+        RestClient restClient = builder.build();
+
         String tokenUrl = googleAuthConfig.getOauthUrl();
         GoogleTokenRequestDto googleTokenRequestDto = new GoogleTokenRequestDto(
             authCode,
