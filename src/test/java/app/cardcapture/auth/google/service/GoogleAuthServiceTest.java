@@ -34,7 +34,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 @RestClientTest(GoogleAuthService.class)
 @Import({RestClientConfig.class, GoogleAuthConfigStub.class})
-public class GoogleAuthServiceRestClientTest {
+public class GoogleAuthServiceTest {
 
     @Autowired
     private GoogleAuthConfigStub googleAuthConfig;

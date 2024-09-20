@@ -9,8 +9,10 @@ import app.cardcapture.payment.common.service.PaymentCommonService;
 import app.cardcapture.user.domain.Role;
 import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.domain.entity.UserRole;
+import app.cardcapture.user.dto.UserGoogleAuthResponseDto;
 import app.cardcapture.user.repository.UserRepository;
 import app.cardcapture.user.repository.UserRoleRepository;
+import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,26 @@ public class UserService {
         assignAndSaveUserRole(user);
 
         return user;
+    }
+
+    public boolean existsByGoogleId(String googleId) {
+        return userRepository.existsByGoogleId(googleId);
+    }
+
+    public User findByGoogleId(String googleId) {
+        return userRepository.findByGoogleId(googleId)
+            .orElseThrow(() -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
+    }
+
+    public List<UserProductCategory> getUserProductCategories(User user) {
+        return userProductCategoryRepository.findByUser(user);
+    }
+
+    public User findOrCreateUser(String googleId,
+        UserGoogleAuthResponseDto userGoogleAuthResponseDto) {
+        return userRepository.findByGoogleId(googleId)
+            .map(existingUser -> updateUser(existingUser, userGoogleAuthResponseDto))
+            .orElseGet(() -> createUser(googleId, userGoogleAuthResponseDto));
     }
 
     private void saveUniqueUser(User user) {
@@ -76,16 +98,29 @@ public class UserService {
             newUserProductCategory.getCount(), user);
     }
 
-    public boolean existsByGoogleId(String googleId) {
-        return userRepository.existsByGoogleId(googleId);
+    private User createUser(String googleId, UserGoogleAuthResponseDto dto) {
+        User newUser = new User();
+
+        newUser.setGoogleId(googleId);
+        newUser.setEmail(dto.email());
+        newUser.setName(dto.name());
+        newUser.setGivenName(dto.givenName());
+        newUser.setFamilyName(dto.familyName());
+        newUser.setPicture(dto.picture());
+        newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setUpdatedAt(LocalDateTime.now());
+
+        return newUser;
     }
 
-    public User findByGoogleId(String googleId) {
-        return userRepository.findByGoogleId(googleId)
-            .orElseThrow(() -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
-    }
+    private User updateUser(User user, UserGoogleAuthResponseDto dto) {
+        user.setEmail(dto.email());
+        user.setName(dto.name());
+        user.setGivenName(dto.givenName());
+        user.setFamilyName(dto.familyName());
+        user.setPicture(dto.picture());
+        user.setUpdatedAt(LocalDateTime.now());
 
-    public List<UserProductCategory> getUserProductCategories(User user) {
-        return userProductCategoryRepository.findByUser(user);
+        return user;
     }
 }

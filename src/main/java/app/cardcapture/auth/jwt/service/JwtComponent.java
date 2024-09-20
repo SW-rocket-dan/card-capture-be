@@ -2,6 +2,8 @@ package app.cardcapture.auth.jwt.service;
 
 import app.cardcapture.auth.jwt.config.JwtConfig;
 import app.cardcapture.auth.jwt.domain.Claims;
+import app.cardcapture.auth.jwt.dto.JwtResponseDto;
+import app.cardcapture.auth.jwt.dto.RefreshTokenRequestDto;
 import app.cardcapture.auth.jwt.exception.InvalidTokenException;
 import app.cardcapture.auth.jwt.exception.TokenBlacklistedException;
 import app.cardcapture.common.utils.TimeUtils;
@@ -14,7 +16,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
-import java.util.List;
+import java.time.ZoneId;
 import java.util.Set;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
@@ -97,6 +99,29 @@ public class JwtComponent {
         return claims;
     }
 
+    public JwtResponseDto refreshJwt(RefreshTokenRequestDto refreshTokenRequest) {
+        String refreshToken = refreshTokenRequest.refreshToken();
+
+        Claims claims = verifyRefreshToken(refreshToken);
+        Long userId = Long.valueOf(claims.getId());
+
+        User user = userService.findUserById(userId);
+        Date userCreatedAt = TimeUtils.toDate(user.getCreatedAt());
+
+        String newJwt = createAccessToken(userId, user.getRoles(), userCreatedAt);
+        String newRefreshToken = createRefreshToken(userId);
+
+        return new JwtResponseDto(newJwt, newRefreshToken);
+    }
+
+    public JwtResponseDto issueJwt(User user) {
+        String jwt = createAccessToken(user.getId(), user.getRoles(),
+            Date.from(user.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant()));
+        String refreshToken = createRefreshToken(user.getId());
+
+        return new JwtResponseDto(jwt, refreshToken);
+    }
+
     private DecodedJWT verifyJWT(String token) {
         DecodedJWT decodedJWT;
         try {
@@ -105,7 +130,7 @@ public class JwtComponent {
             throw new InvalidTokenException(INVALID_TOKEN);
         }
         return decodedJWT;
-    } //TODO: 한번 더 던져서 JWTExpiredException 처리 => filter에서 처리해야함! (controllerhandler에서 하는게 아닌게 맞는지 postman으로테스트하기)
+    }
 
     private void verifyBlacklisted(String token) {
         if (tokenBlacklistService.isTokenBlacklisted(token)) {

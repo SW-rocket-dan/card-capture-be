@@ -3,6 +3,7 @@ package app.cardcapture.auth.google.controller;
 import app.cardcapture.auth.google.service.GoogleAuthService;
 import app.cardcapture.auth.jwt.dto.JwtResponseDto;
 import app.cardcapture.auth.jwt.dto.RefreshTokenRequestDto;
+import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.common.dto.SuccessResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GoogleAuthController {
 
     private final GoogleAuthService googleAuthService;
+    private final JwtComponent jwtComponent;
 
     @GetMapping("/redirect")
     @Operation(summary = "구글 리다이렉트 엔드포인트", description = "구글 리다이렉트를 통해 받은 auth code를 받습니다. auth code를 이용하여 유저 정보를 가져올 것입니다.")
@@ -40,7 +42,7 @@ public class GoogleAuthController {
     public ResponseEntity<SuccessResponseDto<JwtResponseDto>> refreshJwt(
             @RequestBody @Valid RefreshTokenRequestDto refreshTokenRequest
     ) {
-        JwtResponseDto jwtResponseDto = googleAuthService.refreshJwt(refreshTokenRequest);
+        JwtResponseDto jwtResponseDto = jwtComponent.refreshJwt(refreshTokenRequest);
         return ResponseEntity.ok(SuccessResponseDto.create(jwtResponseDto));
     }
 }
