@@ -16,5 +16,5 @@ public abstract class EstablishedSecurityControllerTest {
     protected JwtComponent jwtComponent;
 
     @MockBean
-    private PrincipleUserDetailsService principleUserDetailsService;
+    private PrincipalUserDetailsService principalUserDetailsService;
 }

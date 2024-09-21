@@ -1,13 +1,12 @@
 package app.cardcapture.auth.jwt.filter;
 
 import app.cardcapture.auth.jwt.domain.Claims;
-import app.cardcapture.auth.jwt.exception.InvalidTokenException;
 import app.cardcapture.auth.jwt.service.JwtComponent;
 import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ErrorResponseDto;
 import app.cardcapture.security.PrincipalDetails;
 import app.cardcapture.security.PrincipalUserDetailsService;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +28,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private final JwtComponent jwtComponent;
     private final PrincipalUserDetailsService userDetailsService;
-    private final ObjectWriter objectWriter;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -79,7 +78,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectWriter.writeValueAsString(errorResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 
     private String extractAuthToken(String authHeader) {

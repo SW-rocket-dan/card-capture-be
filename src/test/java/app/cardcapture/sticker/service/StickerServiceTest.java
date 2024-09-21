@@ -61,7 +61,7 @@ public class StickerServiceTest {
         given(stickerRepository.save(any(Sticker.class))).willReturn(savedSticker);
 
         // when
-        StickerResponseDto result = stickerService.saveStickerWithTags(fileUrl, tagDtos);
+        StickerResponseDto result = stickerService.saveStickerWithTags(fileUrl, tagDtos, "prompt");
 
         // then
         assertAll(

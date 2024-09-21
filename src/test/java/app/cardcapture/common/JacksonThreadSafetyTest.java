@@ -19,9 +19,6 @@ public class JacksonThreadSafetyTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private ObjectWriter objectWriter;
-
     private static final int NUM_THREADS = 10;
 
     @Test
@@ -46,28 +43,4 @@ public class JacksonThreadSafetyTest {
         executorService.shutdown();
         executorService.awaitTermination(1, TimeUnit.MINUTES);
     }
-
-    @Test
-    public void testObjectWriterThreadSafety() throws InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS);
-
-        for (int i = 0; i < NUM_THREADS; i++) {
-            int threadId = i;
-            executorService.submit(() -> {
-                try {
-                    Person person = new Person("Person" + threadId, threadId * 10);
-                    String jsonString = objectWriter.writeValueAsString(person);
-                    assertEquals(String.format("{\"name\":\"Person%d\",\"age\":%d}", threadId,
-                        threadId * 10), jsonString);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
-
-        executorService.shutdown();
-        executorService.awaitTermination(1, TimeUnit.MINUTES);
-    }
-
-
 }

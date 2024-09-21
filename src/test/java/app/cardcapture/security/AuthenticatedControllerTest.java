@@ -27,7 +27,7 @@ public abstract class AuthenticatedControllerTest {
     protected PrincipalDetails principalDetails;
 
     @MockBean
-    private PrincipleUserDetailsService principleUserDetailsService;
+    private PrincipalUserDetailsService principalUserDetailsService;
 
     protected User mockUser;
 

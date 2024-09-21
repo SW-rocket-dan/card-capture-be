@@ -12,9 +12,4 @@ public class JacksonConfig {
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
-
-    @Bean
-    public ObjectWriter objectWriter() {
-        return objectMapper().writer();
-    }
 }
