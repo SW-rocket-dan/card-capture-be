@@ -1,129 +1,150 @@
 package app.cardcapture.auth.google.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import app.cardcapture.auth.google.config.GoogleAuthConfig;
 import app.cardcapture.auth.google.config.GoogleAuthConfigStub;
 import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
+import app.cardcapture.auth.jwt.service.JwtComponent;
+import app.cardcapture.common.config.RestClientConfig;
 import app.cardcapture.common.exception.BusinessLogicException;
-import app.cardcapture.user.dto.UserDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import app.cardcapture.user.domain.entity.User;
+import app.cardcapture.user.dto.UserGoogleAuthResponseDto;
+import app.cardcapture.user.repository.UserRepository;
+import app.cardcapture.user.service.UserService;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
-import org.springframework.test.web.client.response.MockRestResponseCreators;
-import org.springframework.web.client.RestTemplate;
 
-@SpringBootTest
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient.Builder;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+@RestClientTest(GoogleAuthService.class)
+@Import({RestClientConfig.class, GoogleAuthConfigStub.class})
 public class GoogleAuthServiceTest {
 
     @Autowired
-    private RestTemplate restTemplate;
+    private GoogleAuthConfigStub googleAuthConfig;
+
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private JwtComponent jwtComponent;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @Autowired
+    private MockRestServiceServer server;
 
     @Autowired
     private GoogleAuthService googleAuthService;
 
-    private GoogleAuthConfig googleAuthConfigStub;
-
-    private MockRestServiceServer mockServer;
+    @Autowired
+    private Builder restClientBuilder;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        googleAuthConfigStub = GoogleAuthConfigStub.createStub();
-        mockServer = MockRestServiceServer.createServer(restTemplate);
+        server = MockRestServiceServer.bindTo(restClientBuilder).build();
     }
 
     @Test
-    public void auth_code로_구글_데이터_서버에_Token을_받아온다() throws Exception {
+    public void 구글_리디렉션을_처리할_수_있다() throws Exception {
         // given
-        GoogleTokenResponseDto mockResponse = new GoogleTokenResponseDto(
-                "mock-access-token", "mock-refresh-token", "mock id token", "Bearer", 3600);
+        String authCode = "auth-code";
+        GoogleTokenResponseDto googleTokenResponse = new GoogleTokenResponseDto("access-token",
+            "refresh-token", "id-token", "token-type", 3600);
 
-        mockServer.expect(ExpectedCount.once(), MockRestRequestMatchers.requestTo(googleAuthConfigStub.getOauthUrl()))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withSuccess(new ObjectMapper().writeValueAsString(mockResponse), MediaType.APPLICATION_JSON));
+        UserGoogleAuthResponseDto userGoogleAuthResponse = new UserGoogleAuthResponseDto("googleId",
+            "email", true, "name", "givenName", "familyName", "picture", LocalDateTime.now(),
+            LocalDateTime.now());
+
+        User user = new User();
+        user.setGoogleId("googleId");
+
+        MultiValueMap<String, String> expectedBody = buildMultiValueBody(authCode);
+
+        this.server.expect(requestTo(googleAuthConfig.getOauthUrl()))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(content().contentType(MediaType.valueOf("application/x-www-form-urlencoded;charset=UTF-8")))
+            .andExpect(content().formData(expectedBody))
+            .andRespond(withSuccess("{ \"access_token\": \"access-token\" }", MediaType.APPLICATION_JSON));
 
         // when
-        GoogleTokenResponseDto response = googleAuthService.getGoogleToken("mock-auth-code");
+        GoogleTokenResponseDto googleTokenResponseDto = googleAuthService.retrieveGoogleToken(authCode);
 
         // then
-        assertAll("GoogleTokenResponseDto",
-                () -> assertThat(response).isNotNull(),
-                () -> assertThat(response.getAccessToken()).isEqualTo("mock-access-token"),
-                () -> assertThat(response.getTokenType()).isEqualTo("Bearer"),
-                () -> assertThat(response.getExpiresIn()).isEqualTo(3600),
-                () -> assertThat(response.getRefreshToken()).isEqualTo("mock-refresh-token")
-        );
+        assertThat(googleTokenResponseDto).isNotNull();
+        assertThat(googleTokenResponseDto.accessToken()).isEqualTo("access-token");
+    }
+
+    private MultiValueMap<String, String> buildMultiValueBody(String authCode) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("code", authCode);
+        formData.add("client_id", googleAuthConfig.getClientId());
+        formData.add("client_secret", googleAuthConfig.getClientSecret());
+        formData.add("redirect_uri", googleAuthConfig.getRedirectUri());
+        formData.add("grant_type", googleAuthConfig.getGrantType());
+        return formData;
     }
 
     @Test
-    public void auth_code로_구글_데이터_서버에_Token을_받아오지_못하면_예외_발생() {
+    public void 구글_토큰을_받아오는_중_에러가_발생하면_예외가_던져진다() {
         // given
-        mockServer.expect(ExpectedCount.once(), MockRestRequestMatchers.requestTo(googleAuthConfigStub.getOauthUrl()))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.BAD_REQUEST));
+        String authCode = "auth-code";
+
+        this.server.expect(requestTo("https://oauth2.googleapis.com/token"))
+            .andRespond(withServerError());
 
         // when & then
-        assertThatThrownBy(() -> googleAuthService.getGoogleToken("mock-auth-code"))
-                .isInstanceOf(BusinessLogicException.class);
+        assertThrows(BusinessLogicException.class,
+            () -> googleAuthService.retrieveGoogleToken(authCode));
     }
 
     @Test
-    public void access_token으로_구글_데이터_서버에_유저정보_받아오기() throws Exception {
+    public void 유저정보를_조회할_수_있다() {
         // given
-        String accessToken = "mock-access-token";
-        UserDto mockResponse = new UserDto(
-                "1234578910987654321",
-                "testuser@example.com",
-                true,
-                "Test User",
-                "Test",
-                "User",
-                "https://example.com/path/to/picture.jpg"
-        );
+        String accessToken = "access-token";
 
-        mockServer.expect(ExpectedCount.once(), MockRestRequestMatchers.requestTo(googleAuthConfigStub.getApiUrl()))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
-                .andRespond(MockRestResponseCreators.withSuccess(new ObjectMapper().writeValueAsString(mockResponse), MediaType.APPLICATION_JSON));
+        this.server.expect(requestTo("https://www.googleapis.com/oauth2/v3/userinfo"))
+            .andRespond(withSuccess(
+                "{ \"id\": \"googleId\", \"email\": \"email@example.com\", \"name\": \"User Name\" }",
+                MediaType.APPLICATION_JSON));
 
         // when
-        UserDto response = googleAuthService.getUserInfo(accessToken);
+        UserGoogleAuthResponseDto userGoogleAuthResponseDto = googleAuthService.retrieveUserInfo(
+            accessToken);
 
         // then
-        assertAll("UserDto",
-                () -> assertThat(response).isNotNull(),
-                () -> assertThat(response.getGoogleId()).isEqualTo("1234578910987654321"),
-                () -> assertThat(response.getEmail()).isEqualTo("testuser@example.com"),
-                () -> assertThat(response.isVerifiedEmail()).isTrue(),
-                () -> assertThat(response.getName()).isEqualTo("Test User"),
-                () -> assertThat(response.getGivenName()).isEqualTo("Test"),
-                () -> assertThat(response.getFamilyName()).isEqualTo("User"),
-                () -> assertThat(response.getPicture()).isEqualTo("https://example.com/path/to/picture.jpg")
-        );
+        assertThat(userGoogleAuthResponseDto).isNotNull();
+        assertThat(userGoogleAuthResponseDto.googleId()).isEqualTo("googleId");
     }
 
-    @Test
-    public void access_token으로_구글_데이터_서버에_유저정보_못_받아오면_예외_발생() {
-        // given
-        String accessToken = "mock-access-token";
 
-        mockServer.expect(ExpectedCount.once(), MockRestRequestMatchers.requestTo(googleAuthConfigStub.getApiUrl()))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
-                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.BAD_REQUEST));
+    @Test
+    public void 유저정보_조회_중_에러가_발생하면_예외가_던져진다() {
+        // given
+        String accessToken = "invalid-access-token";
+
+        this.server.expect(requestTo("https://www.googleapis.com/oauth2/v3/userinfo"))
+            .andRespond(withServerError());
 
         // when & then
-        assertThatThrownBy(() -> googleAuthService.getUserInfo(accessToken))
-                .isInstanceOf(BusinessLogicException.class);
+        assertThrows(BusinessLogicException.class,
+            () -> googleAuthService.retrieveUserInfo(accessToken));
     }
 }

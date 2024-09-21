@@ -4,7 +4,7 @@ import app.cardcapture.ai.openai.dto.AiImageChangeReqeustDto;
 import app.cardcapture.ai.openai.dto.AiImageChangeResponseDto;
 import app.cardcapture.ai.openai.service.OpenAiFacadeService;
 import app.cardcapture.common.dto.SuccessResponseDto;
-import app.cardcapture.security.PrincipleDetails;
+import app.cardcapture.security.PrincipalDetails;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
 import app.cardcapture.template.dto.TemplateEmptyResponseDto;
 import app.cardcapture.template.dto.TemplateUpdateRequestDto;
@@ -43,7 +43,7 @@ public class TemplateController {
     @Operation(summary = "템플릿 생성", description = "프롬프트 데이터를 받아 AI 포스터 템플릿을 생성합니다. 이용권이 없는 사람이 요청하면 403이 뜹니다.")
     public ResponseEntity<SuccessResponseDto<TemplateEditorResponseDto>> createTemplate(
         @Valid @RequestBody TemplateRequestDto templateRequestDto,
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         log.info("templateRequestDto = " + templateRequestDto);
 
@@ -57,7 +57,7 @@ public class TemplateController {
     @GetMapping("/create-empty")
     @Operation(summary = "빈 템플릿 생성", description = "빈 템플릿을 생성합니다. 이용권이 없어도 생성할 수 있습니다.")
     public ResponseEntity<SuccessResponseDto<TemplateEmptyResponseDto>> createEmptyTemplate(
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         TemplateEmptyResponseDto templateEmptyResponseDto = templateService.createEmptyTemplate(principle.getUser());
         SuccessResponseDto<TemplateEmptyResponseDto> responseDto = SuccessResponseDto.create(
@@ -69,7 +69,7 @@ public class TemplateController {
     @Operation(summary = "템플릿 조회", description = "템플릿 ID를 사용하여 템플릿을 조회합니다.")
     public ResponseEntity<SuccessResponseDto<TemplateResponseDto>> getTemplate(
         @PathVariable Long id,
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         TemplateResponseDto templateResponseDto = templateService.findById(id, principle.getUser());
         SuccessResponseDto<TemplateResponseDto> responseDto = SuccessResponseDto.create(
@@ -85,7 +85,7 @@ public class TemplateController {
             "자신이 소유한 템플릿이 아니라면 403이 뜨며 수정이 거부됩니다")
     public ResponseEntity<SuccessResponseDto<TemplateUpdateResponseDto>> updateTemplate(
         @Valid @RequestBody TemplateUpdateRequestDto templateUpdateRequestDto,
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         TemplateUpdateResponseDto templateEditorResponseDto = templateService.updateTemplateEditor(
             templateUpdateRequestDto, principle.getUser());
@@ -97,7 +97,7 @@ public class TemplateController {
     @GetMapping("/all")
     @Operation(summary = "사용자 템플릿 조회", description = "사용자의 모든 템플릿을 조회합니다.")
     public ResponseEntity<SuccessResponseDto<List<TemplateResponseDto>>> getAllTemplatesByUser(
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         List<TemplateResponseDto> templateResponseDtos = templateService.findAllByUserId(
             principle.getUser().getId());
@@ -116,7 +116,7 @@ public class TemplateController {
             + "현재는 배경 제거가 되지 않은 이미지만 생성됩니다. 추후 배경 제거된 이미지도 같이 받을지 선택할 수 있게 할 예정입니다.")
     public ResponseEntity<SuccessResponseDto<AiImageChangeResponseDto>> getChangedAiImage(
         @Valid @RequestBody AiImageChangeReqeustDto aiImageChangeReqeustDto,
-        @AuthenticationPrincipal PrincipleDetails principle
+        @AuthenticationPrincipal PrincipalDetails principle
     ) {
         AiImageChangeResponseDto aiImageChangeResponseDto = openAiFacadeService.changeAiImage(
             aiImageChangeReqeustDto, principle.getUser()); //TODO: 배경 제거 선택 기능 넣기

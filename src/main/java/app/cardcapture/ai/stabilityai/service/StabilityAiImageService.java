@@ -2,6 +2,7 @@ package app.cardcapture.ai.stabilityai.service;
 
 import app.cardcapture.ai.openai.config.StabilityAiConfig;
 import app.cardcapture.ai.openai.config.StabilityAiImageConfig;
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.s3.service.S3Service;
 import app.cardcapture.user.domain.entity.User;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -46,8 +46,7 @@ public class StabilityAiImageService {
             .retrieve()
             .onStatus(HttpStatusCode::isError, (request, response) -> {
                 log.error("Failed to remove background: " + response.getStatusText());
-                throw new BusinessLogicException("Failed to remove background",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new BusinessLogicException(ErrorCode.BACKGROUND_REMOVAL_FAILED);
             })
             .body(byte[].class);
         System.out.println("removed = " + removed);

@@ -1,7 +1,7 @@
-package app.cardcapture.payment.business.domain.entity;
+package app.cardcapture.user.domain.entity;
 
-import app.cardcapture.payment.business.domain.ProductCategory;
-import app.cardcapture.user.domain.entity.User;
+import app.cardcapture.user.domain.Role;
+import app.cardcapture.user.domain.UserRoleId;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -13,10 +13,11 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,32 +26,25 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_product_categories",
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "product_category"})})
+@IdClass(UserRoleId.class)
+@Table(name = "user_roles")
 @EntityListeners(AuditingEntityListener.class)
-public class UserProductCategory {
+public class UserRole {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "user_id", nullable = false,  foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private User user;
 
+    @Id
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProductCategory productCategory;
-
-    @Column(nullable = false)
-    private int quantity;
+    @Column(name = "role", nullable = false)
+    private Role role;
 
     @Column(nullable = false)
     @CreatedDate
@@ -58,8 +52,4 @@ public class UserProductCategory {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
-    public void deductUsage() {
-        this.quantity--;
-    }
 }

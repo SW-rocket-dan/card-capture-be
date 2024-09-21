@@ -11,7 +11,7 @@ import java.util.Collection;
 
 @Getter
 @RequiredArgsConstructor
-public class PrincipleDetails implements UserDetails {
+public class PrincipalDetails implements UserDetails {
 
     private final User user;
 
@@ -27,9 +27,14 @@ public class PrincipleDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(() -> user.getRole());
-        return collection;
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+
+        // Set<Role> 또는 Set<UserRole>에서 권한을 추출하여 GrantedAuthority로 변환
+        user.getRoles().forEach(role -> {
+            authorities.add(() -> role.getRole().name()); // Enum의 name() 메소드를 사용하여 문자열로 반환
+        });
+
+        return authorities;
     }
 
     @Override

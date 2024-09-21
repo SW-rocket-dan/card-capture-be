@@ -3,9 +3,7 @@ package app.cardcapture.auth.jwt.service;
 import app.cardcapture.auth.jwt.config.JwtConfig;
 import app.cardcapture.auth.jwt.domain.entity.TokenBlacklist;
 import app.cardcapture.auth.jwt.repository.TokenBlacklistRepository;
-import app.cardcapture.common.exception.BusinessLogicException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,7 +12,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class TokenBlacklistService {
 
-    private final static String TOKEN_ALREADY_BLACKLISTED = "이미 블랙리스트에 추가된 토큰입니다.";
     private final TokenBlacklistRepository tokenBlacklistRepository;
     private final JwtConfig jwtConfig;
 
@@ -26,7 +23,7 @@ public class TokenBlacklistService {
         String refinedToken = token.replace("Bearer ", "");
 
         if (isTokenBlacklisted(refinedToken)) {
-            throw new BusinessLogicException(TOKEN_ALREADY_BLACKLISTED, HttpStatus.BAD_REQUEST);
+            return;
         }
 
         TokenBlacklist tokenBlacklist = new TokenBlacklist();

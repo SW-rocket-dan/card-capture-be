@@ -12,8 +12,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,7 +28,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Builder // TODO: 빌더 제거
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
@@ -57,7 +57,8 @@ public class User {
     private String picture;
 
     @Column(nullable = false)
-    private String role = "ROLE_USER";
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<UserRole> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Template> templates;
@@ -66,7 +67,7 @@ public class User {
     private List<Payment> payments;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<UserProductCategory> userProductCategories;
+    private Set<UserProductCategory> userProductCategories;
 
     @Column(nullable = false)
     @CreatedDate

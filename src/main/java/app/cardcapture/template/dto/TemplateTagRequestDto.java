@@ -1,9 +1,9 @@
 package app.cardcapture.template.dto;
 
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.template.domain.entity.TemplateTag;
 import jakarta.validation.constraints.Size;
-import org.springframework.http.HttpStatus;
 
 public record TemplateTagRequestDto(
         @Size(max = 15) String english,
@@ -11,7 +11,7 @@ public record TemplateTagRequestDto(
 ) {
     public TemplateTagRequestDto {
         if (english == null && korean == null) {
-            throw new BusinessLogicException("At least one of 'english' or 'korean' must be provided.", HttpStatus.BAD_REQUEST);
+            throw new BusinessLogicException(ErrorCode.MISSING_REQUIRED_LANGUAGE);
         }
     }
 

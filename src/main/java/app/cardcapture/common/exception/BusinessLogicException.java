@@ -1,16 +1,14 @@
 package app.cardcapture.common.exception;
 
-import org.springframework.http.HttpStatus;
+import app.cardcapture.common.dto.ErrorCode;
+import lombok.Getter;
 
+@Getter
 public class BusinessLogicException extends RuntimeException {
-    private final HttpStatus status;
+    private final ErrorCode errorCode;
 
-    public BusinessLogicException(String message, HttpStatus status) {
-        super(message);
-        this.status = status;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
+    public BusinessLogicException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
     }
 }
