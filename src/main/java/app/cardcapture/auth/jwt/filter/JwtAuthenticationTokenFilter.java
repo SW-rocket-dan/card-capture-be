@@ -7,12 +7,13 @@ import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ErrorResponseDto;
 import app.cardcapture.security.PrincipalDetails;
 import app.cardcapture.security.PrincipalUserDetailsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -22,19 +23,20 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private final JwtComponent jwtComponent;
     private final PrincipalUserDetailsService userDetailsService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectWriter objectWriter;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         String authHeader = request.getHeader("Authorization");
-        System.out.println("authHeader = " + authHeader);
-        System.out.println("requestURI = " + request.getRequestURI());
+        log.info("authHeader = " + authHeader);
+        log.info("requestURI = " + request.getRequestURI());
 
         try {
             if (authHeader != null && !authHeader.isEmpty()) {
@@ -69,7 +71,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+            response.getWriter().write(objectWriter.writeValueAsString(errorResponse));
         }
     }
 }
