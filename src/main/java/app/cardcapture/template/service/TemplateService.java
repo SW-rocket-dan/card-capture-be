@@ -136,15 +136,7 @@ public class TemplateService {
     public TemplateEmptyResponseDto createEmptyTemplate(User user) {
         Template template = new Template();
         template.setEditor(String.format("""
-            [{
-              "id": %s,
-              "background": {
-                "url": "",
-                "opacity": 100,
-                "color": "#FFFFFF",
-              },
-              "layers": [],
-            }]""".replace("\n", ""),user.getId()));
+            [{ "id": %s, "background": { "url": "", "opacity": 100, "color": "#FFFFFF"}, "layers": [] }]""".replace("\n", ""),user.getId()));
         template.setTitle("제목이 없습니다.");
         template.setDescription("설명이 없습니다.");
         template.setFileUrl(
