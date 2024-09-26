@@ -8,7 +8,9 @@ import app.cardcapture.user.domain.entity.UserRole;
 import java.time.LocalDateTime;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 public abstract class AuthenticatedControllerTest {
 
@@ -29,11 +32,11 @@ public abstract class AuthenticatedControllerTest {
     @MockBean
     private PrincipalUserDetailsService principalUserDetailsService;
 
-    protected User mockUser;
+    protected User mockUser; // TODO: mock을 쓰는 걸 최대한 지양하고, 실제 객체를 사용하는 것이 좋다. mock 객체는 테스트를 더 복잡하게 만들 수 있기 때문이다. UserMapper랑 User랑 연관성이 있는데, 내부 toUserProfileResponseDto 같은 로직이 변경된 것을 테스트하기 어렵다.
 
     @BeforeEach
     void initMocks() {
-        MockitoAnnotations.openMocks(this);
+//        MockitoAnnotations.openMocks(this); // TODO: 이 코드 없이 어노테이션으로 사용가능 찾아보기
 
         mockUser = new User();
         mockUser.setId(1L);

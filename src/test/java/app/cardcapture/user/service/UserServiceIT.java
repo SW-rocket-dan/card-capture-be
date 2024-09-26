@@ -68,7 +68,7 @@ public class UserServiceIT {
     }
 
     @Test
-    @DisplayName("동시성 테스트: 중복된 유저를 동시에 저장 시도할 경우, 하나만 성공하고 나머지는 예외 발생")
+    @DisplayName("동시성 테스트: 중복된 유저를 동시에 저장 시도할 경우, 하나만 성공하고 나머지는 예외 발생") // TODO:
     void testConcurrentUserSave() throws InterruptedException {
         // given
         // 쓰레드 개수

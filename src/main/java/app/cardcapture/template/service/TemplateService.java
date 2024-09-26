@@ -50,11 +50,13 @@ public class TemplateService {
             .orElseThrow(() -> new BusinessLogicException(ErrorCode.PRODUCT_VOUCHER_RETRIEVAL_FAILED));
 
         // 사용 가능한 이용권이 있는지 확인
-        if (userProductCategory.getQuantity() < 1) {
-            throw new BusinessLogicException(ErrorCode.INSUFFICIENT_PRODUCT_VOUCHER);
-        }
+//        if (userProductCategory.getQuantity() < 1) {
+//            throw new BusinessLogicException(ErrorCode.INSUFFICIENT_PRODUCT_VOUCHER);
+//        } // TODO: 따닥 문제는 클라이언트에서도 막고 1초 이내에 요청 1개만 받기로 해결
+        // TODO: 확신이 없는 부분은 테스트 해봐도 괜찮을듯
 
-        userProductCategory.deductUsage();
+//        userProductCategory.deductUsage(); // TODO: deduct 쿼리를 직접 짜기. -1 하되 0보다 클 때만. 0보다 큰 경 그 떄 잡아서 BusinessLogicException 던지기
+        // TODO:update user_product_categories set quantity=quantity-1 where user_id=2 and quantity>0;
         userProductCategoryRepository.save(userProductCategory);
 
         Prompt prompt = templateRequestDto.prompt().toEntity();
@@ -142,8 +144,7 @@ public class TemplateService {
                 "color": "#FFFFFF",
               },
               "layers": [],
-            }];
-            """.replace("\n", ""),user.getId()));
+            }]""".replace("\n", ""),user.getId()));
         template.setTitle("제목이 없습니다.");
         template.setDescription("설명이 없습니다.");
         template.setFileUrl(

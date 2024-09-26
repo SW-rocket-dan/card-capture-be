@@ -72,7 +72,7 @@ public class UserService {
                     throw new BusinessLogicException(ErrorCode.DUPLICATED_USER);
                 },
                 () -> {
-                    userRepository.save(user);
+                    userRepository.save(user); // TODO: 또 에러 발생할 수 있음 수정하기  / 테스트코드에서는 service단에서 동시성 검사할 필요 없이 예외 잘 뜨는지 확인정도하고, repositoryTest에서 unique constraint 잘 걸려있는지 테스트 / 그리고 굳이 excutorservice로 동시성확인까지 안해도 순차적으로 service 호출해도 테스트 가능
                 });
     }
 

@@ -18,7 +18,7 @@ public class UserMapperTest {
     }
 
     @Test
-    public void 유저를_UserGoogleAuthResponseDto로_매핑할_수_있다() {
+    public void 유저를_UserGoogleAuthResponseDto로_매핑할_수_있다() { // TODO: 이정도는 컨트롤러 테스트에 포함됨 안해도 괜츈
         // given
         User user = new User();
         user.setGoogleId("1234578910987654321");

@@ -48,7 +48,9 @@ public class GoogleAuthService {
             .getBody();
     }
 
-    protected GoogleTokenResponseDto retrieveGoogleToken(String authCode) {
+    //  TODO: 테스트는 하고 싶은데, 접근제어자 바꾸기 애매한 상황에서 바꿨다는걸 애노테이션으로 달아둠  https://hbase.tistory.com/3
+    // @Visiblefortestion
+    GoogleTokenResponseDto retrieveGoogleToken(String authCode) {
         String tokenUrl = googleAuthConfig.getOauthUrl();
 
         return restClientBuilder.build()

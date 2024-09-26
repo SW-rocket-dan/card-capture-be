@@ -166,7 +166,7 @@ public class PaymentCommonService {
             throw new BusinessLogicException(ErrorCode.UNMATECHED_PAYMENT_CURRENCY);
         }
 
-        // TODO: 각 경우에 맞게 다시 설계해야함 안전하게 모든 경우의 수 다 적는것도 방법?
+        // TODO: 각 경우에 맞게 다시 설계해야함 안전하게 모든 경우의 수 다 적는것도 방법? ㄴㄴ
         // FINAL_PAID와 PAID는 변동이 없음
         if (FINAL_PAID.equals(payment.getPaymentStatus()) && PAID.equals(paymentStatus)) {
             log.info("이미 PAID 상태입니다.");

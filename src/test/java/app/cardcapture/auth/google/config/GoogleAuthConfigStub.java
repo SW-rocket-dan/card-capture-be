@@ -6,7 +6,7 @@ public class GoogleAuthConfigStub extends GoogleAuthConfig {
         super();
     }
 
-    public static GoogleAuthConfig createStub() {
+    public static GoogleAuthConfigStub createStub() {
         return new GoogleAuthConfigStub();
     }
 

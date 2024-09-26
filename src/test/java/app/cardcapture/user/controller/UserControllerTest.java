@@ -28,7 +28,7 @@ public class UserControllerTest extends AuthenticatedControllerTest {
     @MockBean
     private UserMapper userMapper;
 
-    @MockBean
+//    @MockBean
     private UserService userService;
 
     private UserProfileResponseDto userProfileResponseDto;
@@ -43,7 +43,7 @@ public class UserControllerTest extends AuthenticatedControllerTest {
         );
 
         given(userMapper.toUserProfileResponseDto(mockUser)).willReturn(userProfileResponseDto);
-    }
+    } // TODO: UserMapper를 mock하지 않고 이 부분 삭제 가능
 
     @Test
     public void getUserDetails_success() throws Exception {

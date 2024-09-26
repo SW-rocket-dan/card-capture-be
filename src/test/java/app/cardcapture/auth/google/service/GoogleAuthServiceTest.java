@@ -12,10 +12,12 @@ import app.cardcapture.user.service.UserService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -32,14 +34,16 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@RestClientTest(GoogleAuthService.class)
-@Import({RestClientConfig.class, GoogleAuthConfigStub.class})
+@RestClientTest
+//@Import({RestClientConfig.class, GoogleAuthConfigStub.class}) // TODO: GoogleAuthService를 MockBean에서 빼니까 이거 없어도 됐음
+@ExtendWith(MockitoExtension.class)
 public class GoogleAuthServiceTest {
 
-    @Autowired
+//    @Autowired
     private GoogleAuthConfigStub googleAuthConfig;
 
-    @MockBean
+//    @MockBean // TODO: 얘도 없어도 됐음. ExtendWith 달기
+    @Mock
     private UserService userService;
 
     @MockBean
@@ -51,8 +55,7 @@ public class GoogleAuthServiceTest {
     @Autowired
     private MockRestServiceServer server;
 
-    @Autowired
-    private GoogleAuthService googleAuthService;
+    private GoogleAuthService googleAuthService; // TODO: 테스트 타겟은 직접 주입하지 말고 실제 객체 만들어 쓰기. 1. 우리가 의존성을 직접 관리해야 우리가 의도한대로 테스트환경을 구성할 수 있음. 이 service autowired빼기
 
     @Autowired
     private Builder restClientBuilder;
@@ -60,6 +63,9 @@ public class GoogleAuthServiceTest {
     @BeforeEach
     public void setUp() {
         server = MockRestServiceServer.bindTo(restClientBuilder).build();
+        googleAuthConfig = GoogleAuthConfigStub.createStub();
+        googleAuthService = new GoogleAuthService(jwtComponent, googleAuthConfig, restClientBuilder, userRepository, userService);
+        // TODO: 그러면 이제 googleAUthconfig도 굳이 stub으로 안만들어도 됨.
     }
 
     @Test
