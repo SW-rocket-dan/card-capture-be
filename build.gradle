@@ -73,6 +73,42 @@ task makeZipForDeploy(type: Exec) {
     '''
 }
 
+task buildDockerCompose(type: Exec) {
+	commandLine 'sh', '-c', '''
+        echo "Starting custom commands"
+        ls -la
+        pwd
+        echo "Current date:" $(date)
+
+        # Step 1: Build the Spring Boot project
+        ./gradlew clean build -Dspring.profiles.active=prod -x test
+        
+        # Step 2: Prepare the deployment package
+        rm -rf deploy 
+        mkdir deploy
+        cp build/libs/cardcapture-0.0.1-SNAPSHOT.jar deploy/
+        cp build/libs/cardcapture-0.0.1-SNAPSHOT.jar src/main/java/app/cardcapture/build
+        cp -R .platform deploy/
+        cp Procfile deploy/
+        rm -f deployment-package.zip
+        cd deploy
+        zip -r ../deployment-package.zip .
+
+        echo "Building Docker image"
+        
+        # Step 3: Specify the path to Dockerfile
+        docker build -t cardcapture-app:latest -f /Users/inpink/Downloads/cardcapture/src/main/java/app/cardcapture/build/Dockerfile .
+		chmod -R 755 deploy
+        chmod 644 deploy/cardcapture-0.0.1-SNAPSHOT.jar
+        
+        echo "Starting Docker Compose"
+        
+        # Step 4: Run docker-compose from the correct path
+        docker-compose -f /Users/inpink/Downloads/cardcapture/src/main/java/app/cardcapture/build/docker-compose.yml down
+        docker-compose -f /Users/inpink/Downloads/cardcapture/src/main/java/app/cardcapture/build/docker-compose.yml up -d
+    '''
+}
+
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.ai:spring-ai-bom:$springAiVersion"

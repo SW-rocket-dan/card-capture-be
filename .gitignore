@@ -62,3 +62,7 @@ generateTemplate.html
 generateImage.html
 /src/main/resources/private/**
 /src/main/resources/static/login.html
+
+
+### build ###
+/src/main/java/app/cardcapture/build/*.jar
