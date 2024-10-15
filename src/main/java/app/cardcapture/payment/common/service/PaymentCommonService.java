@@ -22,7 +22,6 @@ import app.cardcapture.payment.common.repository.TotalSalesRepository;
 import app.cardcapture.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
