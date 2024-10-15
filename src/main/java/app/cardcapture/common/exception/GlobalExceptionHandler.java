@@ -55,4 +55,13 @@ public class GlobalExceptionHandler {
         ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
+
+    @ExceptionHandler(InterruptedException.class)
+    public ResponseEntity<ErrorResponseDto<String>> handleInterruptedException(InterruptedException ex) {
+        log.error("InterruptedException: {}", ex.getMessage(), ex);
+
+        ErrorCode errorCode = ErrorCode.INTERREPTED_EXCEPTION;
+        ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
 }

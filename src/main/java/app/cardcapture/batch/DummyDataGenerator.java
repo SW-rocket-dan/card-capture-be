@@ -1,5 +1,7 @@
 package app.cardcapture.batch;
 
+import app.cardcapture.common.dto.ErrorCode;
+import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.user.domain.entity.User;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,17 +11,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
-@RestController
-public class DummyDateGenerator {
+@Service
+public class DummyDataGenerator {
 
     private final UserJdbcRepository userJdbcRepository;
 
-    public DummyDateGenerator(UserJdbcRepository userJdbcRepository) {
+    public DummyDataGenerator(UserJdbcRepository userJdbcRepository) {
         this.userJdbcRepository = userJdbcRepository;
     }
 
@@ -27,8 +26,7 @@ public class DummyDateGenerator {
 
     }
 
-    @GetMapping("/dummy/user")
-    public ResponseEntity<String> generateUserDummyDataWithExecutorService(@RequestParam int count) {
+    public void generateUserDummyDataWithExecutorService(int count) {
         int threadCount = 1000;
         int batchSize = count / threadCount;
         int chunkSize = 1000;
@@ -43,15 +41,11 @@ public class DummyDateGenerator {
 
         try {
             if (!executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-                return ResponseEntity.status(500)
-                    .body("Error: Timeout occurred while waiting for threads to finish.");
+                throw new BusinessLogicException(ErrorCode.TIMEOUT);
             }
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return ResponseEntity.status(500).body("Error: Thread interrupted.");
+            throw new BusinessLogicException(ErrorCode.INTERREPTED_EXCEPTION);
         }
-
-        return ResponseEntity.ok("Dummy data generation initiated successfully");
     }
 
     private void runThread(int count, int i, int batchSize, int threadCount,
@@ -63,7 +57,8 @@ public class DummyDateGenerator {
             List<User> users = new ArrayList<>();
 
             for (int j = start; j < end; j++) {
-                generateRandomUser(users);
+                User newUser = generateRandomUser();
+                users.add(newUser);
                 users = saveIfChunkFull(chunkSize, users);
             }
 
@@ -73,7 +68,7 @@ public class DummyDateGenerator {
         });
     }
 
-    private void generateRandomUser(List<User> users) {
+    private User generateRandomUser() {
         User user = new User();
         user.setGoogleId(generateGoogleId());
         user.setEmail(generateUniqueEmail());
@@ -83,7 +78,7 @@ public class DummyDateGenerator {
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
 
-        users.add(user);
+        return user;
     }
 
     private List<User> saveIfChunkFull(int chunkSize, List<User> users) {
@@ -111,5 +106,16 @@ public class DummyDateGenerator {
     private String generateName() {
         int randomLength = ThreadLocalRandom.current().nextInt(1, 8);
         return UUID.randomUUID().toString().substring(0, randomLength);
+    }
+
+    public void generateUserDummyDataWithOneThread(int count) {
+        List<User> users = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            User newUser = generateRandomUser();
+            users.add(newUser);
+        }
+
+        userJdbcRepository.saveAll(users);
     }
 }
