@@ -48,6 +48,8 @@ public enum ErrorCode {
     USER_PRODUCT_CATEGORY_RETRIEVAL_FAILED(HttpStatus.NOT_FOUND, "Failed to retrieve user product category from the database"),
     USER_ALREADY_RECEIVED_SIGNUP_REWARD(HttpStatus.BAD_REQUEST, "User has already received the signup reward"),
 
+    TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "Request timeout"),
+    INTERREPTED_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "Interrepted exception"),
     ;
 
     private final HttpStatus httpStatus;
