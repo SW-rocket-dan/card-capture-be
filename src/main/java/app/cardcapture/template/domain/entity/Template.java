@@ -70,6 +70,9 @@ public class Template {
     private Prompt prompt;
 
     @Column(nullable = false)
+    private boolean visible;
+
+    @Column(nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
 
