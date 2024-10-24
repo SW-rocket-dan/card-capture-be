@@ -7,10 +7,12 @@ import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.security.PrincipalDetails;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
 import app.cardcapture.template.dto.TemplateEmptyResponseDto;
+import app.cardcapture.template.dto.TemplateSearchResponseDto;
 import app.cardcapture.template.dto.TemplateUpdateRequestDto;
 import app.cardcapture.template.dto.TemplateUpdateResponseDto;
 import app.cardcapture.template.dto.TemplateRequestDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
+import app.cardcapture.template.service.TemplateSearchService;
 import app.cardcapture.template.service.TemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +40,7 @@ public class TemplateController {
 
     private final TemplateService templateService;
     private final OpenAiFacadeService openAiFacadeService;
+    private final TemplateSearchService templateSearchService;
 
     @PostMapping("/create")
     @Operation(summary = "템플릿 생성", description = "프롬프트 데이터를 받아 AI 포스터 템플릿을 생성합니다. 이용권이 없는 사람이 요청하면 403이 뜹니다.")
@@ -122,6 +125,18 @@ public class TemplateController {
             aiImageChangeReqeustDto, principle.getUser()); //TODO: 배경 제거 선택 기능 넣기
         SuccessResponseDto<AiImageChangeResponseDto> responseDto = SuccessResponseDto.create(
             aiImageChangeResponseDto);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/search/{query}")
+    @Operation(summary = "템플릿 검색", description = "템플릿을 특정 단어 1개로 검색합니다.")
+    public ResponseEntity<SuccessResponseDto<TemplateSearchResponseDto>> searchTemplate(
+        @PathVariable String query
+    ) {
+        TemplateSearchResponseDto templateResponseDtos = templateSearchService.searchByTitleField(query);
+        SuccessResponseDto<TemplateSearchResponseDto> responseDto = SuccessResponseDto.create(
+            templateResponseDtos);
 
         return ResponseEntity.ok(responseDto);
     }
