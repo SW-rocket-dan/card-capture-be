@@ -66,3 +66,7 @@ generateImage.html
 
 ### build ###
 /src/main/java/app/cardcapture/build/*.jar
+/deployment-package/.platform/nginx/conf.d/rate_limit.conf
+/deployment-package 2/.platform/nginx/conf.d/rate_limit.conf
+/deployment-package/.platform/hooks/prebuild/setTimeZone.sh
+/deployment-package 2/.platform/hooks/prebuild/setTimeZone.sh
