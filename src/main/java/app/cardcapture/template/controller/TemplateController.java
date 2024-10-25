@@ -90,6 +90,8 @@ public class TemplateController {
         @Valid @RequestBody TemplateUpdateRequestDto templateUpdateRequestDto,
         @AuthenticationPrincipal PrincipalDetails principle
     ) {
+        templateSearchService.update(templateUpdateRequestDto);
+
         TemplateUpdateResponseDto templateEditorResponseDto = templateService.updateTemplateEditor(
             templateUpdateRequestDto, principle.getUser());
         SuccessResponseDto<TemplateUpdateResponseDto> responseDto = SuccessResponseDto.create(
