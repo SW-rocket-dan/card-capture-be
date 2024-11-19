@@ -11,10 +11,15 @@ import app.cardcapture.template.repository.TemplateRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch._types.query_dsl.Query;
@@ -32,6 +37,69 @@ public class TemplateSearchService {
     private static final String INDEX = "templates";
     private final OpenSearchClient openSearchClient;
     private final TemplateRepository templateRepository;
+    private final ConcurrentHashMap<Long, TemplateUpdateRequestDto> updateMap = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    @PostConstruct
+    public void initScheduler() {
+        scheduler.scheduleAtFixedRate(this::processBatchUpdates, 1, 1, TimeUnit.SECONDS);
+    }
+
+    public void collectUpdate(TemplateUpdateRequestDto templateUpdateRequestDto) {
+        System.out.println(updateMap);
+        updateMap.compute(templateUpdateRequestDto.id(), (key, existingValue) -> {
+            if (existingValue == null) {
+                return templateUpdateRequestDto;
+            }
+            if (existingValue.createdAt().isBefore(templateUpdateRequestDto.createdAt())) {
+                return templateUpdateRequestDto;
+            }
+            return existingValue;
+        });
+    }
+
+    private void processBatchUpdates() {
+        if (updateMap.isEmpty()) {
+            return;
+        }
+
+        updateMap.forEach((id, updateRequestDto) -> {
+            try {
+                Template template = templateRepository.findById(updateRequestDto.id())
+                    .orElseThrow(() -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
+
+                ObjectNode updateJson = objectMapper.createObjectNode();
+                Set<TemplateAttribute> updatedAttributes = updateRequestDto.updatedAttributes();
+
+                if (updatedAttributes.contains(TemplateAttribute.TITLE)) {
+                    updateJson.put("title", updateRequestDto.title());
+                }
+                if (updatedAttributes.contains(TemplateAttribute.DESCRIPTION)) {
+                    updateJson.put("description", updateRequestDto.description());
+                }
+                if (updatedAttributes.contains(TemplateAttribute.FILE_URL)) {
+                    updateJson.put("fileUrl", updateRequestDto.fileUrl());
+                }
+                if (updatedAttributes.contains(TemplateAttribute.EDITOR)) {
+                    updateJson.put("editor", updateRequestDto.editor());
+                }
+
+                UpdateRequest updateRequest = new UpdateRequest.Builder()
+                    .index(INDEX)
+                    .id(String.valueOf(template.getId()))
+                    .doc(updateJson)
+                    .build();
+
+                openSearchClient.update(updateRequest, JsonNode.class);
+
+            } catch (Exception e) {
+                throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
+            } finally {
+                updateMap.remove(id);
+            }
+        });
+    }
 
     public TemplateSearchResponseDto searchByTitleField(String query) {
         Query termQuery = buildTitleFieldQuery(query);

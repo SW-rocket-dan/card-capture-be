@@ -39,6 +39,7 @@ public class TemplateService {
     private final OpenAiTextService openAiTextService;
     private final UserProductCategoryRepository userProductCategoryRepository;
     private final OpenAiFacadeService openAiFacadeService;
+    private final TemplateSearchService templateSearchService;
 
     @Transactional // TODO: 템플릿 생성 버튼 눌렀을 때, 사용자가 마이페이지에서 확인할 수 있게 프론트랑 뭐 같이 해야할 듯
     public TemplateEditorResponseDto createTemplate(TemplateRequestDto templateRequestDto,
@@ -110,6 +111,7 @@ public class TemplateService {
         if (template.getUser().getId() != user.getId()) {
             throw new BusinessLogicException(ErrorCode.TEMPLATE_MODIFICATION_ACCESS_DENIED);
         }
+        templateSearchService.update(templateUpdateRequestDto);
 
         Set<TemplateAttribute> updatedAttributes = templateUpdateRequestDto.updatedAttributes();
 

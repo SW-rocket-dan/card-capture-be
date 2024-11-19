@@ -90,12 +90,25 @@ public class TemplateController {
         @Valid @RequestBody TemplateUpdateRequestDto templateUpdateRequestDto,
         @AuthenticationPrincipal PrincipalDetails principle
     ) {
-        templateSearchService.update(templateUpdateRequestDto);
-
         TemplateUpdateResponseDto templateEditorResponseDto = templateService.updateTemplateEditor(
             templateUpdateRequestDto, principle.getUser());
         SuccessResponseDto<TemplateUpdateResponseDto> responseDto = SuccessResponseDto.create(
             templateEditorResponseDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @PatchMapping("/collect-update")
+    @Operation(
+        summary = "템플릿 업데이트 요청 수집",
+        description = "템플릿 업데이트 요청을 수집하고 배치로 처리합니다. 업데이트할 템플릿 ID와 변경된 요소를 전달해야 합니다. " +
+            "실제 OpenSearch 반영은 일정 주기(1초)로 처리됩니다."
+    )
+    public ResponseEntity<SuccessResponseDto<String>> collectUpdate(
+        @Valid @RequestBody TemplateUpdateRequestDto templateUpdateRequestDto
+    ) {
+        templateSearchService.collectUpdate(templateUpdateRequestDto);
+
+        SuccessResponseDto<String> responseDto = SuccessResponseDto.create("Update request collected successfully.");
         return ResponseEntity.ok(responseDto);
     }
 
