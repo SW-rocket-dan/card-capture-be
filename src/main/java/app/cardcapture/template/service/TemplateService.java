@@ -63,8 +63,6 @@ public class TemplateService {
         template.setEditor(editorJson);
         template.setTitle(templateRequestDto.prompt().phraseDetails().phrases().get(0));
         template.setDescription(templateRequestDto.prompt().purpose());
-        template.setFileUrl(
-            "https://cardcaptureposterimage.s3.ap-northeast-2.amazonaws.com/default/incompleteAnnouncement.png"); //TODO: 잘못됐어 대기열넣고 뜯어고쳐야함
 
         Template savedTemplate = templateRepository.save(template);
 
