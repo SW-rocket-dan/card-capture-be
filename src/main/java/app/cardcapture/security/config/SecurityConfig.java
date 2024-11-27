@@ -28,7 +28,7 @@ public class SecurityConfig {
                 -> requests
                 .requestMatchers("/api/v1/auth/google/**", "/api/v1/payment/single/webhook",
                     "/health", "/favicon.ico",
-                    swaggerPath + "/**", "/swagger-ui/**", "/actuator/**", "/**"
+                    swaggerPath + "/**", "/swagger-ui/**", "/actuator/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

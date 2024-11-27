@@ -10,6 +10,7 @@ public enum ErrorCode {
     DUPLICATED_USER(HttpStatus.CONFLICT, "User already exists"),
     USER_RETRIEVAL_FAILED(HttpStatus.NOT_FOUND, "Failed to retrieve user from the database"),
     GOOGLE_ACCESS_TOKEN_RETRIEVAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve Google access token"), //
+    SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Server error"),
 
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
 

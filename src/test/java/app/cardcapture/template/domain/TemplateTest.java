@@ -28,6 +28,7 @@ public class TemplateTest {
                 "fileUrl",
                 new ArrayList<>(),
                 prompt,
+                true,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );

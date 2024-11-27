@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +17,8 @@ public record TemplateUpdateRequestDto(
     @Size(max = 300) String description,
     @Size(max = 500) String fileUrl,
     @Valid List<TemplateTagRequestDto> templateTags,
-    @NotEmpty Set<TemplateAttribute> updatedAttributes
+    @NotEmpty Set<TemplateAttribute> updatedAttributes,
+    LocalDateTime createdAt
 ) {
 
 }

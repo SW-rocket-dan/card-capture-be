@@ -7,10 +7,12 @@ import app.cardcapture.common.dto.SuccessResponseDto;
 import app.cardcapture.security.PrincipalDetails;
 import app.cardcapture.template.dto.TemplateEditorResponseDto;
 import app.cardcapture.template.dto.TemplateEmptyResponseDto;
+import app.cardcapture.template.dto.TemplateSearchResponseDto;
 import app.cardcapture.template.dto.TemplateUpdateRequestDto;
 import app.cardcapture.template.dto.TemplateUpdateResponseDto;
 import app.cardcapture.template.dto.TemplateRequestDto;
 import app.cardcapture.template.dto.TemplateResponseDto;
+import app.cardcapture.template.service.TemplateSearchService;
 import app.cardcapture.template.service.TemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +40,7 @@ public class TemplateController {
 
     private final TemplateService templateService;
     private final OpenAiFacadeService openAiFacadeService;
+    private final TemplateSearchService templateSearchService;
 
     @PostMapping("/create")
     @Operation(summary = "템플릿 생성", description = "프롬프트 데이터를 받아 AI 포스터 템플릿을 생성합니다. 이용권이 없는 사람이 요청하면 403이 뜹니다.")
@@ -94,6 +97,21 @@ public class TemplateController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PatchMapping("/collect-update")
+    @Operation(
+        summary = "템플릿 업데이트 요청 수집",
+        description = "템플릿 업데이트 요청을 수집하고 배치로 처리합니다. 업데이트할 템플릿 ID와 변경된 요소를 전달해야 합니다. " +
+            "실제 OpenSearch 반영은 일정 주기(1초)로 처리됩니다."
+    )
+    public ResponseEntity<SuccessResponseDto<String>> collectUpdate(
+        @Valid @RequestBody TemplateUpdateRequestDto templateUpdateRequestDto
+    ) {
+        templateSearchService.collectUpdate(templateUpdateRequestDto);
+
+        SuccessResponseDto<String> responseDto = SuccessResponseDto.create("Update request collected successfully.");
+        return ResponseEntity.ok(responseDto);
+    }
+
     @GetMapping("/all")
     @Operation(summary = "사용자 템플릿 조회", description = "사용자의 모든 템플릿을 조회합니다.")
     public ResponseEntity<SuccessResponseDto<List<TemplateResponseDto>>> getAllTemplatesByUser(
@@ -122,6 +140,18 @@ public class TemplateController {
             aiImageChangeReqeustDto, principle.getUser()); //TODO: 배경 제거 선택 기능 넣기
         SuccessResponseDto<AiImageChangeResponseDto> responseDto = SuccessResponseDto.create(
             aiImageChangeResponseDto);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/search/{query}")
+    @Operation(summary = "템플릿 검색", description = "템플릿을 특정 단어 1개로 검색합니다.")
+    public ResponseEntity<SuccessResponseDto<TemplateSearchResponseDto>> searchTemplate(
+        @PathVariable String query
+    ) {
+        TemplateSearchResponseDto templateResponseDtos = templateSearchService.searchByTitleField(query);
+        SuccessResponseDto<TemplateSearchResponseDto> responseDto = SuccessResponseDto.create(
+            templateResponseDtos);
 
         return ResponseEntity.ok(responseDto);
     }

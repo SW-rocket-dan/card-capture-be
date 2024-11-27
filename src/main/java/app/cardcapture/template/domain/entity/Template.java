@@ -61,13 +61,15 @@ public class Template {
     @Column(nullable = false)
     private String fileUrl; //TODO: 처음 template이 생길때 null임
 
-    // @Column(nullable = false)
     @OneToMany(mappedBy = "template", fetch = FetchType.LAZY)
     private List<TemplateTag> templateTags;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prompt_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Prompt prompt;
+
+    @Column(nullable = false)
+    private boolean visible;
 
     @Column(nullable = false)
     @CreatedDate
