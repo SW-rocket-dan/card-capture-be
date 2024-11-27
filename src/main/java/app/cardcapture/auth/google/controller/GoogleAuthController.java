@@ -31,7 +31,7 @@ public class GoogleAuthController {
     @Operation(summary = "구글 리다이렉트 엔드포인트", description = "구글 리다이렉트를 통해 받은 auth code를 받습니다. auth code를 이용하여 유저 정보를 가져올 것입니다.")
     @Transactional
     public ResponseEntity<SuccessResponseDto<JwtResponseDto>> getGoogleRedirect(
-            @RequestParam(name = "code") String authCode
+        @RequestParam(name = "code") String authCode
     ) {
         JwtResponseDto jwtResponseDto = googleAuthService.handleGoogleRedirect(authCode);
         return ResponseEntity.ok(SuccessResponseDto.create(jwtResponseDto));
@@ -40,7 +40,7 @@ public class GoogleAuthController {
     @PostMapping("/refresh")
     @Operation(summary = "JWT 갱신", description = "리프레시 토큰을 이용하여 새로운 JWT를 반환합니다.")
     public ResponseEntity<SuccessResponseDto<JwtResponseDto>> refreshJwt(
-            @RequestBody @Valid RefreshTokenRequestDto refreshTokenRequest
+        @RequestBody @Valid RefreshTokenRequestDto refreshTokenRequest
     ) {
         JwtResponseDto jwtResponseDto = jwtComponent.refreshJwt(refreshTokenRequest);
         return ResponseEntity.ok(SuccessResponseDto.create(jwtResponseDto));

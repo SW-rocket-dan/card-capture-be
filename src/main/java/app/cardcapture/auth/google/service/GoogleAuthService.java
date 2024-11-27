@@ -10,6 +10,7 @@ import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.dto.UserGoogleAuthResponseDto;
 import app.cardcapture.user.repository.UserRepository;
 import app.cardcapture.user.service.UserService;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
@@ -48,8 +49,7 @@ public class GoogleAuthService {
             .getBody();
     }
 
-    //  TODO: 테스트는 하고 싶은데, 접근제어자 바꾸기 애매한 상황에서 바꿨다는걸 애노테이션으로 달아둠  https://hbase.tistory.com/3
-    // @Visiblefortestion
+    @VisibleForTesting
     GoogleTokenResponseDto retrieveGoogleToken(String authCode) {
         String tokenUrl = googleAuthConfig.getOauthUrl();
 

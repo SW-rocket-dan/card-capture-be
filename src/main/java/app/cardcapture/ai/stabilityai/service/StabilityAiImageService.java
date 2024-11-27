@@ -37,10 +37,26 @@ public class StabilityAiImageService {
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("image", imageResource);
 
-        byte[] removed = restClient.post()
+        byte[] removed = requestToStabilityAi(bodyBuilder);
+        log.info("removed = " + removed);
+
+        return uploadImageToS3(fileName, user, removed);
+    }
+
+    private String uploadImageToS3(String fileName, User user, byte[] removed) {
+        return s3Service.uploadImageFromByte(
+            removed,
+            stabilityAiImageConfig.getRemovedBackgroundImageFilePath(),
+            fileName + "_removed",
+            stabilityAiImageConfig.getExtension(),
+            user);
+    }
+
+    private byte[] requestToStabilityAi(MultipartBodyBuilder bodyBuilder) {
+        return restClient.post()
             .uri("https://api.stability.ai/v2beta/stable-image/edit/remove-background")
             .contentType(MediaType.MULTIPART_FORM_DATA)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer "+stabilityAiConfig.getApiKey())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + stabilityAiConfig.getApiKey())
             .header(HttpHeaders.ACCEPT, "image/*")
             .body(bodyBuilder.build())
             .retrieve()
@@ -49,13 +65,5 @@ public class StabilityAiImageService {
                 throw new BusinessLogicException(ErrorCode.BACKGROUND_REMOVAL_FAILED);
             })
             .body(byte[].class);
-        System.out.println("removed = " + removed);
-
-        return s3Service.uploadImageFromByte(
-            removed,
-            stabilityAiImageConfig.getRemovedBackgroundImageFilePath(),
-            fileName+"_removed",
-            stabilityAiImageConfig.getExtension(),
-            user);
     }
 }
