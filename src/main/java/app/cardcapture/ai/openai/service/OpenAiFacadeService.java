@@ -53,9 +53,8 @@ public class OpenAiFacadeService {
         return new PosterMainImageDto(
             originalImage.aiImageId(),
             originalImage.url(),
-            removedBackgroundImageUrl);   // TODO: 이름을 어떻게 통일할지??? Template, Poster
-        // TODO: 비동기(리액티브)를 하는게 좋을까요? 이유: IO가 5번 (유나, openai, s3, stability, s3) + DB IO
-    } // 템플릿 요청 저장(임시 장바구니)   /  openai 보내
+            removedBackgroundImageUrl); // TODO: consider asyn
+    }
 
     private ImageMessage makeImageMessage(PromptRequestDto promptRequestDto, User user) {
         String untranslatedPurpose = promptRequestDto.purpose();
@@ -75,7 +74,6 @@ public class OpenAiFacadeService {
     }
 
     public ImageDto generateBackgroundImage(String originalImageUrl, String message, User user) {
-        // Spring ai로 현재 이미지의 prompt 불러오든, 이미지 저장할 때부터 prompt 저장해놓든 하고
         String originalImagePrompt = "기존에 이런 이미지가 있어."
             + "Create a soft, dreamy background with a gradient of pastel pink and blue. Include various sizes of translucent circles and sparkles throughout the image to give a whimsical, ethereal effect.";
         String changeRequestInstruction = originalImagePrompt + "여기서 조금 더" + message + "느낌을 더해줘";

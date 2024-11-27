@@ -33,15 +33,12 @@ import java.util.Set;
 public class TemplateService {
 
     private final TemplateRepository templateRepository;
-    private final TemplateTagRepository templateTagRepository;
     private final PromptRepository promptRepository;
-    private final TemplateTagService templateTagService;
-    private final OpenAiTextService openAiTextService;
     private final UserProductCategoryRepository userProductCategoryRepository;
     private final OpenAiFacadeService openAiFacadeService;
     private final TemplateSearchService templateSearchService;
 
-    @Transactional // TODO: 템플릿 생성 버튼 눌렀을 때, 사용자가 마이페이지에서 확인할 수 있게 프론트랑 뭐 같이 해야할 듯
+    @Transactional
     public TemplateEditorResponseDto createTemplate(TemplateRequestDto templateRequestDto,
         User user) {
         ProductCategory productCategory = ProductCategory.AI_POSTER_PRODUCTION_TICKET;
@@ -50,11 +47,9 @@ public class TemplateService {
                 user, productCategory)
             .orElseThrow(() -> new BusinessLogicException(ErrorCode.PRODUCT_VOUCHER_RETRIEVAL_FAILED));
 
-        // 사용 가능한 이용권이 있는지 확인
-//        if (userProductCategory.getQuantity() < 1) {
-//            throw new BusinessLogicException(ErrorCode.INSUFFICIENT_PRODUCT_VOUCHER);
-//        } // TODO: 따닥 문제는 클라이언트에서도 막고 1초 이내에 요청 1개만 받기로 해결
-        // TODO: 확신이 없는 부분은 테스트 해봐도 괜찮을듯
+        if (userProductCategory.getQuantity() < 1) {
+            throw new BusinessLogicException(ErrorCode.INSUFFICIENT_PRODUCT_VOUCHER);
+        } // TODO: 따닥 문제는 클라이언트에서도 막고 1초 이내에 요청 1개만 받기로 해결
 
 //        userProductCategory.deductUsage(); // TODO: deduct 쿼리를 직접 짜기. -1 하되 0보다 클 때만. 0보다 큰 경 그 떄 잡아서 BusinessLogicException 던지기
         // TODO:update user_product_categories set quantity=quantity-1 where user_id=2 and quantity>0;
@@ -63,12 +58,8 @@ public class TemplateService {
         Prompt prompt = templateRequestDto.prompt().toEntity();
         Prompt savedPrompt = promptRepository.save(prompt);
 
-        // TODO: tag 관련 기획 확정되면 template create dto 설계 다시해야할듯
-        // List<TemplateTagRequestDto> tags = templateRequestDto.templateTags();
-
         Template template = templateRequestDto.toEntity(savedPrompt);
 
-        // template에 무언가를 열심히 설정한다
         template.setUser(user);
         String editorJson = openAiFacadeService.generateText(templateRequestDto.prompt(),
             templateRequestDto.count(), user);
@@ -97,7 +88,7 @@ public class TemplateService {
     }
 
     public List<TemplateResponseDto> findAllByUserId(Long userId) {
-        return templateRepository.findByUserId(userId).stream()
+        return templateRepository.findByUserIdWithRelations(userId).stream()
             .map(template -> TemplateResponseDto.fromEntity(template))
             .toList();
     }
