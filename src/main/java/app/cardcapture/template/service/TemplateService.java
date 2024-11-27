@@ -43,17 +43,13 @@ public class TemplateService {
         User user) {
         ProductCategory productCategory = ProductCategory.AI_POSTER_PRODUCTION_TICKET;
 
-        UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategoryWithLock(
-                user, productCategory)
-            .orElseThrow(() -> new BusinessLogicException(ErrorCode.PRODUCT_VOUCHER_RETRIEVAL_FAILED));
+        // TODO: 따닥 문제는 클라이언트에서도 막고 1초 이내에 요청 1개만 받기로 해결
 
-        if (userProductCategory.getQuantity() < 1) {
+        int rowsUpdated = userProductCategoryRepository.deductUsage(user.getId(), productCategory);
+
+        if (rowsUpdated == 0) {
             throw new BusinessLogicException(ErrorCode.INSUFFICIENT_PRODUCT_VOUCHER);
-        } // TODO: 따닥 문제는 클라이언트에서도 막고 1초 이내에 요청 1개만 받기로 해결
-
-//        userProductCategory.deductUsage(); // TODO: deduct 쿼리를 직접 짜기. -1 하되 0보다 클 때만. 0보다 큰 경 그 떄 잡아서 BusinessLogicException 던지기
-        // TODO:update user_product_categories set quantity=quantity-1 where user_id=2 and quantity>0;
-        userProductCategoryRepository.save(userProductCategory);
+        }
 
         Prompt prompt = templateRequestDto.prompt().toEntity();
         Prompt savedPrompt = promptRepository.save(prompt);
@@ -71,7 +67,6 @@ public class TemplateService {
             "https://cardcaptureposterimage.s3.ap-northeast-2.amazonaws.com/default/incompleteAnnouncement.png"); //TODO: 잘못됐어 대기열넣고 뜯어고쳐야함
 
         Template savedTemplate = templateRepository.save(template);
-        // List<TemplateTag> savedTags = templateTagService.saveTags(tags, savedTemplate);
 
         return new TemplateEditorResponseDto(savedTemplate.getId(), savedTemplate.getEditor());
     }

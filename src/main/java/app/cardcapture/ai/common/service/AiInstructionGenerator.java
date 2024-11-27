@@ -3,7 +3,6 @@ package app.cardcapture.ai.common.service;
 import app.cardcapture.common.dto.ImageDto;
 import app.cardcapture.template.dto.PosterMainImageDto;
 import app.cardcapture.template.dto.PromptRequestDto;
-import app.cardcapture.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,19 +12,16 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AiInstructionGenerator {
 
-    private final UserRepository userRepository;
-
     public String makeTemplateBackgroundImageInstruction(
         String purpose,
         String color,
         String phrases
-    ) { // TODO: instruction 외부파일로 관리하는 방법?
+    ) {
         String instruction = "an soft pastel-colored illustration of " + purpose + "and "
             + phrases + "." +
             "I like images that are easy to pick from the background with a thick, dark outline that encloses everything. "
             +
             "The color mood is " + color + "." +
-            //"the key word is " + prompt.phraseDetails().firstEmphasis() + " and " +prompt.phraseDetails().secondEmphasis() +
             "Ensure there are no text or letters in the image. If the letter is included, draw it again until it is not included. If there are invalid letters,  draw it again until it is not included."
             +
             "The style is cute and cartoonish with rounded edges and a friendly atmosphere." +
@@ -78,7 +74,8 @@ public class AiInstructionGenerator {
             + "                \"size\": \"32px\",\n"
             + "                \"color\": \"#ba1ff7\"\n"
             + "              },\n"
-            + "              \"insert\": \"" + promptRequestDto.phraseDetails().phrases().get(0) + "\"\n"
+            + "              \"insert\": \"" + promptRequestDto.phraseDetails().phrases().get(0)
+            + "\"\n"
             + "            },\n"
             + "            {\n"
             + "              \"insert\": \"\\n\"\n"
@@ -131,7 +128,9 @@ public class AiInstructionGenerator {
             + "                \"font\": \"BlackHanSans\",\n"
             + "                \"color\": \"#9b00ff\"\n"
             + "              },\n"
-            + "              \"insert\": \"" + (promptRequestDto.phraseDetails().phrases().size() >= 2 ? promptRequestDto.phraseDetails().phrases().get(1) : "") + "\"\n"
+            + "              \"insert\": \"" + (
+            promptRequestDto.phraseDetails().phrases().size() >= 2
+                ? promptRequestDto.phraseDetails().phrases().get(1) : "") + "\"\n"
             + "            },\n"
             + "            {\n"
             + "              \"insert\": \"\\n\"\n"

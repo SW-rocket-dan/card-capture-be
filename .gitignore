@@ -41,6 +41,7 @@ out/
 /src/main/resources/application-prod.yml
 /src/main/resources/application-dev.yml
 /src/main/resources/application.yml
+/src/test/resources/application-test.yml
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

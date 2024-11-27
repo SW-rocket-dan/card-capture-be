@@ -19,6 +19,7 @@ import app.cardcapture.template.domain.entity.Template;
 import app.cardcapture.template.dto.TemplateUpdateRequestDto;
 import app.cardcapture.template.repository.TemplateRepository;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,8 @@ public class TemplateSearchServiceTest {
             "New Description",
             "new-file-url.jpg",
             List.of(),
-            Set.of(TemplateAttribute.TITLE, TemplateAttribute.DESCRIPTION)
+            Set.of(TemplateAttribute.TITLE, TemplateAttribute.DESCRIPTION),
+            LocalDateTime.now()
         );
     }
 

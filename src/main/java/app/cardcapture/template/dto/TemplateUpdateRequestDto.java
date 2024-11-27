@@ -12,7 +12,7 @@ import java.util.Set;
 
 public record TemplateUpdateRequestDto(
     @Min(1) Long id,
-    String editor, // TODO: 길이 제한, format 확인
+    String editor,
     @Size(max = 50) String title,
     @Size(max = 300) String description,
     @Size(max = 500) String fileUrl,
