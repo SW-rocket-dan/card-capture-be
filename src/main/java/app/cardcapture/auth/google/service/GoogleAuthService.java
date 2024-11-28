@@ -43,7 +43,7 @@ public class GoogleAuthService {
             .headers(headers -> headers.setBearerAuth(accessToken))
             .retrieve()
             .onStatus(HttpStatusCode::isError, (request, response) -> {
-                throw new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED);
+                throw new BusinessLogicException(ErrorCode.NOT_FOUND);
             })
             .toEntity(UserGoogleAuthResponseDto.class)
             .getBody();
@@ -61,7 +61,7 @@ public class GoogleAuthService {
             .body(buildMultiValueBody(authCode))
             .retrieve()
             .onStatus(HttpStatusCode::isError, (request, response) -> {
-                throw new BusinessLogicException(ErrorCode.GOOGLE_ACCESS_TOKEN_RETRIEVAL_ERROR);
+                throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
             })
             .toEntity(GoogleTokenResponseDto.class)
             .getBody();

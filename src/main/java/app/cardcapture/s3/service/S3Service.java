@@ -13,7 +13,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.util.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -124,7 +123,7 @@ public class S3Service {
                     savedAiImage.getId());
             }
         } catch (IOException e) {
-            throw new BusinessLogicException(ErrorCode.IMAGE_URL_READ_FAILED);
+            throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
         }
     }
 
@@ -134,7 +133,7 @@ public class S3Service {
             connection.setRequestMethod("GET");
             return connection;
         } catch (IOException e) {
-            throw new BusinessLogicException(ErrorCode.IMAGE_URL_READ_FAILED);
+            throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
         }
     }
 
@@ -155,7 +154,7 @@ public class S3Service {
             amazonS3.putObject(bucket+path, fileName+user.getId()+"."+extension, byteArrayInputStream, metadata);
             return String.format("https://%s.s3.%s.amazonaws.com"+path+"/%s", bucket, "ap-northeast-2", fileName+user.getId()+"."+extension);
         } catch (IOException e) {
-            throw new BusinessLogicException(ErrorCode.IMAGE_RAW_READ_FAILED);
+            throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
         }
     }
 }

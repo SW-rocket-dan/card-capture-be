@@ -36,7 +36,7 @@ public class DummyDataGenerator {
                 throw new BusinessLogicException(ErrorCode.TIMEOUT);
             }
         } catch (InterruptedException e) {
-            throw new BusinessLogicException(ErrorCode.INTERREPTED_EXCEPTION);
+            throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
         }
     }
 

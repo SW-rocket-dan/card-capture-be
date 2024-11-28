@@ -67,7 +67,7 @@ public class TemplateSearchService {
         updateMap.forEach((id, updateRequestDto) -> {
             try {
                 Template template = templateRepository.findById(updateRequestDto.id())
-                    .orElseThrow(() -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
+                    .orElseThrow(() -> new BusinessLogicException(ErrorCode.NOT_FOUND));
 
                 ObjectNode updateJson = objectMapper.createObjectNode();
                 Set<TemplateAttribute> updatedAttributes = updateRequestDto.updatedAttributes();
@@ -112,7 +112,7 @@ public class TemplateSearchService {
     public void update(TemplateUpdateRequestDto templateUpdateRequestDto) {
         Template template = templateRepository.findById(templateUpdateRequestDto.id())
             .orElseThrow(()
-                -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
+                -> new BusinessLogicException(ErrorCode.NOT_FOUND));
 
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode updateJson = objectMapper.createObjectNode();

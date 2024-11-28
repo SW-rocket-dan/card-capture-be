@@ -137,7 +137,7 @@ public class PaymentCommonService {
                 log.info("Portone API error: " + response.getStatusCode());
                 canclePayment(unchekcedPaymentId);
                 throw new BusinessLogicException(
-                    ErrorCode.PAYMENT_VERIFICATION_FAILED);  //TODO: 일단 바로 취소되게 해놨는데 ,나중에 여러 번 시도하는 걸로 바꾸기
+                    ErrorCode.SERVER_ERROR);  //TODO: 일단 바로 취소되게 해놨는데 ,나중에 여러 번 시도하는 걸로 바꾸기
             })
             .body(PortonePaymentInquiryResponseDto.class);
 
@@ -152,8 +152,8 @@ public class PaymentCommonService {
         String currency = portonePaymentInquiryResponseDto.currency();
 
         Payment payment = paymentRepository.findByPaymentIdWithLock(
-                paymentId) // (select for update 락 걸기)
-            .orElseThrow(() -> new BusinessLogicException(ErrorCode.PAYMENT_RETRIEVAL_FAILED));
+                paymentId)
+            .orElseThrow(() -> new BusinessLogicException(ErrorCode.NOT_FOUND));
 
         if (totalPrice != payment.getTotalPrice()) {
             canclePayment(payment);
@@ -192,14 +192,14 @@ public class PaymentCommonService {
             .retrieve()
             .onStatus(HttpStatusCode::isError, (request, response) -> {
                 // TODO: 관리자 알람을 주든지 따로 모아놓고 배치를 주든지 해야함
-                throw new BusinessLogicException(ErrorCode.PAYMENT_CANCELLATION_FAILED);
+                throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
             });
     }
 
     @Transactional
     public void canclePayment(String paymentId) {
         Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId)
-            .orElseThrow(() -> new BusinessLogicException(ErrorCode.PAYMENT_RETRIEVAL_FAILED));
+            .orElseThrow(() -> new BusinessLogicException(ErrorCode.NOT_FOUND));
 
         canclePayment(payment);
     }
@@ -211,7 +211,6 @@ public class PaymentCommonService {
         // 각 상품(DisplayProduct)에 맞는 ProductCategory를 조회한다.
         // 각 ProductCategory에 대해,
         if (payment.isVoucherIssued()) {
-            log.info("이미 이용권이 발급된 payment입니다.");
             return payment; // TODO: 이름 Voucher로 통일하기
         }
         List<PaymentProduct> products = payment.getPaymentProducts();
@@ -219,13 +218,12 @@ public class PaymentCommonService {
         ProductCategory productCategory = product.getProductCategory();
         int quantity = product.getQuantity();
 
-        // 이미 있는 값이면 업데이트해줘야 한다
         if (userProductCategoryRepository.existsByUserAndProductCategory(user,
             productCategory)) { // TODO: 동시성 이슈 확인하기
             UserProductCategory userProductCategory = userProductCategoryRepository.findByUserAndProductCategoryWithLock(
                     user, productCategory)
                 .orElseThrow(() -> new BusinessLogicException(
-                    ErrorCode.USER_PRODUCT_CATEGORY_RETRIEVAL_FAILED));
+                    ErrorCode.NOT_FOUND));
             userProductCategory.setQuantity(userProductCategory.getQuantity() + quantity);
             userProductCategoryRepository.save(userProductCategory);
         } else {
@@ -247,7 +245,7 @@ public class PaymentCommonService {
     public void saveUserProductCategory(ProductCategory productCategory, int count, User user) {
         userProductCategoryRepository.findByUserAndProductCategory(user, productCategory)
             .ifPresentOrElse(userProductCategory -> {
-                    throw new BusinessLogicException(ErrorCode.USER_PRODUCT_CATEGORY_RETRIEVAL_FAILED);
+                    throw new BusinessLogicException(ErrorCode.NOT_FOUND);
                 },
                 () -> {
                     UserProductCategory userProductCategory = new UserProductCategory();

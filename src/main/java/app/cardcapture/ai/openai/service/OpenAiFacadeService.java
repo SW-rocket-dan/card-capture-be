@@ -93,7 +93,7 @@ public class OpenAiFacadeService {
         User user) {
         AiImage aiImage = aiImageRepository.findById(aiImageChangeReqeustDto.aiImageId())
             .orElseThrow(
-                () -> new BusinessLogicException(ErrorCode.IMAGE_RETREIVAL_FAILED));
+                () -> new BusinessLogicException(ErrorCode.NOT_FOUND));
 
         ImageMessage changeImageMessage = new ImageMessage(
             "기존에 이런 이미지가 있어." + aiImage.getPrompt() + "여기서 조금 더" + aiImageChangeReqeustDto.message()

@@ -62,7 +62,7 @@ public class StabilityAiImageService {
             .retrieve()
             .onStatus(HttpStatusCode::isError, (request, response) -> {
                 log.error("Failed to remove background: " + response.getStatusText());
-                throw new BusinessLogicException(ErrorCode.BACKGROUND_REMOVAL_FAILED);
+                throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
             })
             .body(byte[].class);
     }

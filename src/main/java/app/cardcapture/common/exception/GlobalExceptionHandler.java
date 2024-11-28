@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto<String>> handleGeneralException(RuntimeException ex) {
         log.error("RuntimeException: {}", ex.getMessage(), ex);
 
-        ErrorCode errorCode = ErrorCode.UNEXPECTED_RUNTIME_EXCEPTION;
+        ErrorCode errorCode = ErrorCode.SERVER_ERROR;
         ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto<String>> handleInterruptedException(InterruptedException ex) {
         log.error("InterruptedException: {}", ex.getMessage(), ex);
 
-        ErrorCode errorCode = ErrorCode.INTERREPTED_EXCEPTION;
+        ErrorCode errorCode = ErrorCode.SERVER_ERROR;
         ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }

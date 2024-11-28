@@ -33,7 +33,7 @@ public class UserService {
     public User findUserById(Long id) {
         return userRepository.findById(id)
             .orElseThrow(
-                () -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
+                () -> new BusinessLogicException(ErrorCode.NOT_FOUND));
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -52,7 +52,7 @@ public class UserService {
 
     public User findByGoogleId(String googleId) {
         return userRepository.findByGoogleId(googleId)
-            .orElseThrow(() -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
+            .orElseThrow(() -> new BusinessLogicException(ErrorCode.NOT_FOUND));
     }
 
     public List<UserProductCategory> getUserProductCategories(User user) {

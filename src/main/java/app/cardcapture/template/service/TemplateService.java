@@ -71,7 +71,7 @@ public class TemplateService {
 
     public TemplateResponseDto findById(Long id, User user) {
         Template template = templateRepository.findById(id).orElseThrow(
-            () -> new BusinessLogicException(ErrorCode.TEMPLTE_RETRIEVAL_FAILED));
+            () -> new BusinessLogicException(ErrorCode.NOT_FOUND));
 
         if (template.getUser().getId()!=user.getId()) {
             throw new BusinessLogicException(ErrorCode.TEMPLATE_ACCESS_DENIED);
@@ -90,7 +90,7 @@ public class TemplateService {
         TemplateUpdateRequestDto templateUpdateRequestDto, User user) {
         Template template = templateRepository.findById(templateUpdateRequestDto.id())
             .orElseThrow(()
-                -> new BusinessLogicException(ErrorCode.USER_RETRIEVAL_FAILED));
+                -> new BusinessLogicException(ErrorCode.NOT_FOUND));
 
         if (template.getUser().getId() != user.getId()) {
             throw new BusinessLogicException(ErrorCode.TEMPLATE_MODIFICATION_ACCESS_DENIED);
