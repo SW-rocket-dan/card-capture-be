@@ -11,7 +11,7 @@ import java.util.Optional;
 public enum DisplayProduct {
     AI_POSTER_PRODUCTION_TICKET("AI 포스터 생성 이용권", ProductCategory.AI_POSTER_PRODUCTION_TICKET, 5000, 500),
     POSTER_BUY_TICKET("포스터 구매 이용권", ProductCategory.POSTER_BUY_TICKET, 3000, 200),
-    SUBSCRIPTION_TICKET("구독 이용권", ProductCategory.AI_COLOR_CHANGE_TICKET, 10000, 1000); // TODO: 구독제 결정되면 바꿔야함
+    SUBSCRIPTION_TICKET("구독 이용권", ProductCategory.AI_COLOR_CHANGE_TICKET, 10000, 1000);
 
     private final String koreanName;
     private final ProductCategory productCategory;
