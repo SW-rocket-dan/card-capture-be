@@ -94,7 +94,7 @@ public class TemplateSearchService {
                 openSearchClient.update(updateRequest, JsonNode.class);
 
             } catch (Exception e) {
-                throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
+                throw new BusinessLogicException(ErrorCode.SERVER_ERROR, e);
             } finally {
                 updateMap.remove(id);
             }

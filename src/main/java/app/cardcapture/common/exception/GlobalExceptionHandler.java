@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessLogicException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleBusinessLogicException(BusinessLogicException ex) {
-        log.error("BusinessLogicException: {}",ex.getMessage(), ex);
+        log.error("BusinessLogicException: {}",ex.getMessage(), ex.getCause(), ex);
 
         ErrorCode errorCode = ex.getErrorCode();
         ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
@@ -27,16 +27,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        log.error("DataIntegrityViolationException: {}", ex.getMessage(), ex);
+        log.error("DataIntegrityViolationException: {}", ex.getMessage(), ex.getCause(), ex);
 
         ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;
         ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
         return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class) // TODO: @valid에서 이거 호출되는지 확인하기
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        log.error("Validation error: {}", ex.getMessage(), ex);
+        log.error("Validation error: {}", ex.getMessage(), ex.getCause(), ex);
 
         String errorMessage = ex.getBindingResult().getFieldErrors().stream()
                 .map(ObjectError::getDefaultMessage)
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleGeneralException(RuntimeException ex) {
-        log.error("RuntimeException: {}", ex.getMessage(), ex);
+        log.error("RuntimeException: {}", ex.getMessage(), ex.getCause(), ex);
 
         ErrorCode errorCode = ErrorCode.SERVER_ERROR;
         ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InterruptedException.class)
     public ResponseEntity<ErrorResponseDto<String>> handleInterruptedException(InterruptedException ex) {
-        log.error("InterruptedException: {}", ex.getMessage(), ex);
+        log.error("InterruptedException: {}", ex.getMessage(), ex.getCause(), ex);
 
         ErrorCode errorCode = ErrorCode.SERVER_ERROR;
         ErrorResponseDto<String> response = ErrorResponseDto.create(errorCode);

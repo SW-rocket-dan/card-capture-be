@@ -123,7 +123,7 @@ public class S3Service {
                     savedAiImage.getId());
             }
         } catch (IOException e) {
-            throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
+            throw new BusinessLogicException(ErrorCode.SERVER_ERROR, e);
         }
     }
 
@@ -133,7 +133,7 @@ public class S3Service {
             connection.setRequestMethod("GET");
             return connection;
         } catch (IOException e) {
-            throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
+            throw new BusinessLogicException(ErrorCode.SERVER_ERROR, e);
         }
     }
 
@@ -141,7 +141,7 @@ public class S3Service {
         try {
             return new URL(imageUrl);
         } catch (MalformedURLException e) {
-            throw new BusinessLogicException(ErrorCode.MALFORMED_IMAGE_URL);
+            throw new BusinessLogicException(ErrorCode.MALFORMED_IMAGE_URL, e);
         }
     }
 
@@ -154,7 +154,7 @@ public class S3Service {
             amazonS3.putObject(bucket+path, fileName+user.getId()+"."+extension, byteArrayInputStream, metadata);
             return String.format("https://%s.s3.%s.amazonaws.com"+path+"/%s", bucket, "ap-northeast-2", fileName+user.getId()+"."+extension);
         } catch (IOException e) {
-            throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
+            throw new BusinessLogicException(ErrorCode.SERVER_ERROR, e);
         }
     }
 }
