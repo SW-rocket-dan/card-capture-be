@@ -124,23 +124,5 @@ public class OpenAiFacadeService {
             changedBackgroundImage);
 
         return instruction;
-
-        /*OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
-            .withModel(OpenAiApi.ChatModel.GPT_4_O)
-            .withN(1)
-            .withResponseFormat(new OpenAiApi.ChatCompletionRequest.ResponseFormat(
-                "json_object")) // 생성 결과물이 json임을 보장합니다
-            .withUser(String.valueOf(user.getId()))
-            .build();
-
-        Prompt prompt = new Prompt(instruction, openAiChatOptions);
-        ChatResponse response = openAiChatModel.call(prompt);
-
-        System.out.println("response = " + response.toString());
-        String editor = response.getResult().getOutput().getContent()
-            //.replace("\n", "")
-            .replace("\\n", "");
-
-        return editor;*/
     }
 }

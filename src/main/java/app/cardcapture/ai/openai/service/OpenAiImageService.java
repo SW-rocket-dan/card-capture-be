@@ -2,7 +2,9 @@ package app.cardcapture.ai.openai.service;
 
 import app.cardcapture.ai.common.AiModel;
 import app.cardcapture.ai.openai.config.OpenAiImageConfig;
+import app.cardcapture.common.dto.ErrorCode;
 import app.cardcapture.common.dto.ImageDto;
+import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.common.utils.StringUtils;
 import app.cardcapture.s3.service.S3Service;
 import app.cardcapture.user.domain.entity.User;
@@ -15,6 +17,7 @@ import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiImageModel;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.ai.openai.metadata.OpenAiImageGenerationMetadata;
+import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,10 +40,15 @@ public class OpenAiImageService {
             aiModel,
             count,
             user);
-        ImageResponse imageResponse = openAiImageModel.call(imagePrompt); // TODO: org.springframework.ai.retry.NonTransientAiException 발생하면 openai 문제니까 정해둔 에러코드 프론트에 보내주기. 다른 call 3개에 모두 적용하기
-        log.info("imageResponse.toString() = " + imageResponse.toString());
 
-        return saveImageToS3Url(user, imageResponse);
+        try {
+            ImageResponse imageResponse = openAiImageModel.call(imagePrompt);
+            log.info("imageResponse.toString() = " + imageResponse.toString());
+            return saveImageToS3Url(user, imageResponse);
+        } catch (NonTransientAiException e) {
+            throw new BusinessLogicException(ErrorCode.SERVER_ERROR);
+        }
+
     }
 
     public ImageDto saveImageToS3Url(
@@ -50,10 +58,12 @@ public class OpenAiImageService {
         String openAiImageUrl = imageResponse.getResult().getOutput().getUrl();
         String fileName = StringUtils.makeUniqueFileName();
 
-        OpenAiImageGenerationMetadata openAiImageGenerationMetadata = (OpenAiImageGenerationMetadata) imageResponse.getResults().get(0).getMetadata();
+        OpenAiImageGenerationMetadata openAiImageGenerationMetadata = (OpenAiImageGenerationMetadata) imageResponse.getResults()
+            .get(0).getMetadata();
         String revisedPrompt = openAiImageGenerationMetadata.getRevisedPrompt();
 
-        log.info("openAiImageGenerationMetadata.getRevisedPrompt() = " + openAiImageGenerationMetadata.getRevisedPrompt());
+        log.info("openAiImageGenerationMetadata.getRevisedPrompt() = "
+            + openAiImageGenerationMetadata.getRevisedPrompt());
 
         return s3Service.uploadImageFromUrl(
             openAiImageConfig.getBackgroundImageFilePath(),

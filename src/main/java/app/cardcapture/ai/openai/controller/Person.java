@@ -1,5 +1,6 @@
 package app.cardcapture.ai.openai.controller;
 
+@Deprecated
 public class Person {
 
     private String name;
