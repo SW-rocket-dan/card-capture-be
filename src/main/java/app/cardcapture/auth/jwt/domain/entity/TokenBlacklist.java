@@ -38,4 +38,4 @@ public class TokenBlacklist {
 
     @Column(nullable = false)
     private LocalDateTime expiryDate;
-} // TODO: 배치로 만료된 토큰 삭제하기
+}

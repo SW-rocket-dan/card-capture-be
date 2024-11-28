@@ -11,20 +11,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class DummyDataGenerator {
 
     private final UserJdbcRepository userJdbcRepository;
-
-    public DummyDataGenerator(UserJdbcRepository userJdbcRepository) {
-        this.userJdbcRepository = userJdbcRepository;
-    }
-
-    public void generateTemplateDummyData(int count) {
-
-    }
 
     public void generateUserDummyDataWithExecutorService(int count) {
         int threadCount = 1000;
@@ -32,11 +26,9 @@ public class DummyDataGenerator {
         int chunkSize = 1000;
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-
         for (int i = 0; i < threadCount; i++) {
             runThread(count, i, batchSize, threadCount, executorService, chunkSize);
         }
-
         executorService.shutdown();
 
         try {

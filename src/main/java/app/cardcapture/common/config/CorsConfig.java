@@ -16,16 +16,15 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-
         String[] origins = getSplitedOrigins();
 
         registry.addMapping("/**")
-                .allowedOrigins(origins)
-                .allowedMethods("*")
-                .allowedHeaders("*")
-                .exposedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
+            .allowedOrigins(origins)
+            .allowedMethods("*")
+            .allowedHeaders("*")
+            .exposedHeaders("*")
+            .allowCredentials(true)
+            .maxAge(3600);
     }
 
     public String[] getSplitedOrigins() {
