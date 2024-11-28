@@ -52,7 +52,7 @@ public class PaymentCommonController {
     public ResponseEntity<SuccessResponseDto<PaymentStatusResponseDto>> endCheck(
         @RequestBody @Valid PaymentStatusRequestDto request,
         @AuthenticationPrincipal PrincipalDetails principle
-    ) { //TODO: principle로 자기의 구매가 맞는지도 확인 필요한가?
+    ) {
         PaymentStatusResponseDto statusResponse = paymentCommonService.checkPaymentStatus(
             request.paymentId(),
             principle.getUser());
@@ -63,7 +63,7 @@ public class PaymentCommonController {
 
     @PostMapping("/webhook")
     @Hidden
-    public ResponseEntity<Void> handleWebhook( // TODO: nginx에서 포트원의 ip("52.78.5.241")만 접근 가능하도록 막기
+    public ResponseEntity<Void> handleWebhook(
         @RequestBody PortoneWebhookReqeustDto portoneWebhookReqeustDto
     ) {
         paymentCommonService.validateWebhook(portoneWebhookReqeustDto);

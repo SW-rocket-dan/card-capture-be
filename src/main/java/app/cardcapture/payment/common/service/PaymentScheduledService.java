@@ -35,7 +35,6 @@ public class PaymentScheduledService {
         for (Payment payment : paymentIdsToCancel) {
             payment.setPaymentStatus(PaymentStatus.CANCELLED);
         }
-
         paymentRepository.saveAll(paymentIdsToCancel);
 
         for (Payment payment : paymentIdsToCancel) {

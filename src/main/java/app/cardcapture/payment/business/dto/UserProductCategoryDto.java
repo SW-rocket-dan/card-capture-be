@@ -6,9 +6,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record UserProductCategoryDto(
-        @NotNull ProductCategory productCategory,
-        @Min(1) int quantity
+    @NotNull ProductCategory productCategory,
+    @Min(1) int quantity
 ) {
+
     public static UserProductCategoryDto from(UserProductCategory userProductCategory) {
         ProductCategory productCategory = userProductCategory.getProductCategory();
         return new UserProductCategoryDto(productCategory, userProductCategory.getQuantity());

@@ -27,6 +27,5 @@ public class TotalSales {
     private Long id;
 
     @Column(nullable = false)
-    @ColumnDefault("0")
-    private Long accumulatedSales;
+    private long accumulatedSales;
 }

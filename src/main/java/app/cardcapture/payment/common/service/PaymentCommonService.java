@@ -95,6 +95,10 @@ public class PaymentCommonService {
         return PaymentStartCheckResponseDto.from(savedPayment);
     }
 
+    /**
+     * nginx에서 포트원의 ip("52.78.5.241")만 접근 가능하도록 막아둠
+     *
+     */
     @Transactional
     public void validateWebhook(PortoneWebhookReqeustDto payload) {
         log.info("validateWebhook payload: " + payload.toString());
