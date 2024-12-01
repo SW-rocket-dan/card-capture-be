@@ -3,7 +3,6 @@ package app.cardcapture.auth.google.service;
 import app.cardcapture.auth.google.config.GoogleAuthConfigStub;
 import app.cardcapture.auth.google.dto.GoogleTokenResponseDto;
 import app.cardcapture.auth.jwt.service.JwtComponent;
-import app.cardcapture.common.config.RestClientConfig;
 import app.cardcapture.common.exception.BusinessLogicException;
 import app.cardcapture.user.domain.entity.User;
 import app.cardcapture.user.dto.UserGoogleAuthResponseDto;
@@ -35,14 +34,11 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RestClientTest
-//@Import({RestClientConfig.class, GoogleAuthConfigStub.class}) // TODO: GoogleAuthService를 MockBean에서 빼니까 이거 없어도 됐음
 @ExtendWith(MockitoExtension.class)
 public class GoogleAuthServiceTest {
 
-//    @Autowired
     private GoogleAuthConfigStub googleAuthConfig;
 
-//    @MockBean // TODO: 얘도 없어도 됐음. ExtendWith 달기
     @Mock
     private UserService userService;
 
@@ -55,7 +51,8 @@ public class GoogleAuthServiceTest {
     @Autowired
     private MockRestServiceServer server;
 
-    private GoogleAuthService googleAuthService; // TODO: 테스트 타겟은 직접 주입하지 말고 실제 객체 만들어 쓰기. 1. 우리가 의존성을 직접 관리해야 우리가 의도한대로 테스트환경을 구성할 수 있음. 이 service autowired빼기
+    // 테스트 타겟은 autowired 등으로 주입하지 말고 실제 객체 만들어 쓰기. 1. 우리가 의존성을 직접 관리해야 우리가 의도한대로 테스트환경을 구성할 수 있음. 2. 그러면 이제 googleAUthconfig도 굳이 stub으로 안만들어도 됨.
+    private GoogleAuthService googleAuthService;
 
     @Autowired
     private Builder restClientBuilder;
@@ -65,7 +62,6 @@ public class GoogleAuthServiceTest {
         server = MockRestServiceServer.bindTo(restClientBuilder).build();
         googleAuthConfig = GoogleAuthConfigStub.createStub();
         googleAuthService = new GoogleAuthService(jwtComponent, googleAuthConfig, restClientBuilder, userRepository, userService);
-        // TODO: 그러면 이제 googleAUthconfig도 굳이 stub으로 안만들어도 됨.
     }
 
     @Test

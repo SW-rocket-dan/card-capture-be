@@ -92,7 +92,7 @@ public class TemplateSearchServiceTest {
             templateSearchService.update(templateUpdateRequestDto);
         });
 
-        assertEquals(ErrorCode.USER_RETRIEVAL_FAILED, exception.getErrorCode());
+        assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
         verify(openSearchClient, never()).update(any(UpdateRequest.class), eq(JsonNode.class));
     }
 

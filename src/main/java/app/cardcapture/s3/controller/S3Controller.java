@@ -27,37 +27,39 @@ public class S3Controller {
 
     @PostMapping("/generate-presigned-url")
     @Operation(
-            summary = "프리사인 URL 발급",
-            description = "S3에 파일을 업로드할 수 있는 프리사인 URL과, 성공 시 사용할 이미지 URL을 반환합니다." +
-                    " 응답된 URL에 {key:file value:업로드할 파일}을 'binary'로 body로 담아서 HTTP PUT으로 보내면 저장이 됩니다. " +
-                    "png같은 확장자를 정해줘야 합니다."
+        summary = "프리사인 URL 발급",
+        description = "S3에 파일을 업로드할 수 있는 프리사인 URL과, 성공 시 사용할 이미지 URL을 반환합니다." +
+            " 응답된 URL에 {key:file value:업로드할 파일}을 'binary'로 body로 담아서 HTTP PUT으로 보내면 저장이 됩니다. " +
+            "png같은 확장자를 정해줘야 합니다."
     )
     public ResponseEntity<SuccessResponseDto<PresignedUrlResponseDto>> generatePresignedUrl(
-            @Parameter(description = "디렉토리명", examples = {
-                    @ExampleObject(name = "example1", value = "myDir"),
-                    @ExampleObject(name = "example2", value = "myDir/subDir")
-            }) @RequestParam("dirName") String dirName,
+        @Parameter(description = "디렉토리명", examples = {
+            @ExampleObject(name = "example1", value = "myDir"),
+            @ExampleObject(name = "example2", value = "myDir/subDir")
+        }) @RequestParam("dirName") String dirName,
 
-            @Parameter(description = "파일명", example = "myFile")
-            @RequestParam("fileName") String fileName,
+        @Parameter(description = "파일명", example = "myFile")
+        @RequestParam("fileName") String fileName,
 
-            @Parameter(description = "확장자명", example = "png")
-            @RequestParam("extension") String extension) {
+        @Parameter(description = "확장자명", example = "png")
+        @RequestParam("extension") String extension) {
         String presignedUrl = s3Service.generatePresignedUrl(dirName, fileName, extension);
         String fileUrl = s3Service.extractFileUrl(presignedUrl);
-        PresignedUrlResponseDto presignedUrlResponseDto = new PresignedUrlResponseDto(presignedUrl, fileUrl);
-        SuccessResponseDto<PresignedUrlResponseDto> response = SuccessResponseDto.create(presignedUrlResponseDto);
+        PresignedUrlResponseDto presignedUrlResponseDto = new PresignedUrlResponseDto(presignedUrl,
+            fileUrl);
+        SuccessResponseDto<PresignedUrlResponseDto> response = SuccessResponseDto.create(
+            presignedUrlResponseDto);
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete")
     @Operation(
-            summary = "파일 삭제",
-            description = "S3에서 파일을 삭제합니다. 전체 URL을 파라미터로 받아 파일을 삭제합니다. 반환 데이터(data)는 없습니다."
+        summary = "파일 삭제",
+        description = "S3에서 파일을 삭제합니다. 전체 URL을 파라미터로 받아 파일을 삭제합니다. 반환 데이터(data)는 없습니다."
     )
     public ResponseEntity<SuccessResponseDto<String>> deleteFile(
-            @Parameter(description = "파일 URL", example = "https://your-s3-bucket.s3.amazonaws.com/test/testFile.png") @RequestParam("fileUrl") String fileUrl) {
+        @RequestParam("fileUrl") String fileUrl) {
         s3Service.deleteFileByUrl(fileUrl);
         SuccessResponseDto<String> response = SuccessResponseDto.create(null);
 

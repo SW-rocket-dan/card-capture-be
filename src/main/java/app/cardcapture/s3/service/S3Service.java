@@ -108,11 +108,9 @@ public class S3Service {
 
                 amazonS3.putObject(bucket+path, fileName+user.getId()+"."+extension, byteArrayInputStream, metadata);
 
-                //TODO: ImageDto 각 메서드가 응답할 수 있는 범위로 분리하기
                 AiImage aiImage = new AiImage();
                 aiImage.setPrompt(revisedPrompt);
                 AiImage savedAiImage = aiImageRepository.save(aiImage);
-
 
                 return new ImageDto(
                     bucket+path,
